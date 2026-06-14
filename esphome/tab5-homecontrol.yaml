@@ -1,0 +1,12 @@
+esphome:
+  name: tab5-homecontrol
+  friendly_name: M5Stack Tab5 Home Control
+  min_version: 2025.9.3
+
+
+packages:
+  hardware: !include packages/hardware.yaml
+  sensors: !include packages/sensors.yaml
+  scripts: !include packages/scripts.yaml
+  lvgl: !include packages/lvgl.yaml
+
