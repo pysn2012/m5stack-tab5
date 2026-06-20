@@ -1,0 +1,1869 @@
+esphome:
+  name: tab5-ha-hmi-ew
+  friendly_name: M5Stack Tab5
+  min_version: 2025.12.0
+
+esp32:
+  variant: esp32p4
+  flash_size: 16MB
+  framework:
+    type: esp-idf
+    advanced:
+      enable_idf_experimental_features: true
+
+esp32_hosted:
+  variant: esp32c6
+  active_high: true
+  clk_pin: GPIO12
+  cmd_pin: GPIO13
+  d0_pin: GPIO11
+  d1_pin: GPIO10
+  d2_pin: GPIO9
+  d3_pin: GPIO8
+  reset_pin: GPIO15
+  slot: 1
+
+logger:
+  hardware_uart: USB_SERIAL_JTAG
+  level: DEBUG
+  logs:
+    sensor: INFO
+    binary_sensor: INFO
+
+psram:
+  mode: hex
+  speed: 200MHz
+
+api:
+  on_client_connected: 
+    then:
+      - lvgl.widget.show: api_icon_label
+  on_client_disconnected: 
+    then:
+      - lvgl.widget.hide: api_icon_label
+
+external_components:
+  - source:
+      type: local
+      path: components/           # 自定义组件目录（相对于本 YAML 文件）
+    
+ota:
+  platform: esphome
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+
+  on_connect: 
+    then:
+      - lvgl.widget.show: wifi_icon_label
+  on_disconnect: 
+    then:
+      - lvgl.widget.hide: wifi_icon_label
+
+i2c:
+  - id: bsp_bus
+    sda: GPIO31
+    scl: GPIO32
+    frequency: 400kHz
+
+pi4ioe5v6408:
+  - id: pi4ioe1
+    address: 0x43
+    # 0: O - wifi_antenna_int_ext
+    # 1: O - speaker_enable
+    # 2: O - external_5v_power
+    # 3: NC
+    # 4: O - lcd reset
+    # 5: O - touch panel reset
+    # 6: O - camera reset
+    # 7: I - headphone detect
+  - id: pi4ioe2
+    address: 0x44
+    # 0: O - wifi_power
+    # 1: NC
+    # 2: NC
+    # 3: O - usb_5v_power
+    # 4: O - poweroff pulse
+    # 5: O - quick charge enable (inverted)
+    # 6: I - charging status
+    # 7: O - charge enable
+
+switch:
+  - platform: gpio
+    id: wifi_power
+    name: "WiFi Power"
+    pin:
+      pi4ioe5v6408: pi4ioe2
+      number: 0
+    restore_mode: ALWAYS_ON
+  - platform: gpio
+    id: usb_5v_power
+    name: "USB Power"
+    pin:
+      pi4ioe5v6408: pi4ioe2
+      number: 3
+  - platform: gpio
+    id: quick_charge
+    name: "Quick Charge"
+    pin:
+      pi4ioe5v6408: pi4ioe2
+      number: 5
+      inverted: true
+  - platform: gpio
+    id: charge_enable
+    name: "Charge Enable"
+    pin:
+      pi4ioe5v6408: pi4ioe2
+      number: 7
+    restore_mode: ALWAYS_ON
+  - platform: gpio
+    id: wifi_antenna_int_ext
+    pin:
+      pi4ioe5v6408: pi4ioe1
+      number: 0
+  - platform: gpio
+    id: speaker_enable
+    name: "Speaker Enable"
+    pin:
+      pi4ioe5v6408: pi4ioe1
+      number: 1
+    restore_mode: ALWAYS_ON
+  - platform: gpio
+    id: external_5v_power
+    name: "External 5V Power"
+    pin:
+      pi4ioe5v6408: pi4ioe1
+      number: 2
+
+binary_sensor:
+  - platform: gpio
+    id: charging
+    name: "Charging Status"
+    pin:
+      pi4ioe5v6408: pi4ioe2
+      number: 6
+      mode: INPUT_PULLDOWN
+    on_press:
+      - lambda: id(battery_percent).update();
+    on_release:
+      - lambda: id(battery_percent).update();
+
+  - platform: gpio
+    id: headphone_detect
+    name: "Headphone Detect"
+    pin:
+      pi4ioe5v6408: pi4ioe1
+      number: 7
+
+select:
+# The DAC Output select needs to be manually 
+# (or with an automation) changed to `LINE1` for the onboard speaker
+  - platform: es8388
+    dac_output:
+      name: DAC Output
+    adc_input_mic:
+      name: ADC Input Mic
+
+  - platform: template
+    id: wifi_antenna_select
+    name: "WiFi Antenna"
+    options:
+      - "Internal"
+      - "External"
+    optimistic: true
+    on_value:
+      - if:
+          condition:
+            lambda: return i == 0;
+          then:
+            - switch.turn_off: wifi_antenna_int_ext
+          else:
+            - switch.turn_on: wifi_antenna_int_ext
+
+sensor:
+  - platform: ina226
+    address: 0x41
+    adc_averaging: 16
+    max_current: 8.192A
+    shunt_resistance: 0.005ohm
+    bus_voltage:
+      id: battery_voltage
+      name: Battery Voltage
+    current:
+      id: battery_current
+      name: Battery Current
+      # Positive means discharging
+      # Negative means charging
+  
+  - platform: homeassistant
+    id: cur_temp
+    entity_id: sensor.bme668_temperature
+    on_value:
+      - lvgl.label.update:
+          id: temp_label
+          text:
+            format: "%.1f °C"
+            args: [ 'x' ]
+  
+  - platform: homeassistant
+    id: cur_humi
+    entity_id: sensor.bme668_humidity
+    on_value:
+      - lvgl.label.update:
+          id: humi_label
+          text:
+            format: "%.1f %%"
+            args: [ 'x' ]
+
+  - platform: homeassistant
+    id: cur_pres
+    entity_id: sensor.bme668_pressure
+    on_value:
+      - lvgl.label.update:
+          id: pres_label
+          text:
+            format: "%.2f hPa"
+            args: [ 'x' ]
+            
+  - platform: homeassistant
+    id: cur_co2
+    entity_id: sensor.espressif_zigbeescd41_carbon_dioxide
+    on_value:
+      - lvgl.label.update:
+          id: co2_label
+          text:
+            format: "%.0f ppm"
+            args: [ 'x' ]
+
+  - platform: template
+    id: battery_percent
+    name: "Battery Percentage"
+    unit_of_measurement: "%"
+    accuracy_decimals: 0
+    lambda: |-
+      float voltage = id(battery_voltage).state;
+      float min_voltage = 6.0;
+      float max_voltage = 8.4;
+      
+      if (voltage < 5.0) return 0.0;
+      if (voltage <= min_voltage) return 0.0;
+      if (voltage >= max_voltage) return 100.0;
+      
+      float percent = ((voltage - min_voltage) / (max_voltage - min_voltage)) * 100.0;
+      return percent;
+    update_interval: 30s
+    on_value:
+      - lvgl.label.update:
+          id: pwr_bat_icon_label
+          text: !lambda |-
+            float voltage = id(battery_voltage).state;
+            float current = id(battery_current).state;
+            bool charging_pin = id(charging).state;
+            int level = int(x);
+            
+            // No battery detected
+            if (voltage < 5.0) {
+              return "\U000F06A5";  // Plug icon
+            }
+            
+            // Determine which icon set to use based on charging status
+            bool is_charging = (current < -0.1 || charging_pin);
+            
+            // Use level/10 to create brackets: 0-9=0, 10-19=1, 20-29=2, etc.
+            int bracket = level / 10;
+            
+            if (is_charging) {
+              // Charging icons
+              switch (bracket) {
+                case 10:
+                case 9:
+                  return "\U000F0085";  // charging-100
+                case 8:
+                  return "\U000F008B";  // charging-90
+                case 7:
+                  return "\U000F008A";  // charging-80
+                case 6:
+                  return "\U000F089E";  // charging-70
+                case 5:
+                  return "\U000F0089";  // charging-60
+                case 4:
+                  return "\U000F089D";  // charging-50
+                case 3:
+                  return "\U000F0088";  // charging-40
+                case 2:
+                  return "\U000F0087";  // charging-30
+                case 1:
+                  return "\U000F0086";  // charging-20
+                default:
+                  return "\U000F089C";  // charging-10
+              }
+            } else {
+              // Regular battery icons
+              switch (bracket) {
+                case 10:
+                case 9:
+                  return "\U000F0079";  // battery-100
+                case 8:
+                  return "\U000F0082";  // battery-90
+                case 7:
+                  return "\U000F0081";  // battery-80
+                case 6:
+                  return "\U000F0080";  // battery-70
+                case 5:
+                  return "\U000F007F";  // battery-60
+                case 4:
+                  return "\U000F007E";  // battery-50
+                case 3:
+                  return "\U000F007D";  // battery-40
+                case 2:
+                  return "\U000F007C";  // battery-30
+                case 1:
+                  return "\U000F007B";  // battery-20
+                default:
+                  return "\U000F007A";  // battery-10
+              }
+            }
+
+  
+touchscreen:
+  - platform: st7123
+    id: my_touchscreen
+    i2c_id: bsp_bus
+    interrupt_pin: GPIO23
+    update_interval: never
+    reset_pin:
+      pi4ioe5v6408: pi4ioe1
+      number: 5
+    transform:
+      swap_xy: true
+      mirror_x: true
+      mirror_y: false
+    calibration:
+      x_min: 0
+      x_max: 1280  #720
+      y_min: 0
+      y_max: 720  #1280
+    on_release:
+      - if:
+          condition: lvgl.is_paused
+          then:
+            - logger.log: "LVGL resuming"
+            - lvgl.resume:
+            - lvgl.widget.redraw:
+            - light.turn_on: backlight
+
+esp_ldo:
+  - voltage: 2.5V
+    channel: 3
+
+display:
+  - platform: mipi_dsi
+    id: main_display
+    dimensions:
+      height: 1280
+      width: 720
+    model: M5STACK-TAB5-V2
+    reset_pin:
+      pi4ioe5v6408: pi4ioe1
+      number: 4
+    show_test_card: false
+    auto_clear_enabled: false
+    update_interval: never
+    rotation: 270
+
+output:
+  - platform: ledc
+    pin: GPIO22
+    id: backlight_pwm
+    frequency: 1000Hz
+
+light:
+  - platform: monochromatic
+    output: backlight_pwm
+    name: "Display Backlight"
+    id: backlight
+    restore_mode: RESTORE_DEFAULT_ON
+    default_transition_length: 250ms
+    initial_state:
+      brightness: "50%"
+
+i2s_audio:
+  - id: mic_bus
+    i2s_lrclk_pin: GPIO29
+    i2s_bclk_pin: GPIO27
+    i2s_mclk_pin: GPIO30
+
+audio_adc:
+  - platform: es7210
+    id: es7210_adc
+    bits_per_sample: 16bit
+    sample_rate: 16000
+
+microphone:
+  - platform: i2s_audio
+    id: tab5_microphone
+    i2s_din_pin: GPIO28
+    sample_rate: 16000
+    bits_per_sample: 16bit
+    adc_type: external
+
+audio_dac:
+  - platform: es8388
+    id: es8388_dac
+
+speaker:
+  - platform: i2s_audio
+    id: tab5_speaker
+    i2s_dout_pin: GPIO26
+    audio_dac: es8388_dac
+    dac_type: external
+    channel: mono
+    buffer_duration: 100ms
+    bits_per_sample: 16bit
+    sample_rate: 48000
+
+media_player:
+  - platform: speaker
+    name: tab5_media_player
+    id: speaker_player
+    announcement_pipeline:
+      speaker: tab5_speaker
+      format: FLAC
+      sample_rate: 48000
+      num_channels: 1
+
+time:
+  - platform: homeassistant
+    id: ha_time
+    on_time_sync:
+      then:
+        rx8130.write_time:
+  - platform: rx8130
+    id: rx8130_time
+    update_interval: never
+    on_time:
+      # Update once ready
+      - seconds: /3
+        then:
+          - lvgl.label.update:
+              id: time_label
+              text: !lambda |-
+                auto t = id(ha_time).now();
+                return t.strftime("%H:%M").c_str();
+
+          - lvgl.label.update:
+              id: date_label
+              text: !lambda |-
+                auto t = id(ha_time).now();
+                return t.strftime("%Y-%m-%d %a").c_str();
+
+text_sensor:
+  - platform: homeassistant
+    id: demo_light
+    entity_id: light.matter_rgb
+    on_value:
+      then:
+        - lvgl.widget.update:
+            id: demo_light_btn
+            state:
+              checked: !lambda return x == "on";
+              disabled: !lambda return ( x == "unavailable" ) or ( x == "unknown" );
+        - lvgl.widget.update:
+            id: demo_light_click_area
+            clickable: !lambda return !((x == "unavailable") || (x == "unknown"));
+        - lvgl.label.update:
+            id: demo_rgb_light_label
+            text_color: !lambda |-
+              if ( x == "on" ) {
+                  return lv_color_hex(0xF5C23B);
+              } else {
+                  return lv_color_hex(0x9E9E9E);
+              }
+            text: !lambda |-
+                static char buf[10];
+                std::string icon;
+                if ( x == "on" ) {
+                    icon = "\U000F18DD";
+                } else {
+                    icon = "\U000F18DE";
+                }
+                snprintf(buf, sizeof(buf), "%s", icon.c_str());
+                return buf;
+        - lvgl.label.update:
+            id: demo_rgb_light_status
+            text: !lambda |-
+                static char buf[10];
+                std::string text;
+                if ( x == "on" ) {
+                    text = "ON";
+                } 
+                else if ( x == "unavailable" ||  x == "unknown" ) {
+                    text = "UNKNOWN";
+                }
+                else {
+                    text = "OFF";
+                }
+                snprintf(buf, sizeof(buf), "%s", text.c_str());
+                return buf;
+
+  - platform: homeassistant
+    id: demo_flash_light
+    entity_id: light.matter_flashlight
+    on_value:
+      then:
+        - lvgl.widget.update:
+            id: demo_light_btn2
+            state:
+              checked: !lambda return x == "on";
+              disabled: !lambda return ( x == "unavailable" ) or ( x == "unknown" );
+        - lvgl.widget.update:
+            id: demo_light_click_area2
+            clickable: !lambda return !((x == "unavailable") || (x == "unknown"));
+        - lvgl.label.update:
+            id: demo_flash_light_label
+            text_color: !lambda |-
+              if ( x == "on" ) {
+                  return lv_color_hex(0xF5C23B);
+              } else {
+                  return lv_color_hex(0x9E9E9E);
+              }
+            text: !lambda |-
+                static char buf[10];
+                std::string icon;
+                if ( x == "on" ) {
+                    icon = "\U000F18DD";
+                } else {
+                    icon = "\U000F18DE";
+                }
+                snprintf(buf, sizeof(buf), "%s", icon.c_str());
+                return buf;
+        - lvgl.label.update:
+            id: demo_flash_light_status
+            text: !lambda |-
+                static char buf[10];
+                std::string text;
+                if ( x == "on" ) {
+                    text = "ON";
+                } 
+                else if ( x == "unavailable" ||  x == "unknown" ) {
+                    text = "UNKNOWN";
+                }
+                else {
+                    text = "OFF";
+                }
+                snprintf(buf, sizeof(buf), "%s", text.c_str());
+                return buf;
+
+  - platform: homeassistant
+    id: demo_rgb_light_brightness
+    entity_id: light.matter_rgb
+    attribute: brightness
+    on_value:
+      - lvgl.slider.update:
+          id: rgb_light_slider
+          value: !lambda |-
+            if (x.empty() || x == "None" || 
+                x == "null" || x == "unknown" 
+                || x == "unavailable") 
+                return 0;
+
+            return std::stoi(x);
+
+      - lvgl.label.update:
+          id: rgb_light_bright_label
+          text: !lambda |-
+            if ( x.empty() || x == "None" || x == "null" ) {
+                return std::string("off");
+            } 
+            else if ( x == "unknown" || x == "unavailable" ) {
+              return std::string("unavailable");
+            }
+            else {
+              int percent = std::stoi(x) * 100 / 255;
+              return std::to_string(percent) + " %";
+            }
+  
+  - platform: homeassistant
+    id: demo_flash_light_brightness
+    entity_id: light.matter_flashlight
+    attribute: brightness
+    on_value:
+      - lvgl.slider.update:
+          id: flash_light_slider
+          value: !lambda |-
+            if (x.empty() || x == "None" || 
+                x == "null" || x == "unknown" 
+                || x == "unavailable") 
+                return 0;
+
+            return std::stoi(x);
+
+      - lvgl.label.update:
+          id: flash_light_bright_label
+          text: !lambda |-
+            if ( x.empty() || x == "None" || x == "null" ) {
+                return std::string("off");
+            } 
+            else if ( x == "unknown" || x == "unavailable" ) {
+              return std::string("unavailable");
+            }
+            else {
+              int percent = std::stoi(x) * 100 / 255;
+              return std::to_string(percent) + " %";
+            }
+  
+  - platform: homeassistant
+    id: demo_light_color
+    entity_id: light.matter_rgb
+    attribute: rgb_color
+    on_value:
+      - lambda: id(sync_ha_palette)->execute(x);
+
+  - platform: template
+    id: device_rgb_color
+    name: "Device RGB Color"
+    update_interval: never
+    lambda: |-
+      char buf[32];
+      snprintf(buf, sizeof(buf), "%d,%d,%d", id(light_r), id(light_g), id(light_b));
+      return std::string(buf);
+
+  
+################################################################################
+
+
+
+font:
+  - file: "https://raw.githubusercontent.com/Templarian/MaterialDesign-Webfont/master/fonts/materialdesignicons-webfont.ttf"
+    id: extra_icon
+    size: 48
+    bpp: 4
+    # https://pictogrammers.com/library/mdi/
+    glyphs: [
+      "\U000F050F", # mdi:thermometer
+      "\U000F058E", # mdi:water-percent
+      "\U000F0F30", # mdi:weather-hazy
+      "\U000F056E", # mdi:dashboard,
+      "\U000F0A1D", # mdi:dashboard-outline
+      "\U000F0335", # mdi:lightbulb,
+      "\U000F0336", # mdi:lightbulb-outline
+      "\U000F0F54", # mdi:home-thermometer
+      "\U000F0F55", # mdi:home-thermometer-outline
+      "\U000F001B", # mdi:air-conditioner
+      "\U000F0493", # mdi:cog
+      "\U000F08BB", # mdi:cog-outline
+      "\U000F0142", # mdi:chevron-right
+      "\U000F1805", # mdi:lightbulb-fluorescent-tube-outline
+      "\U000F1804", # mdi:lightbulb-fluorescent-tube
+      "\U000F18DE", # mdi:ceiling-light-multiple-outline
+      "\U000F18DD", # mdi:ceiling-light-multiple
+      "\U000F0425", # mdi:power
+      "\U000F07E4", # mdi:CO2
+      "\U000F029A", # mdi:gauge (used to indicate air pressure in hPa)
+      "\U000F05A9", # mdi:wifi
+      "\U000F007A", # mdi:battery-10
+      "\U000F007B", # mdi:battery-20
+      "\U000F007C", # mdi:battery-30
+      "\U000F007D", # mdi:battery-40
+      "\U000F007E", # mdi:battery-50
+      "\U000F007F", # mdi:battery-60
+      "\U000F0080", # mdi:battery-70
+      "\U000F0081", # mdi:battery-80
+      "\U000F0082", # mdi:battery-90
+      "\U000F0079", # mdi:battery-100
+      "\U000F089C", # mdi:bat-charging-10
+      "\U000F0086", # mdi:bat-charging-20
+      "\U000F0087", # mdi:bat-charging-30
+      "\U000F0088", # mdi:bat-charging-40
+      "\U000F089D", # mdi:bat-charging-50
+      "\U000F0089", # mdi:bat-charging-60
+      "\U000F089E", # mdi:bat-charging-70
+      "\U000F008A", # mdi:bat-charging-80
+      "\U000F008B", # mdi:bat-charging-90
+      "\U000F0085", # mdi:bat-charging-100
+      "\U000F06A5", # mdi:power-plug (indicate no battery connected, using USB-C power the device)
+      "\U000F109B", # mdi:ha-api
+      "\U000F0064", # mdi:assistant
+      "\U000F0004", # mdi:account
+      "\U000F0156", # mdi:close
+      "\U000F0415", # mdi:plus
+      "\U000F0374", # mdi:minus
+      "\U000F00DF", # mdi:brightness-6
+      "\U000F03D8", # mdi:color-palette
+    ]
+
+  # larger icon
+  - file: "https://raw.githubusercontent.com/Templarian/MaterialDesign-Webfont/master/fonts/materialdesignicons-webfont.ttf"
+    id: extra_icon_64
+    size: 64
+    bpp: 4
+    glyphs: [
+      "\U000F0D80", # mdi:home-floor-1
+    ]
+  
+  - file: gfonts://Montserrat@600
+    id: montserrat_96
+    size: 96
+    bpp: 4
+
+
+lvgl:
+  on_boot:
+    - light.turn_on: backlight
+    - rx8130.read_time:
+    - script.execute: expand_nav_btn_click_area    # Expand the click area of nav rail buttons
+    - script.execute: nav_rail_update              # Update rail UI
+    - script.execute: sync_ha                      # Sync Home Assistant states if necessary
+
+  byte_order: little_endian
+  color_depth: 16
+
+  style_definitions:
+    - id: sidebar
+      bg_color: 0xE9EFEE
+      bg_opa: COVER
+      border_opa: TRANSP
+      pad_top: 30
+      pad_left: 0
+      pad_right: 0
+      radius: 0
+      width: 192
+      height: 100%
+
+    - id: nav_btn_container
+      bg_opa: TRANSP
+      border_opa: TRANSP
+      width: 180
+      height: 150
+
+    - id: nav_btn_inactivate
+      bg_opa: TRANSP
+      align: CENTER
+      width: 112
+      height: 64
+      radius: 48
+      border_opa: TRANSP
+      shadow_opa: TRANSP
+
+    - id: nav_icon_activate
+      align: CENTER
+      text_font: extra_icon
+      text_color: 0x4A6363
+
+    - id: nav_icon_inactivate
+      align: CENTER
+      text_font: extra_icon
+      text_color: 0x3F4948
+
+    - id: nav_label_activate
+      align: BOTTOM_MID
+      text_color: 0x4A6363
+      text_font: montserrat_24
+
+    - id: nav_label_inactivate
+      align: BOTTOM_MID
+      text_color: 0x3F4948
+      text_font: montserrat_24
+
+    - id: content_container
+      align: CENTER
+      bg_opa: COVER
+      border_opa: TRANSP
+      height: 100%
+      width: 1080
+      x: 96
+      pad_top: 120
+      pad_left: 30
+
+    # A typical small card for control
+    # Match the style with Home Assistant
+    - id: card_sm
+      width: 400
+      height: 112
+      radius: 24
+
+    - id: card_sm_icon_btn
+      width: 72
+      height: 72
+      radius: 50
+      bg_color: 0xECECEC
+      shadow_opa: TRANSP
+      align: LEFT_MID
+
+    - id: card_sm_main_label
+      text_font: montserrat_32
+      align: TOP_LEFT
+      x: 92
+      y: 5
+      
+    - id: card_sm_sub_label
+      text_font: montserrat_24
+      align: BOTTOM_LEFT
+      x: 92
+    
+    - id: card_md
+      width: 400
+      height: 240
+      radius: 24
+
+    - id: card_md_icon_btn
+      width: 72
+      height: 72
+      radius: 50
+      bg_color: 0xECECEC
+      shadow_opa: TRANSP
+      align: TOP_LEFT
+
+    - id: card_md_main_label
+      text_font: montserrat_32
+      align: TOP_LEFT
+      x: 92
+      y: 5
+      
+    - id: card_md_sub_label
+      text_font: montserrat_24
+      x: 92
+      y: 60
+    
+    # Large card container for modal
+    - id: card_lg
+      width: 800
+      height: 600
+      radius: 24
+      align: CENTER
+      opa: 1
+
+    - id: card_lg_icon_btn
+      width: 72
+      height: 72
+      radius: 50
+      bg_color: 0xECECEC
+      shadow_opa: TRANSP
+      align: TOP_LEFT
+    
+    - id: card_lg_icon_btn_transp
+      width: 72
+      height: 72
+      radius: 50
+      bg_opa: TRANSP
+      shadow_opa: TRANSP
+      align: TOP_LEFT
+
+    - id: card_lg_main_label
+      text_font: montserrat_32
+      align: TOP_LEFT
+      
+    - id: card_lg_sub_label
+      text_font: montserrat_24
+    
+    - id: modal_container
+      width: 1280 # full width
+      height: 720 # full height
+      bg_color: 0xA9A9A9
+      bg_opa: 0.7
+      align: CENTER
+
+
+  # Navigation buttons
+  top_layer:
+    widgets:
+      - obj:
+          align: TOP_LEFT
+          styles: sidebar
+          id: sidebars
+          layout:
+            type: flex
+            flex_flow: COLUMN
+            pad_row: 12
+            flex_align_main: start
+            flex_align_cross: center
+            flex_align_track: center
+          widgets:
+            # Dashboard icon button
+            - obj:
+                styles: nav_btn_container
+                widgets:
+                  - button:
+                      align: center
+                      styles: nav_btn_inactivate
+                      id: dash_panel_btn
+                      checkable: true
+                      state:
+                        checked: false
+                      checked:
+                        bg_color: 0xCCE8E7
+                      widgets:
+                        - label:
+                            id: dash_btn_icon
+                            align: CENTER
+                            styles: nav_icon_inactivate
+                            text: "\U000F056E" # mdi:dashboard
+                      on_value:
+                        - lambda: id(page_num) = 0;
+                        - script.execute: nav_rail_update
+                      on_press:
+                        - lvgl.page.show: dashboard_page
+                  - label:
+                      styles: nav_label_inactivate
+                      id: dash_btn_label
+                      text: "Dashboard"
+
+
+            # Light bulb icon button     
+            - obj:
+                styles: nav_btn_container
+                widgets:
+                  - button:
+                      align: center
+                      styles: nav_btn_inactivate
+                      id: light_panel_btn
+                      checkable: true
+                      state:
+                        checked: false
+                      checked:
+                        bg_color: 0xCCE8E7
+                      widgets:
+                        - label:
+                            id: light_btn_icon
+                            align: CENTER
+                            styles: nav_icon_inactivate
+                            text: "\U000F0336" # mid:lightbulb-outlined
+                      on_value:
+                        - lambda: id(page_num) = 1;
+                        - script.execute: nav_rail_update
+                      on_press:
+                        - lvgl.page.show: light_page
+                  - label:
+                      styles: nav_label_inactivate
+                      id: light_btn_label
+                      text: "Light"
+
+      - obj:
+          align: CENTER
+          id: rgb_light_card_modal_container
+          styles: modal_container
+          clickable: true
+          hidden: true # default hidden
+          on_press:
+            - lvgl.widget.hide: rgb_light_card_modal_container
+          widgets:
+            - obj:
+                styles: card_lg
+                widgets:
+                  # close button
+                  - button:
+                      styles: card_lg_icon_btn_transp
+                      align: TOP_LEFT
+                      widgets:
+                        - label:
+                            text_color: 0x3F4948
+                            text_font: extra_icon
+                            text: "\U000F0156"
+                            align: CENTER
+                      on_press:
+                        - lvgl.widget.hide: rgb_light_card_modal_container
+                  - label:
+                      id: rgb_light_bright_label
+                      text_font: montserrat_48
+                      align: TOP_MID
+                      y: 30
+                      text: "off"
+                  # Brightness adjust slider
+                  - slider:
+                      align: CENTER
+                      width: 130
+                      height: 360
+                      radius: 42
+                      min_value: 0
+                      max_value: 255
+                      id: rgb_light_slider
+                      bg_color: 0xECECEC # Default inactivate color
+                      bg_opa: COVER
+                      indicator:
+                        radius: 12
+                        bg_color: 0xFFB90B
+                      knob:
+                        bg_opa: TRANSP
+                      on_boot:
+                        - lambda: |-
+                            lv_obj_move_foreground(id(rgb_light_slider));
+                      on_release:
+                        - homeassistant.action:
+                            action: light.turn_on
+                            data:
+                              entity_id: light.matter_rgb
+                              brightness: !lambda return int(x);
+                        - lvgl.label.update:
+                            id: rgb_light_bright_label
+                            text: !lambda |-
+                              int percent = int(x) * 100 / 255;
+                              return std::to_string(percent) + " %";
+                        - logger.log: 
+                            format: ">>>>>>>>>>>>   Color Light Brightness: %d%%"
+                            args: [int((x*100)/255)]
+                  # Color palette 
+                  - canvas:
+                      id: color_palette_canvas
+                      width: 320
+                      height: 320
+                      hidden: true # default hidden
+                      align: CENTER
+                      on_boot:
+                        # Draw a round color palette
+                        - lvgl.canvas.fill:
+                            id: color_palette_canvas
+                            color: white
+                        - script.execute: draw_color_palette
+
+                  # Make our color palette clickable
+                  - obj:
+                      id: color_palette_click_area
+                      align: CENTER
+                      width: 320
+                      height: 320
+                      bg_opa: TRANSP
+                      border_opa: TRANSP
+                      radius: 50
+                      clickable: true
+                      on_click:
+                        - lvgl.widget.show: color_palette_indicator
+                        - script.execute: move_color_palette_indicator
+                        - text_sensor.template.publish:
+                            id: device_rgb_color
+                            state: !lambda |-
+                              char buf[32];
+                              snprintf(buf, sizeof(buf), "%d,%d,%d", id(light_r), id(light_g), id(light_b));
+                              return std::string(buf);
+                        - logger.log: 
+                            format: "Clickable Color Light changed RGB: (%d, %d, %d)"
+                            args: [id(light_r), id(light_g), id(light_b)]
+
+                  # Indicator, also make it draggable
+                  - obj:
+                      id: color_palette_indicator
+                      align: CENTER
+                      width: 50
+                      height: 50
+                      radius: 50
+                      hidden: true
+                      clickable: true
+                      bg_color: white
+                      border_width: 3
+                      border_color: white
+                      # Make this indicator draggable
+                      on_boot:
+                        - script.execute: draw_color_palette_indicator
+                      on_release:
+                        - text_sensor.template.publish:
+                            id: device_rgb_color
+                            state: !lambda |-
+                              char buf[32];
+                              snprintf(buf, sizeof(buf), "%d,%d,%d", id(light_r), id(light_g), id(light_b));
+                              return std::string(buf);
+                        - logger.log: 
+                            format: "Draggable Color Light changed RGB: (%d, %d, %d)"
+                            args: [id(light_r), id(light_g), id(light_b)]
+                      
+                  # Button group
+                  - obj:
+                      width: 280
+                      height: 84
+                      radius: 50
+                      scrollable: false
+                      align: BOTTOM_MID
+                      bg_color: 0xF3F4F4
+                      border_opa: TRANSP
+                      layout:
+                        type: flex
+                        flex_align_main: CENTER
+                        flex_align_cross: CENTER
+                        flex_align_track: CENTER
+                      widgets:
+                        - button:
+                            id: demo_rgb_light_pwr_btn
+                            styles: card_md_icon_btn
+                            bg_opa: TRANSP
+                            widgets:
+                              - label:
+                                  text_color: 0x3F4948
+                                  text_font: extra_icon
+                                  text: "\U000F0425"
+                                  align: CENTER
+                            on_short_click:
+                              - logger.log: "Toggle the RGB light!"
+                              - homeassistant.action:
+                                  action: light.toggle
+                                  data:
+                                    entity_id: light.matter_rgb
+                        - button:
+                            id: rgb_bright_ctrl_btn
+                            styles: card_md_icon_btn
+                            bg_opa: TRANSP
+                            widgets:
+                              - label:
+                                  align: CENTER
+                                  text_color: 0x3F4948
+                                  text_font: extra_icon
+                                  text: "\U000F00DF"
+                            on_press:
+                              - lvgl.widget.hide: color_palette_canvas
+                              - lvgl.widget.hide: color_palette_indicator
+                              - lvgl.widget.show: rgb_light_slider
+                        - button:
+                            id: color_palette_btn
+                            styles: card_md_icon_btn
+                            bg_opa: TRANSP
+                            widgets:
+                              - label:
+                                  id: color_palette_icon
+                                  align: CENTER
+                                  text_color: 0x3F4948
+                                  text_font: extra_icon
+                                  text: "\U000F03D8"
+                            on_press:
+                              - lvgl.widget.hide: rgb_light_slider
+                              - lvgl.widget.show: color_palette_canvas
+                              - lvgl.widget.show: color_palette_indicator
+      - obj:
+          align: CENTER
+          id: flash_light_card_modal_container
+          styles: modal_container
+          clickable: true
+          hidden: true # default hidden
+          on_press:
+            - lvgl.widget.hide: flash_light_card_modal_container
+          widgets:
+            - obj:
+                styles: card_lg
+                widgets:
+                  # close button
+                  - button:
+                      styles: card_lg_icon_btn_transp
+                      align: TOP_LEFT
+                      widgets:
+                        - label:
+                            text_color: 0x3F4948
+                            text_font: extra_icon
+                            text: "\U000F0156"
+                            align: CENTER
+                      on_press:
+                        - lvgl.widget.hide: flash_light_card_modal_container
+                  - label:
+                      id: flash_light_bright_label
+                      text_font: montserrat_48
+                      align: TOP_MID
+                      y: 30
+                      text: "off"
+                  # Brightness adjust slider
+                  - slider:
+                      align: CENTER
+                      width: 130
+                      height: 360
+                      radius: 42
+                      min_value: 0
+                      max_value: 255
+                      id: flash_light_slider
+                      bg_color: 0xECECEC # Default inactivate color
+                      bg_opa: COVER
+                      indicator:
+                        radius: 12
+                        bg_color: 0xFFB90B
+                      knob:
+                        bg_opa: TRANSP
+                      on_boot:
+                        - lambda: |-
+                            lv_obj_move_foreground(id(flash_light_slider));
+                      on_release:
+                        - homeassistant.action:
+                            action: light.turn_on
+                            data:
+                              entity_id: light.matter_flashlight
+                              brightness: !lambda return int(x);
+                        - lvgl.label.update:
+                            id: flash_light_bright_label
+                            text: !lambda |-
+                              int percent = int(x) * 100 / 255;
+                              return std::to_string(percent) + " %";
+                        - logger.log: 
+                            format: "Flash Light Brightness: %d%%"
+                            args: [int((x*100)/255)]
+                  # Button group
+                  - obj:
+                      width: 280
+                      height: 84
+                      radius: 50
+                      scrollable: false
+                      align: BOTTOM_MID
+                      bg_color: 0xF3F4F4
+                      border_opa: TRANSP
+                      layout:
+                        type: flex
+                        flex_align_main: CENTER
+                        flex_align_cross: CENTER
+                        flex_align_track: CENTER
+                      widgets:
+                        - button:
+                            id: demo_flash_light_pwr_btn
+                            styles: card_md_icon_btn
+                            bg_opa: TRANSP
+                            widgets:
+                              - label:
+                                  text_color: 0x3F4948
+                                  text_font: extra_icon
+                                  text: "\U000F0425"
+                                  align: CENTER
+                            on_short_click:
+                              - logger.log: "Toggle the Flash light!"
+                              - homeassistant.action:
+                                  action: light.toggle
+                                  data:
+                                    entity_id: light.matter_flashlight
+      - obj:
+          align: TOP_RIGHT
+          id: status_bar
+          width: 1280
+          height: 90
+          bg_opa: TRANSP
+          border_opa: TRANSP
+          layout:
+            type: FLEX
+            flex_flow: ROW_REVERSE
+            flex_align_main: END
+            flex_align_cross: CENTER
+            flex_align_track: CENTER
+            pad_column: 20
+          widgets:
+            - label:
+                id: pwr_bat_icon_label
+                text_font: extra_icon
+                text: "\U000F06A5"
+            - label:
+                id: wifi_icon_label
+                hidden: true
+                text_font: extra_icon
+                text: "\U000F05A9"
+            - label:
+                id: api_icon_label
+                hidden: true
+                text_font: extra_icon
+                text: "\U000F109B"
+  pages:
+    - id: dashboard_page
+      widgets:
+        - obj:
+            styles: content_container
+            widgets:
+              - label:
+                  id: time_label
+                  text_font: montserrat_96
+                  text: "14:07"
+                  align: CENTER
+                  y: -100
+              - label:
+                  id: date_label
+                  text_font: montserrat_32
+                  text: "2026-03-11 Thu"
+                  align: CENTER
+                  y: 30
+              - obj:
+                  width: 800
+                  height: 200
+                  bg_opa: TRANSP
+                  border_opa: TRANSP
+                  align: CENTER
+                  y: 200
+                  layout:
+                    type: GRID
+                    grid_columns: [FR(20), FR(30), FR(20), FR(30)]
+                    grid_rows: [FR(1), FR(1)]
+                    pad_row: 24
+                    pad_column: 24
+                  widgets:
+                    - label:
+                        text_font: extra_icon
+                        text: "\U000F050F"
+                        grid_cell_column_pos: 0 
+                        grid_cell_row_pos: 0 
+                        grid_cell_x_align: CENTER
+                        grid_cell_y_align: CENTER
+                    - label:
+                        id: temp_label
+                        text_font: montserrat_32
+                        text: "- °C"
+                        grid_cell_column_pos: 1 
+                        grid_cell_row_pos: 0 
+                        grid_cell_x_align: START
+                        grid_cell_y_align: CENTER
+                    - label:
+                        text_font: extra_icon
+                        text: "\U000F058E"
+                        grid_cell_column_pos: 2 
+                        grid_cell_row_pos: 0 
+                        grid_cell_x_align: CENTER
+                        grid_cell_y_align: CENTER
+                    - label:
+                        text_font: montserrat_32
+                        id: humi_label
+                        text: "- %"
+                        grid_cell_column_pos: 3 
+                        grid_cell_row_pos: 0 
+                        grid_cell_x_align: START
+                        grid_cell_y_align: CENTER
+                    - label:
+                        text_font: extra_icon
+                        text: "\U000F07E4"
+                        grid_cell_column_pos: 0 
+                        grid_cell_row_pos: 1 
+                        grid_cell_x_align: CENTER
+                        grid_cell_y_align: CENTER
+                    - label:
+                        text_font: montserrat_32
+                        id: co2_label
+                        text: "- ppm"
+                        grid_cell_column_pos: 1 
+                        grid_cell_row_pos: 1 
+                        grid_cell_x_align: START
+                        grid_cell_y_align: CENTER
+                    - label:
+                        text_font: extra_icon
+                        text: "\U000F029A"
+                        grid_cell_column_pos: 2 
+                        grid_cell_row_pos: 1 
+                        grid_cell_x_align: CENTER
+                        grid_cell_y_align: CENTER
+                    - label:
+                        text_font: montserrat_32
+                        id: pres_label
+                        text: "- hPa"
+                        grid_cell_column_pos: 3 
+                        grid_cell_row_pos: 1 
+                        grid_cell_x_align: START
+                        grid_cell_y_align: CENTER
+        - label:
+            x: 220
+            y: 40
+            text_font: montserrat_48
+            text: "Dashboard"      
+
+    - id: light_page
+      widgets:
+        - obj:
+            styles: content_container
+            layout:
+              type: grid
+              grid_rows: [fr(10), fr(30), fr(30), fr(30)]
+              grid_columns: [fr(1), fr(1)]
+              pad_row: 24
+              pad_column: 24
+
+            widgets:
+# RGB Light
+              - obj:
+                  id: demo_light_click_area
+                  styles: card_sm
+                  grid_cell_row_pos: 0
+                  grid_cell_column_pos: 0
+                  grid_cell_x_align: STRETCH
+                  clickable: true
+                  on_press:
+                    - logger.log: "Demo Light Area1 Clicked!"
+                    - lvgl.widget.show: rgb_light_card_modal_container
+                    - lvgl.widget.hide: color_palette_canvas
+                    - lvgl.widget.hide: color_palette_indicator
+                    - lvgl.widget.show: rgb_light_slider
+                  widgets:
+                    - button:
+                        styles: card_sm_icon_btn
+                        id: demo_light_btn
+                        checkable: true
+                        state:
+                          checked: false
+                        checked:
+                          bg_color: 0xFDF3D8    # Dim yellow
+                        widgets:
+                          - label:
+                              id: demo_rgb_light_label
+                              text_font: extra_icon
+                              text_color: 0X9E9E9E
+                              text: "\U000F18DE"
+                              align: CENTER
+                        on_short_click:
+                          - logger.log: "Toggle the RGB Light!"
+                          - homeassistant.action:
+                              action: light.toggle
+                              data:
+                                entity_id: light.matter_rgb
+
+                    - label:
+                        styles: card_sm_main_label
+                        text: "Color Light"
+                    - label:
+                        styles: card_sm_sub_label
+                        id: demo_rgb_light_status
+                        text: "OFF"
+# Flash Light
+              - obj:
+                  id: demo_light_click_area2
+                  styles: card_sm
+                  grid_cell_row_pos: 2
+                  grid_cell_column_pos: 0
+                  grid_cell_x_align: STRETCH
+                  clickable: true
+                  on_press:
+                    - logger.log: "Demo Dimmable Light Clicked!"
+                    - lvgl.widget.show: flash_light_card_modal_container
+                    - lvgl.widget.show: flash_light_slider
+                  widgets:
+                    - button:
+                        styles: card_sm_icon_btn
+                        id: demo_light_btn2
+                        checkable: true
+                        state:
+                          checked: false
+                        checked:
+                          bg_color: 0xFDF3D8    # Dim yellow
+                        widgets:
+                          - label:
+                              id: demo_flash_light_label
+                              text_font: extra_icon
+                              text_color: 0X9E9E9E
+                              text: "\U000F18DE"
+                              align: CENTER
+                        on_short_click:
+                          - logger.log: "Toggle the Flash Light!"
+                          - homeassistant.action:
+                              action: light.toggle
+                              data:
+                                entity_id: light.matter_flashlight
+
+                    - label:
+                        styles: card_sm_main_label
+                        text: "Dimmable Light"
+                    - label:
+                        styles: card_sm_sub_label
+                        id: demo_flash_light_status
+                        text: "OFF"
+        - label:
+            x: 220
+            y: 40
+            text_font: montserrat_48
+            text: "Lights"
+
+
+################################################################################
+
+
+script:
+  - id: expand_nav_btn_click_area
+    # Expand the clickable area for the main navigation buttons so
+    # that touches near the icons are also registered. This improves
+    # usability of the side navigation rail on small touch targets.
+    then:
+      - lambda: |-
+          std::vector<lv_obj_t*> btns = {
+            id(dash_panel_btn),
+            id(light_panel_btn)
+          };
+          for (auto* btn : btns) {
+            lv_obj_set_ext_click_area(btn, 180);
+          }
+  - id: nav_rail_update
+    # Update the navigation rail UI to reflect the current page
+    # selection. This sets the checked state on the correct nav button,
+    # updates the icon to the active/inactive glyph, and applies the
+    # appropriate label style (active/inactive color).
+    then:
+      - lambda: |-
+          const int active = id(page_num);
+          lv_obj_t* buttons[] = { 
+              id(dash_panel_btn), 
+              id(light_panel_btn), 
+          };
+          lv_obj_t* icons[] = { 
+              id(dash_btn_icon), 
+              id(light_btn_icon), 
+          };
+          lv_obj_t* labels[] = { 
+              id(dash_btn_label), 
+              id(light_btn_label), 
+          };
+          const char* icon_unchecked[] = {
+              "\U000F0A1D", // dashboard-outline
+              "\U000F0336", // lightbulb-outline
+              "\U000F0F55", // thermometer
+          };
+          const char* icon_checked[] = {
+              "\U000F056E", // dashboard
+              "\U000F0335", // lightbulb
+              "\U000F0F54", // thermometer
+          };
+
+          const int count = sizeof(buttons) / sizeof(buttons[0]);
+          
+          // Update button UI
+          for (int i = 0; i < count; i++) {
+              if (i == id(page_num)) {
+                lv_obj_add_state(buttons[i], LV_STATE_CHECKED);
+              } else {
+                lv_obj_clear_state(buttons[i], LV_STATE_CHECKED);
+              }
+              bool selected = (i == active);
+              lv_obj_add_style(labels[i], selected ? id(nav_label_activate) : id(nav_label_inactivate), LV_PART_MAIN);
+              lv_label_set_text(icons[i], selected ? icon_checked[i] : icon_unchecked[i]);
+          }
+    
+  # The below script was used to sync home assistant
+  # entity states with our LVGL UI when UI is drawn on screen.
+  - id: sync_ha
+    then:
+      - logger.log: "Sync with Home Assistant"
+
+  # This script was used to draw a custom 'indicator' on color palette
+  # It used a canvas and allow us to fill pixels with different color
+  - id: draw_color_palette
+    # Draw a circular HSV color wheel on the canvas widget.
+    # This lambda computes hue from angle and saturation from distance
+    # to center, converts HSV to RGB and sets each canvas pixel.
+    then:
+      - lambda: |-
+          const int W = 320;
+          const int H = 320;
+          const int cx = W / 2;
+          const int cy = H / 2;
+          const int radius = 160;
+
+          auto canvas = id(color_palette_canvas);
+
+          // HSV to RGB helper
+          auto hsv_to_rgb = [](float h, float s, float v) -> lv_color_t {
+            float r, g, b;
+
+            int i = (int)(h / 60.0f) % 6;
+            float f = h / 60.0f - i;
+            float p = v * (1.0f - s);
+            float q = v * (1.0f - f * s);
+            float t = v * (1.0f - (1.0f - f) * s);
+
+            switch (i) {
+              case 0: r=v; g=t; b=p; break;
+              case 1: r=q; g=v; b=p; break;
+              case 2: r=p; g=v; b=t; break;
+              case 3: r=p; g=q; b=v; break;
+              case 4: r=t; g=p; b=v; break;
+              case 5: r=v; g=p; b=q; break;
+            }
+
+            uint8_t R = (uint8_t)(r * 255);
+            uint8_t G = (uint8_t)(g * 255);
+            uint8_t B = (uint8_t)(b * 255);
+
+            return lv_color_make(R, G, B);
+          };
+
+          // Draw HSV color wheel
+          for (int y = 0; y < H; y++) {
+            for (int x = 0; x < W; x++) {
+
+              int dx = x - cx;
+              int dy = y - cy;
+              int dist2 = dx*dx + dy*dy;
+
+              if (dist2 > radius * radius) continue;
+
+              float angle = atan2f(dy, dx);  // -π ~ π
+              float hue = fmodf((angle + M_PI) * 180.0f / M_PI + 180.0f, 360.0f);
+
+              float dist = sqrtf(dist2);  // 0 ~ 160
+              float sat = dist / radius;  // 0.0 ~ 1.0
+
+              float val = 1.0f;  // fixed brightness
+
+              lv_color_t c = hsv_to_rgb(hue, sat, val);
+              lv_canvas_set_px(canvas, x, y, c);
+            }
+          };
+  # This script was used to draw a custom 'indicator' on color palette
+  # using the object widget
+  # and calculate the selected color with positions
+  # meanwhile 
+  # 1. setting the background color of the object
+  # 2. store the r, g, b value separately in global variables
+  - id: draw_color_palette_indicator
+    # Make the small draggable indicator respond to touch/move
+    # events on the color palette. The callback computes the indicator
+    # position, clamps it to the palette radius, converts the (x,y)
+    # position to an HSV color, converts HSV to RGB and then updates
+    # the indicator background and global RGB variables for use when
+    # sending the selected color to Home Assistant.
+    then:
+      - lambda: |-
+          lv_obj_add_event_cb(id(color_palette_indicator), [](lv_event_t * e){
+            lv_obj_t * obj = lv_event_get_target(e);
+
+            lv_indev_t * indev = lv_indev_get_act();
+            if(indev == NULL)  return;
+
+            lv_point_t vect;
+            lv_indev_get_vect(indev, &vect);
+
+            lv_coord_t x = lv_obj_get_x_aligned(obj) + vect.x;
+            lv_coord_t y = lv_obj_get_y_aligned(obj) + vect.y;
+
+            int radius = 160;
+
+            float angle = atan2f(y, x);
+
+            if( x * x + y * y > radius * radius ){
+                x = cosf(angle) * radius;
+                y = sinf(angle) * radius;
+            }
+
+            float hue, saturation, dist, value;
+
+            hue = angle * 180.0f / M_PI;
+
+            if (hue < 0) hue += 360.0f;
+
+            dist = sqrtf( x * x + y * y );
+
+            saturation = dist / radius;
+
+            if (saturation > 1) saturation = 1;
+
+            value = 1.0f;
+
+            auto hsv_to_rgb888 = [](float h, float s, float v,
+              uint8_t &r, uint8_t &g, uint8_t &b){
+                float c = v * s;
+                float h_prime = h / 60.0f;
+                float x = c * (1 - fabsf(fmodf(h_prime, 2) - 1));
+                float m = v - c;
+
+                float r1=0, g1=0, b1=0;
+                if(h_prime >=0 && h_prime <1){ r1=c; g1=x; b1=0; }
+                else if(h_prime >=1 && h_prime <2){ r1=x; g1=c; b1=0; }
+                else if(h_prime >=2 && h_prime <3){ r1=0; g1=c; b1=x; }
+                else if(h_prime >=3 && h_prime <4){ r1=0; g1=x; b1=c; }
+                else if(h_prime >=4 && h_prime <5){ r1=x; g1=0; b1=c; }
+                else{ r1=c; g1=0; b1=x; }
+
+                r = (uint8_t)((r1 + m) * 255);
+                g = (uint8_t)((g1 + m) * 255);
+                b = (uint8_t)((b1 + m) * 255);
+            };
+
+            uint8_t r, g, b;
+            hsv_to_rgb888(hue, saturation, value, r, g, b);
+
+            lv_color_t update_color = lv_color_make(r, g, b);
+
+            lv_obj_set_pos(obj, x, y);
+
+            // Set the indicator's background color
+            lv_obj_set_style_bg_color(obj, update_color, LV_STATE_DEFAULT);
+
+            // Give the slider proper color like in the Home Assistant
+            float brightness = 0.299 * r + 0.587 * g + 0.114 * b;
+
+            // If it's too close to white, we use gray for substitution
+            if (brightness > 235) {
+                lv_obj_set_style_bg_color(id(rgb_light_slider), lv_color_hex(0xE1E1E1), LV_PART_INDICATOR);
+                lv_obj_set_style_bg_color(id(rgb_light_slider), lv_color_hex(0xF9F9F9), LV_PART_MAIN);
+            } else {
+              lv_obj_set_style_bg_color(id(rgb_light_slider), update_color, LV_PART_INDICATOR);
+              // a fade background
+              float factor = 0.85;
+              uint8_t bg_r = r + (255 - r) * factor;
+              uint8_t bg_g = g + (255 - g) * factor;
+              uint8_t bg_b = b + (255 - b) * factor;
+              lv_color_t bar_bg = lv_color_make(bg_r, bg_g, bg_b);
+              lv_obj_set_style_bg_color(id(rgb_light_slider), bar_bg, LV_PART_MAIN);
+            }
+
+            // Set the current light color
+            id(light_r) = r;
+            id(light_g) = g;
+            id(light_b) = b;
+
+          }, LV_EVENT_PRESSING, NULL);
+    
+
+  - id: move_color_palette_indicator
+    # Brief: Move color palette indicator script
+    # This script reads the current input device touch coordinates and computes
+    # the local position relative to the color canvas. It clamps the position
+    # inside the circular palette radius, converts the position to HSV
+    # (hue/saturation) and then to RGB, updates the indicator position and
+    # its background color, and stores the resulting R/G/B values into global
+    # variables for use when sending the selected color to Home Assistant.
+    then:
+      - lambda: |-
+          lv_indev_t * indev = lv_indev_get_act();
+          if(indev == NULL)  return;
+
+          lv_point_t p;
+          lv_indev_get_point(indev, &p);
+
+          lv_area_t area;
+          lv_obj_get_coords(id(color_palette_canvas), &area);
+          
+          int radius = 160;
+
+          int local_x = p.x - area.x1 - radius;
+          int local_y = p.y - area.y1 - radius;
+
+          float angle = atan2f(local_y, local_x);
+
+          // restrict the click area inside the circle
+          if ( local_x * local_x + local_y * local_y > radius * radius ) {
+              local_x = cosf(angle) * radius;
+              local_y = sinf(angle) * radius;
+          }
+
+          float hue, saturation, dist, value;
+
+          hue = angle * 180.0f / M_PI;
+
+          if (hue < 0) hue += 360.0f;
+
+          dist = sqrtf( local_x * local_x + local_y * local_y );
+
+          saturation = dist / radius;
+
+          if (saturation > 1) saturation = 1;
+
+          value = 1.0f;
+
+          auto hsv_to_rgb888 = [](float h, float s, float v,
+            uint8_t &r, uint8_t &g, uint8_t &b){
+              float c = v * s;
+              float h_prime = h / 60.0f;
+              float x = c * (1 - fabsf(fmodf(h_prime, 2) - 1));
+              float m = v - c;
+
+              float r1=0, g1=0, b1=0;
+              if(h_prime >=0 && h_prime <1){ r1=c; g1=x; b1=0; }
+              else if(h_prime >=1 && h_prime <2){ r1=x; g1=c; b1=0; }
+              else if(h_prime >=2 && h_prime <3){ r1=0; g1=c; b1=x; }
+              else if(h_prime >=3 && h_prime <4){ r1=0; g1=x; b1=c; }
+              else if(h_prime >=4 && h_prime <5){ r1=x; g1=0; b1=c; }
+              else{ r1=c; g1=0; b1=x; }
+
+              r = (uint8_t)((r1 + m) * 255);
+              g = (uint8_t)((g1 + m) * 255);
+              b = (uint8_t)((b1 + m) * 255);
+          };
+
+          uint8_t r, g, b;
+          hsv_to_rgb888(hue, saturation, value, r, g, b);
+
+          lv_color_t update_color = lv_color_make(r, g, b);
+
+          lv_obj_set_pos(id(color_palette_indicator), local_x, local_y);
+
+          lv_obj_set_style_bg_color(id(color_palette_indicator), update_color, LV_STATE_DEFAULT);
+
+          // Give the slider proper color like in the Home Assistant
+          float brightness = 0.299 * r + 0.587 * g + 0.114 * b;
+
+          // If it's too close to white, we use gray for subsititution
+          if (brightness > 235) {
+              lv_obj_set_style_bg_color(id(rgb_light_slider), lv_color_hex(0xE1E1E1), LV_PART_INDICATOR);
+              lv_obj_set_style_bg_color(id(rgb_light_slider), lv_color_hex(0xF9F9F9), LV_PART_MAIN);
+          } else {
+            lv_obj_set_style_bg_color(id(rgb_light_slider), update_color, LV_PART_INDICATOR);
+            // a fade background
+            float factor = 0.85;
+            uint8_t bg_r = r + (255 - r) * factor;
+            uint8_t bg_g = g + (255 - g) * factor;
+            uint8_t bg_b = b + (255 - b) * factor;
+            lv_color_t bar_bg = lv_color_make(bg_r, bg_g, bg_b);
+            lv_obj_set_style_bg_color(id(rgb_light_slider), bar_bg, LV_PART_MAIN);
+          }
+          
+
+          // Set the current light color
+          id(light_r) = r;
+          id(light_g) = g;
+          id(light_b) = b;
+
+  - id: sync_ha_palette
+    parameters:
+      color_str: string
+    then:
+      - lambda: |-
+          ESP_LOGI("sync_ha_palette", "received: %s", color_str.c_str());
+          
+          if (color_str.empty() || color_str == "None" 
+              || color_str == "null" || color_str == "unknown" 
+              || color_str == "unavailable" ) {
+            lv_obj_set_pos(id(color_palette_indicator), 0, 0);
+            lv_obj_set_style_bg_color(id(color_palette_indicator), lv_color_hex(0xFFFFFF), LV_STATE_DEFAULT);
+            lv_obj_set_style_bg_color(id(rgb_light_slider), lv_color_hex(0xECECEC), LV_PART_MAIN);
+            return;
+          }
+          int r, g, b;
+          // remove '(' and ')' in string, obtain r, g, b value
+          color_str.erase(std::remove(color_str.begin(), color_str.end(), '('), color_str.end());
+          color_str.erase(std::remove(color_str.begin(), color_str.end(), ')'), color_str.end());
+          sscanf(color_str.c_str(), "%d,%d,%d", &r, &g, &b);
+          lv_color_t update_color = lv_color_make(r, g, b);
+          lv_color_hsv_t hsv = lv_color_rgb_to_hsv(r, g, b);
+          int radius = 160;
+
+          float rad = hsv.h * M_PI / 180.0f;
+          float s = hsv.s / 100.0f;
+
+          int x = (int)(cosf(rad) * s * radius);
+          int y = (int)(sinf(rad) * s * radius);
+
+          lv_obj_set_pos(id(color_palette_indicator), x, y);
+          // Set the indicator's background color
+          lv_obj_set_style_bg_color(id(color_palette_indicator), update_color, LV_STATE_DEFAULT);
+          
+          // Give the slider proper color like in the Home Assistant
+          float brightness = 0.299 * r + 0.587 * g + 0.114 * b;
+
+          // If it's too close to white, we use gray for subsititution
+          if (brightness > 235) {
+              lv_obj_set_style_bg_color(id(rgb_light_slider), lv_color_hex(0xE1E1E1), LV_PART_INDICATOR);
+              lv_obj_set_style_bg_color(id(rgb_light_slider), lv_color_hex(0xF9F9F9), LV_PART_MAIN);
+          } else {
+            lv_obj_set_style_bg_color(id(rgb_light_slider), update_color, LV_PART_INDICATOR);
+            // a fade background
+            float factor = 0.85;
+            uint8_t bg_r = r + (255 - r) * factor;
+            uint8_t bg_g = g + (255 - g) * factor;
+            uint8_t bg_b = b + (255 - b) * factor;
+            lv_color_t bar_bg = lv_color_make(bg_r, bg_g, bg_b);
+            lv_obj_set_style_bg_color(id(rgb_light_slider), bar_bg, LV_PART_MAIN);
+          }
+
+          
+          id(light_r) = r;
+          id(light_g) = g;
+          id(light_b) = b;
+
+################################################################################
+
+globals:
+  - id: page_num
+    type: int
+    restore_value: no
+    initial_value: '0'
+  - id: light_r
+    type: uint8_t
+    restore_value: no
+    initial_value: '0xFF'
+  - id: light_g
+    type: uint8_t
+    restore_value: no
+    initial_value: '0xFF'
+  - id: light_b
+    type: uint8_t
+    restore_value: no
+    initial_value: '0xFF'
+
+################################################################################
+

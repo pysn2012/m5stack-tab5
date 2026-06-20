@@ -1,0 +1,105 @@
+# ============================================================
+# 逐小时天气预报卡片UI组件
+# 显示未来5小时的天气预报（温度、降雨概率）
+# ============================================================
+
+- obj:
+    id: layer_forecast_hourly
+    x: 20
+    y: 570
+    width: 1240
+    height: 200
+    styles: style_meteo_card
+    scrollbar_mode: "OFF"
+    hidden: true
+    layout:
+      type: FLEX
+      flex_flow: ROW
+      flex_align_main: SPACE_EVENLY
+      flex_align_cross: CENTER
+      pad_column: 10
+    widgets:
+      # ==================== 1小时后天气预报 ====================
+      - obj:
+          id: forecast_hour_0
+          width: 200
+          height: 180
+          styles: style_transparent
+          layout:
+            type: FLEX
+            flex_flow: COLUMN
+            flex_align_main: CENTER
+            flex_align_cross: CENTER
+          widgets:
+            - label: { id: h0_time, text: "1小时后", text_font: roboto_32_b, text_color: color_text }
+            - label: { id: h0_icon_layer1, text: "\U000F0725", text_font: mdi_font_64, text_color: color_text }
+            - label: { id: h0_temp, text: "24°", text_font: roboto_32_b, text_color: color_temp_max }
+            - label: { id: h0_prob, text: "20%", text_font: roboto_32, text_color: color_text }
+      
+      # ==================== 2小时后天气预报 ====================
+      - obj:
+          id: forecast_hour_1
+          width: 200
+          height: 180
+          styles: style_transparent
+          layout:
+            type: FLEX
+            flex_flow: COLUMN
+            flex_align_main: CENTER
+            flex_align_cross: CENTER
+          widgets:
+            - label: { id: h1_time, text: "2小时后", text_font: roboto_32_b, text_color: color_text }
+            - label: { id: h1_icon_layer1, text: "\U000F0725", text_font: mdi_font_64, text_color: color_text }
+            - label: { id: h1_temp, text: "25°", text_font: roboto_32_b, text_color: color_temp_max }
+            - label: { id: h1_prob, text: "15%", text_font: roboto_32, text_color: color_text }
+      
+      # ==================== 3小时后天气预报 ====================
+      - obj:
+          id: forecast_hour_2
+          width: 200
+          height: 180
+          styles: style_transparent
+          layout:
+            type: FLEX
+            flex_flow: COLUMN
+            flex_align_main: CENTER
+            flex_align_cross: CENTER
+          widgets:
+            - label: { id: h2_time, text: "3小时后", text_font: roboto_32_b, text_color: color_text }
+            - label: { id: h2_icon_layer1, text: "\U000F0725", text_font: mdi_font_64, text_color: color_text }
+            - label: { id: h2_temp, text: "26°", text_font: roboto_32_b, text_color: color_temp_max }
+            - label: { id: h2_prob, text: "10%", text_font: roboto_32, text_color: color_text }
+      
+      # ==================== 4小时后天气预报 ====================
+      - obj:
+          id: forecast_hour_3
+          width: 200
+          height: 180
+          styles: style_transparent
+          layout:
+            type: FLEX
+            flex_flow: COLUMN
+            flex_align_main: CENTER
+            flex_align_cross: CENTER
+          widgets:
+            - label: { id: h3_time, text: "4小时后", text_font: roboto_32_b, text_color: color_text }
+            - label: { id: h3_icon_layer1, text: "\U000F0725", text_font: mdi_font_64, text_color: color_text }
+            - label: { id: h3_temp, text: "27°", text_font: roboto_32_b, text_color: color_temp_max }
+            - label: { id: h3_prob, text: "5%", text_font: roboto_32, text_color: color_text }
+      
+      # ==================== 5小时后天气预报 ====================
+      - obj:
+          id: forecast_hour_4
+          width: 200
+          height: 180
+          styles: style_transparent
+          layout:
+            type: FLEX
+            flex_flow: COLUMN
+            flex_align_main: CENTER
+            flex_align_cross: CENTER
+          widgets:
+            - label: { id: h4_time, text: "5小时后", text_font: roboto_32_b, text_color: color_text }
+            - label: { id: h4_icon_layer1, text: "\U000F0725", text_font: mdi_font_64, text_color: color_text }
+            - label: { id: h4_temp, text: "28°", text_font: roboto_32_b, text_color: color_temp_max }
+            - label: { id: h4_prob, text: "0%", text_font: roboto_32, text_color: color_text }

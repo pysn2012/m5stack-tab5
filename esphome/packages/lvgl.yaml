@@ -1,10 +1,20 @@
+# ============================================================
+# M5Stack Tab5 LVGL界面配置文件
+# 包含：主页面布局、手势处理、状态图标、时钟、天气预报、控制按钮等
+# ============================================================
+
 lvgl:
 
   pages:
 
+    # ==================== 主页面 ====================
     - id: page_main
       scrollbar_mode: "OFF"
 
+      # ==================== 手势处理 ====================
+      # 上滑：显示系统控制台
+      # 下滑：隐藏系统控制台
+      # 左右滑动（下半屏）：切换天气预报页面
       on_gesture:
         then:
           - lambda: |-
@@ -14,11 +24,14 @@ lvgl:
                   lv_indev_get_point(indev, &pt);
                   lv_dir_t d = lv_indev_get_gesture_dir(indev);
 
+                  // 上滑显示系统控制台
                   if (d == LV_DIR_TOP) {
                       lv_obj_clear_flag(id(layer_console_sys), LV_OBJ_FLAG_HIDDEN);
                       lv_obj_move_foreground(id(layer_console_sys));
+                  // 下滑隐藏系统控制台
                   } else if (d == LV_DIR_BOTTOM) {
                       lv_obj_add_flag(id(layer_console_sys), LV_OBJ_FLAG_HIDDEN);
+                  // 下半屏左右滑动切换天气预报页面
                   } else if (pt.y > 400) {
                       int page = id(forecast_page_index);
                       if (d == LV_DIR_LEFT) {
@@ -30,10 +43,12 @@ lvgl:
                       }
                       id(forecast_page_index) = page;
 
+                      // 切换到每日预报或逐小时预报
                       if (page >= 2) {
                           lv_obj_clear_flag(id(layer_forecast_daily), LV_OBJ_FLAG_HIDDEN);
                           lv_obj_add_flag(id(layer_forecast_hourly), LV_OBJ_FLAG_HIDDEN);
                           
+                          // 刷新每日预报数据
                           WeatherDaySlot slots[] = {
                               {id(j0_day), id(j0_max), id(j0_min), id(j0_icon_layer1), id(j0_icon_layer2), id(btn_j0_action), id(icon_card_pc), nullptr, nullptr},
                               {id(j1_day), id(j1_max), id(j1_min), id(j1_icon_layer1), id(j1_icon_layer2), id(btn_j1_action), id(icon_card_shutter1), id(icon_card_shutter_arrow), id(btn_j1_dir)},
@@ -46,6 +61,7 @@ lvgl:
                           lv_obj_add_flag(id(layer_forecast_daily), LV_OBJ_FLAG_HIDDEN);
                           lv_obj_clear_flag(id(layer_forecast_hourly), LV_OBJ_FLAG_HIDDEN);
 
+                          // 刷新逐小时预报数据
                           WeatherHourSlot slots[] = {
                               {id(h4_time), id(h4_temp), id(h4_prob), id(h4_icon_layer1), id(h4_icon_layer2)},
                               {id(h3_time), id(h3_temp), id(h3_prob), id(h3_icon_layer1), id(h3_icon_layer2)},
@@ -56,6 +72,7 @@ lvgl:
                           refresh_hourly_forecast(slots, 1 - page, id(font_meteo_main), id(font_meteo_card), id(font_meteo_main_small), id(font_meteo_card_small));
                       }
 
+                      // 更新分页指示器
                       lv_obj_t* bars[] = {id(pbar_0), id(pbar_1), id(pbar_2), id(pbar_3), id(pbar_4)};
                       for(int i = 0; i < 5; i++) {
                         if(i == page) {
@@ -69,11 +86,17 @@ lvgl:
                   }
               }
 
+      # ==================== UI组件 ====================
       widgets:
 
-        # --- Top Left: Status Icons (Moved lower) ---
+        # ==================== 左上角：状态图标 ====================
+        # 显示PC、手机、WiFi连接状态
+        - label: { id: icon_pc, text: "\U000F0379", align: TOP_LEFT, x: 10, y: 10, text_font: mdi_font_26, text_color: color_text_dim }
+        - label: { id: icon_phone, text: "\U000F011E", align: TOP_LEFT, x: 45, y: 10, text_font: mdi_font_26, text_color: color_text_dim }
+        - label: { id: icon_wifi, text: "\U000F05A9", align: TOP_LEFT, x: 80, y: 10, text_font: mdi_font_26, text_color: color_text_dim }
 
-        # --- Voice Assistant Panel (Left) ---
+        # ==================== 语音助手面板 ====================
+        # 麦克风图标和语音助手触发按钮
         - label: { id: icon_mic_status, text: "\U000F036C", align: TOP_LEFT, x: 146, y: 85, text_font: mdi_font_120, text_color: color_text_dim }
         - button:
             id: btn_assist_trigger
@@ -87,7 +110,8 @@ lvgl:
               - voice_assistant.start:
                   id: va
         
-        # Bouton Domo
+        # ==================== 模式切换按钮 ====================
+        # 智能家居模式按钮（控制Home Assistant设备）
         - button:
             id: btn_mode_domo
             align: TOP_LEFT
@@ -110,9 +134,9 @@ lvgl:
                     option: "preferred"
             widgets:
               - label: { text: "\U000F07D0", align: CENTER, y: -10, text_font: mdi_font_32, text_color: color_text }
-              - label: { text: "Domo", align: CENTER, y: 15, text_font: roboto_22, text_color: color_text }
+              - label: { text: "智能家居", align: CENTER, y: 15, text_font: roboto_22, text_color: color_text }
 
-        # Bouton Discu
+        # 对话模式按钮（启用LLM对话功能）
         - button:
             id: btn_mode_discu
             align: TOP_LEFT
@@ -135,9 +159,9 @@ lvgl:
                     option: "Discussion LLM"
             widgets:
               - label: { text: "\U000F0450", align: CENTER, y: -10, text_font: mdi_font_32, text_color: color_text }
-              - label: { text: "Discu", align: CENTER, y: 15, text_font: roboto_22, text_color: color_text }
+              - label: { text: "对话", align: CENTER, y: 15, text_font: roboto_22, text_color: color_text }
 
-        # Bouton OK Nabu
+        # Ok Nabu唤醒词开关按钮
         - button:
             id: btn_ok_nabu
             align: TOP_LEFT
@@ -149,13 +173,14 @@ lvgl:
             on_short_click:
               - switch.toggle: tab5_wake_word_active
             widgets:
-              - label: { id: lbl_ok_nabu, text: "Ok Nabu: ON", align: CENTER, text_font: roboto_22, text_color: color_success }
+              - label: { id: lbl_ok_nabu, text: "Ok Nabu: 开启", align: CENTER, text_font: roboto_22, text_color: color_success }
 
-        # Label d'état masqué pour la compatibilité
+        # 隐藏的状态标签（兼容性保留）
         - label: { id: icon_mode_status, text: "", hidden: true }
 
 
-        # --- Centre: Horloge (Déplacée légèrement à gauche) ---
+        # ==================== 中央：时钟显示 ====================
+        # 显示当前时间和日期（中文格式）
         - obj:
             id: clock_tile
             align: TOP_MID
@@ -167,14 +192,10 @@ lvgl:
             scrollbar_mode: "OFF"
             widgets:
               - label: { id: lbl_time, text: "19:50", align: TOP_MID, y: 10, text_font: roboto_130_b, text_color: color_text }
-              - label: { id: lbl_date, text: "Jeu 02 Avr", align: TOP_MID, y: 145, text_font: roboto_45, text_color: color_text }
+              - label: { id: lbl_date, text: "星期三 4月2日", align: TOP_MID, y: 145, text_font: roboto_45, text_color: color_text }
 
-        # --- Top Left: Status Icons (Small) ---
-        - label: { id: icon_pc, text: "\U000F0379", align: TOP_LEFT, x: 10, y: 10, text_font: mdi_font_26, text_color: color_text_dim }
-        - label: { id: icon_phone, text: "\U000F011E", align: TOP_LEFT, x: 45, y: 10, text_font: mdi_font_26, text_color: color_text_dim }
-        - label: { id: icon_wifi, text: "\U000F05A9", align: TOP_LEFT, x: 80, y: 10, text_font: mdi_font_26, text_color: color_text_dim }
-
-        # --- Top Right Buttons (Horizontal Layout) ---
+        # ==================== 右上角控制按钮 ====================
+        # Home Assistant控制按钮（显示/隐藏开关面板）
         - button:
             id: btn_control_ha
             align: TOP_LEFT
@@ -203,6 +224,7 @@ lvgl:
             widgets:
               - label: { id: icon_ha, text: "\U000F07D0", align: CENTER, text_font: mdi_font_56, text_color: color_text }
 
+        # 系统控制台按钮（显示系统信息面板）
         - button:
             id: btn_control_console
             align: TOP_LEFT
@@ -219,6 +241,7 @@ lvgl:
             widgets:
               - label: { text: "\U000F0717", align: CENTER, text_font: mdi_font_56, text_color: color_text }
 
+        # 未使用按钮（预留）
         - button:
             id: btn_control_inactive
             align: TOP_LEFT
@@ -231,13 +254,16 @@ lvgl:
             widgets:
               - label: { text: "\U000F02E4", align: CENTER, text_font: mdi_font_56, text_color: 0x555555 }
 
-        # ==================== MOISTURE SENSORS ====================
+        # ==================== 植物湿度传感器显示 ====================
+        # 显示5个植物的土壤湿度，自动排序显示前4个最缺水的
         - !include ui_components/moisture_sensors.yaml
 
-        # ==================== CLIMATE CONTROL (MIDDLE RIGHT) ====================
-
+        # ==================== 温湿度控制卡片 ====================
+        # 显示温室、客厅的温度和湿度信息
         - !include ui_components/climate_card.yaml
-        # ==================== CENTRAL CARD (Alertes, Pluie, Planning) ====================
+
+        # ==================== 中央信息卡片 ====================
+        # 显示天气预警、降雨概率、日程安排等信息
         - obj:
             id: central_card
             x: 20
@@ -249,6 +275,7 @@ lvgl:
             pad_left: 20
             pad_right: 20
             widgets:
+              # 天气预警容器（最多显示4个预警）
               - obj:
                   id: alert_container
                   align: CENTER
@@ -268,7 +295,7 @@ lvgl:
                     - label: { id: alerte_slot_2, text: "", text_font: mdi_font_alert, text_color: color_text, hidden: true }
                     - label: { id: alerte_slot_3, text: "", text_font: mdi_font_alert, text_color: color_text, hidden: true }
 
-              # Pluie Wrapper
+              # 降雨概率显示容器（9个时间段的降雨条形图）
               - obj:
                   id: rain_wrapper
                   align: CENTER
@@ -284,6 +311,7 @@ lvgl:
                     pad_column: 15
                   widgets:
                     - label: { id: icon_rain_predict, text: "\U000F0597", text_font: mdi_font_alert, text_color: color_temp_min }
+                    # 降雨条形图容器
                     - obj:
                         id: rain_bar_container
                         width: SIZE_CONTENT
@@ -304,6 +332,7 @@ lvgl:
                           - obj: { id: rb_6, width: 55, height: 50, bg_color: color_bar_inactive, border_width: 0, pad_all: 0, widgets: [{ obj: { id: rb_6_in, align: BOTTOM_MID, width: 55, height: 0, bg_color: color_bar_inactive, border_width: 0, radius: 0 } }] }
                           - obj: { id: rb_7, width: 55, height: 50, bg_color: color_bar_inactive, border_width: 0, pad_all: 0, widgets: [{ obj: { id: rb_7_in, align: BOTTOM_MID, width: 55, height: 0, bg_color: color_bar_inactive, border_width: 0, radius: 0 } }] }
                           - obj: { id: rb_8, width: 55, height: 50, bg_color: color_bar_inactive, border_width: 0, pad_all: 0, widgets: [{ obj: { id: rb_8_in, align: BOTTOM_MID, width: 55, height: 0, bg_color: color_bar_inactive, border_width: 0, radius: 0 } }] }
+                    # 降雨数值显示
                     - obj:
                         width: SIZE_CONTENT
                         height: 100%
@@ -315,11 +344,11 @@ lvgl:
                           flex_align_cross: END
                           pad_column: 6
                         widgets:
-                          - label: { id: lbl_proc_pluie, text: "Synchronisation...", text_font: roboto_32_b, text_color: color_text, pad_bottom: 15 }
+                          - label: { id: lbl_proc_pluie, text: "同步中...", text_font: roboto_32_b, text_color: color_text, pad_bottom: 15 }
                           - label: { id: lbl_pluie_val, text: "", text_font: roboto_45_b, text_color: color_orange_vif, pad_bottom: 10 }
                           - label: { id: lbl_pluie_unit, text: "", text_font: roboto_32_b, text_color: color_text, pad_bottom: 15 }
 
-              # Planning Wrapper
+              # 日程安排显示容器
               - obj:
                   id: planning_wrapper
                   align: CENTER
@@ -329,7 +358,8 @@ lvgl:
                   widgets:
                     - label: { id: lbl_planning_text, text: "", align: CENTER, y: 4, text_font: roboto_45_b, text_color: color_text }
 
-        # ==================== PAGINATION BARS ====================
+        # ==================== 分页指示器 ====================
+        # 5个点表示5个可切换的页面（2个逐小时 + 3个每日预报）
         - obj:
             id: pagination_container
             x: 480
@@ -351,13 +381,16 @@ lvgl:
               - obj: { id: pbar_3, width: 16, height: 4, radius: 2, bg_color: color_text_dim, bg_opa: 40%, border_width: 0 }
               - obj: { id: pbar_4, width: 16, height: 4, radius: 2, bg_color: color_text_dim, bg_opa: 40%, border_width: 0 }
 
-        # ==================== BOTTOM CARDS (FORECAST) ====================
-
-        # --- °CK 1: J0 to J4 ---
-
+        # ==================== 底部UI组件 ====================
+        # 每日天气预报卡片
         - !include ui_components/forecast_daily.yaml
+        # 逐小时天气预报卡片
         - !include ui_components/forecast_hourly.yaml
+        # 开关控制卡片（小米插座、灯光等）
         - !include ui_components/switches_card.yaml
+        # 系统控制台（内存、CPU、网络等信息）
         - !include ui_components/console_sys.yaml
+        # 温湿度控制弹窗
         - !include ui_components/climate_popup.yaml
+        # 灯光控制弹窗
         - !include ui_components/light_popup.yaml

@@ -1,0 +1,8 @@
+esphome:
+  name: tab5-va
+  friendly_name: M5Stack Tab5 Voice Assistant
+  min_version: 2025.9.3
+
+packages:
+  hardware: !include packages/hardware.yaml
+

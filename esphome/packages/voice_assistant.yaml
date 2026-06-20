@@ -1,0 +1,139 @@
+# I2S音频总线配置
+i2s_audio:
+  - id: mic_bus
+    i2s_lrclk_pin: GPIO29
+    i2s_bclk_pin: GPIO27
+    i2s_mclk_pin: GPIO30
+
+# 音频ADC配置（麦克风） ES7210 - 4通道音频ADC
+audio_adc:
+  - platform: es7210
+    id: es7210_adc
+    bits_per_sample: 16bit
+    sample_rate: 16000
+
+# 麦克风配置 I2S数字麦克风
+microphone:
+  - platform: i2s_audio
+    id: tab5_microphone
+    i2s_din_pin: GPIO28
+    sample_rate: 16000
+    bits_per_sample: 16bit
+    adc_type: external
+
+# 音频DAC配置（扬声器） ES8388 - 音频DAC芯片
+audio_dac:
+  - platform: es8388
+    id: es8388_dac
+
+# 扬声器配置 I2S数字扬声器
+speaker:
+  - platform: i2s_audio
+    id: tab5_speaker
+    i2s_dout_pin: GPIO26
+    audio_dac: es8388_dac
+    dac_type: external
+    channel: mono
+    buffer_duration: 100ms
+    timeout: 2000ms
+    bits_per_sample: 16bit
+    sample_rate: 48000
+
+# DAC输出选择 选择音频输出通道：LINE1、LINE2或BOTH
+select:
+  - platform: es8388
+    dac_output:
+      id: es8388_dac_output
+      internal: true
+  - platform: template
+    name: "Tab5 DAC输出"
+    id: tab5_dac_output_template
+    options:
+      - "LINE1"
+      - "LINE2"
+      - "BOTH"
+    restore_value: true
+    optimistic: true
+    on_value:
+      then:
+        - select.set:
+            id: es8388_dac_output
+            option: !lambda "return x;"
+
+# 媒体播放器配置 用于播放TTS语音和音频通知
+media_player:
+  - platform: speaker
+    name: tab5_media_player
+    id: speaker_player
+    announcement_pipeline:
+      speaker: tab5_speaker
+      format: WAV
+      sample_rate: 16000
+      num_channels: 1
+    on_announcement:
+      - if:
+          condition:
+            - microphone.is_capturing: tab5_microphone
+          then:
+            - micro_wake_word.stop:
+    on_idle:
+      - if:
+          condition:
+            - and:
+                - not:
+                    voice_assistant.is_running:
+                - switch.is_on: tab5_wake_word_active
+          then:
+            - micro_wake_word.start:
+
+# 唤醒词检测配置 检测"Okay Nabu"唤醒词
+micro_wake_word:
+  id: mww
+  models:
+    - okay_nabu
+  on_wake_word_detected:
+    - if:
+        condition:
+          - switch.is_on: tab5_wake_word_active
+        then:
+          - voice_assistant.start:
+              wake_word: !lambda return wake_word;
+
+# 语音助手配置
+voice_assistant:
+  id: va
+  microphone: tab5_microphone
+  media_player: speaker_player
+  micro_wake_word: mww
+  on_listening:
+    - lambda: 'lv_obj_set_style_text_color(id(icon_mic_status), lv_color_hex(UIColor::SUCCESS), LV_PART_MAIN);' # 绿色（请说话）
+  on_stt_end:
+    - lambda: 'lv_obj_set_style_text_color(id(icon_mic_status), lv_color_hex(UIColor::WARNING), LV_PART_MAIN);' # 橙色（分析中）
+  on_tts_start:
+    - lambda: 'lv_obj_set_style_text_color(id(icon_mic_status), lv_color_hex(UIColor::INFO), LV_PART_MAIN);' # 浅蓝色（回复中）
+  on_end:
+    - lambda: 'lv_obj_set_style_text_color(id(icon_mic_status), lv_color_hex(UIColor::TEXT_DIM), LV_PART_MAIN);' # 灰色（空闲）
+    - wait_until:
+        condition:
+          - media_player.is_announcing:
+        timeout: 3s    # 增加到3秒，避免长语音被截断
+    - wait_until:
+        - and:
+            - not:
+                media_player.is_announcing:
+            - not:
+                speaker.is_playing: tab5_speaker
+    - if:
+        condition:
+          - switch.is_on: tab5_wake_word_active
+        then:
+          - micro_wake_word.start:
+  on_error:
+    - lambda: 'lv_obj_set_style_text_color(id(icon_mic_status), lv_color_hex(UIColor::ERROR), LV_PART_MAIN);' # 红色（错误）
+    - delay: 2s
+    - lambda: 'lv_obj_set_style_text_color(id(icon_mic_status), lv_color_hex(UIColor::TEXT_DIM), LV_PART_MAIN);' # 恢复灰色
+    - if:
+        condition:
+          - switch.is_on: tab5_wake_word_active
+        then:
+          - micro_wake_word.start:

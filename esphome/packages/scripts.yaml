@@ -1,5 +1,11 @@
+# ============================================================
+# M5Stack Tab5 脚本配置文件
+# 用于存放LVGL界面的自定义脚本逻辑
+# ============================================================
+
 script:
-  # Fichier vierge, prêt à accueillir la logique d'interface
+  # ==================== 初始化脚本 ====================
+  # 空脚本，用于后续添加LVGL界面逻辑
   - id: dummy_script
     then:
-      - logger.log: "Scripts LVGL initialisés."
+      - logger.log: "LVGL脚本已初始化。"

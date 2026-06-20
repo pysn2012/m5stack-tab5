@@ -1,0 +1,96 @@
+# ============================================================
+# 灯光控制弹窗UI组件
+# 用于控制灯光的开关
+# 点击灯光开关按钮打开此弹窗
+# ============================================================
+
+- obj:
+    id: layer_light_popup
+    x: 20
+    y: 20
+    width: 1240
+    height: 760
+    styles: style_meteo_card
+    scrollbar_mode: "OFF"
+    hidden: true
+    layout:
+      type: FLEX
+      flex_flow: COLUMN
+      flex_align_main: CENTER
+      flex_align_cross: CENTER
+      pad_column: 20
+      pad_row: 20
+    widgets:
+      # ==================== 标题 ====================
+      - label: { text: "灯光控制", align: TOP_MID, y: 20, text_font: roboto_45_b, text_color: color_text }
+      
+      # ==================== 当前控制实体（隐藏） ====================
+      # 记录当前控制的灯光实体ID
+      - label: { id: current_light_entity, text: "", align: CENTER, hidden: true }
+      
+      # ==================== 灯光状态显示区域 ====================
+      # 显示当前灯光开关状态图标
+      - obj:
+          width: 400
+          height: 200
+          styles: style_transparent
+          layout:
+            type: FLEX
+            flex_flow: COLUMN
+            flex_align_main: CENTER
+            flex_align_cross: CENTER
+          widgets:
+            - label: { text: "灯光状态", text_font: roboto_32, text_color: color_text }
+            - label: { id: btn_light_power_icon, text: "\U000F0335", text_font: mdi_font_130, text_color: color_text }
+      
+      # ==================== 控制按钮区域 ====================
+      # 开启和关闭灯光的按钮
+      - obj:
+          width: 600
+          height: 100
+          styles: style_transparent
+          layout:
+            type: FLEX
+            flex_flow: ROW
+            flex_align_main: SPACE_EVENLY
+            flex_align_cross: CENTER
+          widgets:
+            # 开启灯光按钮
+            - button:
+                id: btn_light_on
+                width: 180
+                height: 80
+                styles: style_clim_btn
+                on_short_click:
+                  - lambda: |-
+                      // TODO: 实现开启灯光的HA服务调用
+                widgets:
+                  - label: { text: "开启", align: CENTER, text_font: roboto_32, text_color: color_text }
+            
+            # 关闭灯光按钮
+            - button:
+                id: btn_light_off
+                width: 180
+                height: 80
+                styles: style_clim_btn
+                on_short_click:
+                  - lambda: |-
+                      // TODO: 实现关闭灯光的HA服务调用
+                widgets:
+                  - label: { text: "关闭", align: CENTER, text_font: roboto_32, text_color: color_text }
+      
+      # ==================== 关闭弹窗按钮 ====================
+      # 点击关闭灯光控制弹窗
+      - button:
+          id: btn_close_light
+          align: BOTTOM_RIGHT
+          x: -20
+          y: -20
+          width: 100
+          height: 50
+          styles: style_clim_btn
+          on_short_click:
+            - lambda: |-
+                lv_obj_add_flag(id(layer_light_popup), LV_OBJ_FLAG_HIDDEN);
+          widgets:
+            - label: { text: "关闭", align: CENTER, text_font: roboto_32, text_color: color_text }

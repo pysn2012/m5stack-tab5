@@ -1,0 +1,124 @@
+# ============================================================
+# 开关控制卡片UI组件
+# 控制小米智能插座、灯光等Home Assistant设备
+# ============================================================
+
+- obj:
+    id: layer_switches
+    x: 20
+    y: 120
+    width: 830
+    height: 300
+    styles: style_meteo_card
+    scrollbar_mode: "OFF"
+    hidden: true
+    layout:
+      type: FLEX
+      flex_flow: ROW_WRAP
+      flex_align_main: SPACE_EVENLY
+      flex_align_cross: CENTER
+      pad_column: 10
+      pad_row: 10
+    widgets:
+      # ==================== 小米智能插座1 ====================
+      - button:
+          id: chuangmi_socket1_button
+          width: 200
+          height: 120
+          styles: style_clim_btn
+          on_short_click:
+            - homeassistant.service:
+                service: switch.toggle
+                data:
+                  entity_id: switch.chuangmi_cn_125697630_m3_on_p_2_1
+          widgets:
+            - label: { text: "\U000F1204", align: CENTER, y: -15, text_font: mdi_font_40, text_color: color_text }
+            - label: { text: "插座1", align: CENTER, y: 15, text_font: roboto_22, text_color: color_text }
+      
+      # ==================== 小米智能插座2 ====================
+      - button:
+          id: chuangmi_socket2_button
+          width: 200
+          height: 120
+          styles: style_clim_btn
+          on_short_click:
+            - homeassistant.service:
+                service: switch.toggle
+                data:
+                  entity_id: switch.chuangmi_cn_125796823_m3_on_p_2_1
+          widgets:
+            - label: { text: "\U000F1204", align: CENTER, y: -15, text_font: mdi_font_40, text_color: color_text }
+            - label: { text: "插座2", align: CENTER, y: 15, text_font: roboto_22, text_color: color_text }
+      
+      # ==================== 小米智能插座3 ====================
+      - button:
+          id: chuangmi_socket3_button
+          width: 200
+          height: 120
+          styles: style_clim_btn
+          on_short_click:
+            - homeassistant.service:
+                service: switch.toggle
+                data:
+                  entity_id: switch.chuangmi_cn_125520813_m3_on_p_2_1
+          widgets:
+            - label: { text: "\U000F1204", align: CENTER, y: -15, text_font: mdi_font_40, text_color: color_text }
+            - label: { text: "插座3", align: CENTER, y: 15, text_font: roboto_22, text_color: color_text }
+      
+      # ==================== PC电脑控制 ====================
+      - button:
+          id: btn_pc_control
+          width: 200
+          height: 120
+          styles: style_clim_btn
+          on_short_click:
+            - lambda: |-
+                // TODO: 实现PC远程开关机控制
+          widgets:
+            - label: { id: icon_sw0, text: "\U000F0379", align: CENTER, y: -15, text_font: mdi_font_40, text_color: color_text }
+            - label: { id: lbl_sw0_state, text: "已关闭", align: CENTER, y: 15, text_font: roboto_22, text_color: color_text }
+      
+      # ==================== 卧室灯控制 ====================
+      - button:
+          id: btn_light_chambre
+          width: 200
+          height: 120
+          styles: style_clim_btn
+          on_short_click:
+            - homeassistant.service:
+                service: light.toggle
+                data:
+                  entity_id: ${entity_light_chambre}
+          widgets:
+            - label: { id: icon_sw2, text: "\U000F06E8", align: CENTER, y: -15, text_font: mdi_font_40, text_color: color_text }
+            - label: { id: lbl_sw2_state, text: "已关闭", align: CENTER, y: 15, text_font: roboto_22, text_color: color_text }
+      
+      # ==================== 客厅灯控制 ====================
+      - button:
+          id: btn_light_salon
+          width: 200
+          height: 120
+          styles: style_clim_btn
+          on_short_click:
+            - homeassistant.service:
+                service: light.toggle
+                data:
+                  entity_id: ${entity_light_salon}
+          widgets:
+            - label: { id: icon_sw3, text: "\U000F06E8", align: CENTER, y: -15, text_font: mdi_font_40, text_color: color_text }
+            - label: { id: lbl_sw3_state, text: "已关闭", align: CENTER, y: 15, text_font: roboto_22, text_color: color_text }
+      
+      # ==================== LED灯控制 ====================
+      - button:
+          id: btn_light_led
+          width: 200
+          height: 120
+          styles: style_clim_btn
+          on_short_click:
+            - homeassistant.service:
+                service: light.toggle
+                data:
+                  entity_id: ${entity_light_bureau}
+          widgets:
+            - label: { id: icon_sw4, text: "\U000F06E8", align: CENTER, y: -15, text_font: mdi_font_40, text_color: color_text }
+            - label: { id: lbl_sw4_state, text: "已关闭", align: CENTER, y: 15, text_font: roboto_22, text_color: color_text }

@@ -1,0 +1,96 @@
+# ============================================================
+# 温湿度控制弹窗UI组件
+# 用于控制空调等温湿度设备
+# 点击温湿度卡片打开此弹窗
+# ============================================================
+
+- obj:
+    id: layer_climate_popup
+    x: 20
+    y: 20
+    width: 1240
+    height: 760
+    styles: style_meteo_card
+    scrollbar_mode: "OFF"
+    hidden: true
+    layout:
+      type: FLEX
+      flex_flow: COLUMN
+      flex_align_main: CENTER
+      flex_align_cross: CENTER
+      pad_column: 20
+      pad_row: 20
+    widgets:
+      # ==================== 标题 ====================
+      - label: { text: "温湿度控制", align: TOP_MID, y: 20, text_font: roboto_45_b, text_color: color_text }
+      
+      # ==================== 当前控制实体（隐藏） ====================
+      # 记录当前控制的设备实体ID
+      - label: { id: current_light_entity, text: "", align: CENTER, hidden: true }
+      
+      # ==================== 温度显示区域 ====================
+      # 显示当前温度值
+      - obj:
+          width: 400
+          height: 200
+          styles: style_transparent
+          layout:
+            type: FLEX
+            flex_flow: COLUMN
+            flex_align_main: CENTER
+            flex_align_cross: CENTER
+          widgets:
+            - label: { text: "当前温度", text_font: roboto_32, text_color: color_text }
+            - label: { id: current_serre, text: "-- °", text_font: roboto_130_b, text_color: color_text }
+      
+      # ==================== 控制按钮区域 ====================
+      # 开启和关闭空调的按钮
+      - obj:
+          width: 600
+          height: 100
+          styles: style_transparent
+          layout:
+            type: FLEX
+            flex_flow: ROW
+            flex_align_main: SPACE_EVENLY
+            flex_align_cross: CENTER
+          widgets:
+            # 开启空调按钮
+            - button:
+                id: btn_climate_on
+                width: 180
+                height: 80
+                styles: style_clim_btn
+                on_short_click:
+                  - lambda: |-
+                      // TODO: 实现开启空调的HA服务调用
+                widgets:
+                  - label: { text: "开启", align: CENTER, text_font: roboto_32, text_color: color_text }
+            
+            # 关闭空调按钮
+            - button:
+                id: btn_climate_off
+                width: 180
+                height: 80
+                styles: style_clim_btn
+                on_short_click:
+                  - lambda: |-
+                      // TODO: 实现关闭空调的HA服务调用
+                widgets:
+                  - label: { text: "关闭", align: CENTER, text_font: roboto_32, text_color: color_text }
+      
+      # ==================== 关闭弹窗按钮 ====================
+      # 点击关闭温湿度控制弹窗
+      - button:
+          id: btn_close_climate
+          align: BOTTOM_RIGHT
+          x: -20
+          y: -20
+          width: 100
+          height: 50
+          styles: style_clim_btn
+          on_short_click:
+            - lambda: |-
+                lv_obj_add_flag(id(layer_climate_popup), LV_OBJ_FLAG_HIDDEN);
+          widgets:
+            - label: { text: "关闭", align: CENTER, text_font: roboto_32, text_color: color_text }
