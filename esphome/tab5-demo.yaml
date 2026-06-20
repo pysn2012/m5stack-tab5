@@ -1478,8 +1478,8 @@ script:
       - lambda: |-
           const int active = id(page_num);
           lv_obj_t* buttons[] = { 
-              id(dash_panel_btn).obj, 
-              id(light_panel_btn).obj, 
+              id(dash_panel_btn), 
+              id(light_panel_btn), 
           };
           lv_obj_t* icons[] = { 
               id(dash_btn_icon), 
@@ -1600,7 +1600,7 @@ script:
     then:
       - lambda: |-
           lv_obj_add_event_cb(id(color_palette_indicator), [](lv_event_t * e){
-            lv_obj_t * obj = lv_event_get_target(e);
+            lv_obj_t * obj = static_cast<lv_obj_t*>(lv_event_get_target(e));
 
             lv_indev_t * indev = lv_indev_get_act();
             if(indev == NULL)  return;
