@@ -1478,8 +1478,8 @@ script:
       - lambda: |-
           const int active = id(page_num);
           lv_obj_t* buttons[] = { 
-              id(dash_panel_btn), 
-              id(light_panel_btn), 
+              id(dash_panel_btn).obj, 
+              id(light_panel_btn).obj, 
           };
           lv_obj_t* icons[] = { 
               id(dash_btn_icon), 
@@ -1581,7 +1581,7 @@ script:
               float val = 1.0f;  // fixed brightness
 
               lv_color_t c = hsv_to_rgb(hue, sat, val);
-              lv_canvas_set_px(canvas, x, y, c);
+              lv_canvas_set_px(canvas, x, y, c, LV_OPA_COVER);
             }
           };
   # This script was used to draw a custom 'indicator' on color palette
