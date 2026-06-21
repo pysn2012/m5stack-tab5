@@ -1,0 +1,27 @@
+# 时间同步
+time:
+  - platform: homeassistant
+    id: ha_time
+    timezone: Asia/Shanghai
+    on_time_sync:
+      - script.execute: time_update
+    on_time:
+      - minutes: '*'
+        seconds: 0
+        then:
+          - script.execute: time_update
+
+# 更新时间
+script:
+  - id: time_update
+    then:
+      # 更新时间
+      - lvgl.label.update:
+          id: display_time
+          text: !lambda |-
+            static char dt_buf[20]; // "YYYY-MM-DD HH:MM" + \0 → 最多17字符，20足够
+            auto now = id(ha_time).now();
+            snprintf(dt_buf, sizeof(dt_buf), "%04d-%02d-%02d %02d:%02d",
+                     now.year, now.month, now.day_of_month,
+                     now.hour, now.minute);
+            return dt_buf;

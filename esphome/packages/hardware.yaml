@@ -1,19 +1,15 @@
 # ESP32主控配置
 esp32:
-  board: esp32-p4-evboard
+  variant: esp32p4
   flash_size: 16MB
+  engineering_sample: true                 # P4芯片版本为V1.3,属于工程样机
+  cpu_frequency: 360MHz                    # 工程样机最高频率为360
   framework:
     type: esp-idf
     advanced:
       enable_idf_experimental_features: true
-    sdkconfig_options:
-      CONFIG_LWIP_TCP_WND_DEFAULT: "16384"        # TCP窗口16KB，确保OTA稳定
-      CONFIG_SPI_FLASH_YIELD_DURING_ERASE: "y"   # OTA擦除时不阻塞CPU
-      CONFIG_ESP_DEFAULT_CPU_FREQ_MHZ_360: "y"
-      CONFIG_ESP_DEFAULT_CPU_FREQ_MHZ: "360"
-      CONFIG_ESP_TASK_WDT_TIMEOUT_S: "15"         # 看门狗超时15秒（网络慢时启动可能较长）
 
-# WiFi模块配置（ESP32-C6）
+# ESP32-C6 WiFi 协处理器配置
 esp32_hosted:
   variant: esp32c6
   active_high: true
@@ -26,31 +22,16 @@ esp32_hosted:
   reset_pin: GPIO15
   slot: 1
 
-# 日志配置
-logger:
-  level: DEBUG
-  baud_rate: 115200
-  hardware_uart: USB_SERIAL_JTAG
-  tx_buffer_size: 2048
-
-# PSRAM配置
+# PSRAM 配置
 psram:
   mode: hex
   speed: 200MHz
 
-# OTA远程更新
-ota:
-
-# 安全模式（启动失败时进入）
-safe_mode:
-  num_attempts: 10
-  boot_is_good_after: 30s
-
-# 外部组件
+# 外部组件配置
 external_components:
   - source:
       type: local
-      path: components
+      path: components/           # 自定义组件目录（相对于本文件位置）
 
 # I2C总线配置
 i2c:
@@ -59,21 +40,153 @@ i2c:
     scl: GPIO32
     frequency: 400kHz
 
-# IO扩展芯片配置 PI4IOE5V6408 - 8通道IO扩展器，用于控制电源和外设
+# PI4IOE5V6408 GPIO 扩展器配置
 pi4ioe5v6408:
   - id: pi4ioe1
     address: 0x43
+    # 0: 输出 - WiFi天线切换（内置/外置）
+    # 1: 输出 - 扬声器使能
+    # 2: 输出 - 外部5V电源
+    # 3: 未连接
+    # 4: 输出 - LCD复位
+    # 5: 输出 - 触摸面板复位
+    # 6: 输出 - 摄像头复位
+    # 7: 输入 - 耳机检测
   - id: pi4ioe2
     address: 0x44
+    # 0: 输出 - WiFi电源
+    # 1: 未连接
+    # 2: 未连接
+    # 3: 输出 - USB 5V电源
+    # 4: 输出 - 关机脉冲
+    # 5: 输出 - 快充使能（低电平有效）
+    # 6: 输入 - 充电状态
+    # 7: 输出 - 充电使能
 
-# LDO稳压器配置
+# GPIO 开关配置
+switch:
+  # WiFi电源
+  - platform: gpio
+    id: wifi_power
+    name: "WiFi Power"
+    pin:
+      pi4ioe5v6408: pi4ioe2
+      number: 0
+    restore_mode: ALWAYS_ON
+  # USB 5V电源
+  - platform: gpio
+    id: usb_5v_power
+    name: "USB Power"
+    pin:
+      pi4ioe5v6408: pi4ioe2
+      number: 3
+  # 快充使能（低电平有效）
+  - platform: gpio
+    id: quick_charge
+    name: "Quick Charge"
+    pin:
+      pi4ioe5v6408: pi4ioe2
+      number: 5
+      inverted: true
+  # 充电使能
+  - platform: gpio
+    id: charge_enable
+    name: "Charge Enable"
+    pin:
+      pi4ioe5v6408: pi4ioe2
+      number: 7
+    restore_mode: ALWAYS_ON
+  # WiFi天线切换（内置/外置）
+  - platform: gpio
+    id: wifi_antenna_int_ext
+    pin:
+      pi4ioe5v6408: pi4ioe1
+      number: 0
+  # 扬声器使能
+  - platform: gpio
+    id: speaker_enable
+    name: "Speaker Enable"
+    pin:
+      pi4ioe5v6408: pi4ioe1
+      number: 1
+    restore_mode: ALWAYS_ON
+  # 外部5V电源
+  - platform: gpio
+    id: external_5v_power
+    name: "External 5V Power"
+    pin:
+      pi4ioe5v6408: pi4ioe1
+      number: 2
+
+# 二进制传感器配置
+binary_sensor:
+  # 充电状态
+  - platform: gpio
+    id: charging
+    name: "Charging Status"
+    pin:
+      pi4ioe5v6408: pi4ioe2
+      number: 6
+      mode: INPUT_PULLDOWN
+    on_press:
+      - lambda: id(battery_percent).update();
+    on_release:
+      - lambda: id(battery_percent).update();
+  # 耳机检测
+  - platform: gpio
+    id: headphone_detect
+    name: "Headphone Detect"
+    pin:
+      pi4ioe5v6408: pi4ioe1
+      number: 7
+
+# 选择器配置
+select:
+  # ES8388 音频编解码器配置，支持输出选择
+  - platform: es8388
+    dac_output:
+      id: es8388_dac_output
+      internal: true
+  - platform: template
+    name: "Tab5 DAC Output"
+    id: tab5_dac_output_template
+    options:
+      - "LINE1"    # 板载扬声器
+      - "LINE2"    # 耳机
+      - "BOTH"
+    restore_value: true
+    optimistic: true
+    on_value:
+      then:
+        - select.set:
+            id: es8388_dac_output
+            option: !lambda "return x;"
+  # WiFi 天线切换
+  - platform: template
+    id: wifi_antenna_select
+    name: "WiFi Antenna"
+    options:
+      - "Internal"    # 内置天线
+      - "External"    # 外置天线
+    optimistic: true
+    on_value:
+      - if:
+          condition:
+            lambda: return i == 0;    # 如果选择了第0项（Internal）
+          then:
+            - switch.turn_off: wifi_antenna_int_ext   # 关闭外置天线开关
+          else:
+            - switch.turn_on: wifi_antenna_int_ext    # 打开外置天线开关
+
+# LDO 稳压器配置（为触摸屏等供电）
 esp_ldo:
   - voltage: 2.5V
     channel: 3
 
-# 显示屏配置 MIPI DSI接口，720x1280分辨率
+# MIPI DSI 显示屏配置
 display:
   - platform: mipi_dsi
+    id: main_display
     dimensions:
       height: 1280
       width: 720
@@ -81,58 +194,54 @@ display:
     reset_pin:
       pi4ioe5v6408: pi4ioe1
       number: 4
-    pixel_mode: 16bit
-    color_order: RGB
-    update_interval: never
+    show_test_card: false
     auto_clear_enabled: false
+    update_interval: never
+    #rotation: 270                   LVGL不可使用
 
-# 触摸屏配置 ST7123触摸控制器，支持触摸唤醒屏幕
+# 触摸屏配置
 touchscreen:
   - platform: st7123
+    id: my_touchscreen
+    i2c_id: bsp_bus
     interrupt_pin: GPIO23
+    update_interval: never
     reset_pin:
       pi4ioe5v6408: pi4ioe1
       number: 5
-    update_interval: never
+    transform:
+      swap_xy: false
+      mirror_x: false
+      mirror_y: false
     calibration:
       x_min: 0
       x_max: 720
       y_min: 0
       y_max: 1280
-    id: touch
     on_release:
-      then:
-        - if:
-            condition:
-              light.is_off: backlight
-            then:
-              - light.turn_on: backlight
+      - if:
+          condition: lvgl.is_paused
+          then:
+            - logger.log: "LVGL 恢复中"
+            - lvgl.resume:
+            - lvgl.widget.redraw:
+            - light.turn_on: backlight
 
-# 背光PWM输出
+# 背光 PWM 输出配置
 output:
   - platform: ledc
     pin: GPIO22
     id: backlight_pwm
     frequency: 1000Hz
 
-# 显示屏背光控制
+# 背光亮度控制配置
 light:
   - platform: monochromatic
     output: backlight_pwm
-    name: "显示屏背光"
+    name: "Display Backlight"
     id: backlight
     restore_mode: RESTORE_DEFAULT_ON
     default_transition_length: 250ms
-    on_turn_on:
-      - lvgl.resume:
-    on_turn_off:
-      - lvgl.pause:
+    initial_state:
+      brightness: "50%"
 
-# 按钮配置
-button:
-  - platform: restart
-    id: btn_restart
-    name: "系统重启"
-
-# 调试信息
-debug:

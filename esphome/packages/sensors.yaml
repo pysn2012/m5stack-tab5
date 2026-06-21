@@ -1,118 +1,6 @@
-# ============================================================
-# M5Stack Tab5 传感器与系统配置文件
-# 包含：WiFi、开关控制、二进制传感器、文本传感器、数值传感器、时间、定时任务等
-# ============================================================
-
-# ==================== WiFi网络配置 ====================
-wifi:
-  ssid: !secret wifi_ssid
-  password: !secret wifi_password
-  power_save_mode: NONE
-  # 备用接入点（主WiFi连接失败时启用）
-  ap:
-    ssid: "Tab5 备用AP"
-    password: !secret wifi_ap_password
-
-# ==================== 开关控制 ====================
-# 控制Tab5板载外设电源
-switch:
-  # WiFi模块电源开关
-  - platform: gpio
-    id: wifi_power
-    name: "WiFi 电源"
-    pin:
-      pi4ioe5v6408: pi4ioe2
-      number: 0
-    restore_mode: ALWAYS_ON
-
-  # USB 5V电源开关
-  - platform: gpio
-    id: usb_5v_power
-    name: "USB 电源"
-    pin:
-      pi4ioe5v6408: pi4ioe2
-      number: 3
-    restore_mode: ALWAYS_ON
-
-  # WiFi天线切换开关（内置/外置）
-  - platform: gpio
-    id: wifi_antenna_int_ext
-    pin:
-      pi4ioe5v6408: pi4ioe1
-      number: 0
-
-  # 扬声器使能开关
-  - platform: gpio
-    id: speaker_enable
-    name: "扬声器使能"
-    pin:
-      pi4ioe5v6408: pi4ioe1
-      number: 1
-    restore_mode: DISABLED
-
-  # 外部5V电源开关
-  - platform: gpio
-    id: external_5v_power
-    name: "外部5V电源"
-    pin:
-      pi4ioe5v6408: pi4ioe1
-      number: 2
-    restore_mode: ALWAYS_ON
-    
-  # 唤醒词功能开关（控制语音助手是否响应唤醒词）
-  - platform: template
-    name: "Tab5 唤醒词激活"
-    id: tab5_wake_word_active
-    icon: mdi:microphone-outline
-    optimistic: true
-    restore_mode: RESTORE_DEFAULT_ON
-    on_turn_on:
-      - if:
-          condition:
-            lambda: 'return id(boot_complete);'
-          then:
-            - micro_wake_word.start:
-      - lambda: |-
-          if (id(lbl_ok_nabu) != nullptr) {
-            lv_label_set_text(id(lbl_ok_nabu), "Ok Nabu: 开启");
-            lv_obj_set_style_text_color(id(lbl_ok_nabu), lv_color_hex(UIColor::SUCCESS), LV_PART_MAIN);
-          }
-    on_turn_off:
-      - if:
-          condition:
-            lambda: 'return id(boot_complete);'
-          then:
-            - micro_wake_word.stop:
-      - lambda: |-
-          if (id(lbl_ok_nabu) != nullptr) {
-            lv_label_set_text(id(lbl_ok_nabu), "Ok Nabu: 关闭");
-            lv_obj_set_style_text_color(id(lbl_ok_nabu), lv_color_hex(UIColor::TEXT_DIM), LV_PART_MAIN);
-          }
-
-# ==================== 二进制传感器（开/关状态） ====================
+# 二进制传感器（开/关状态）
 binary_sensor:
-  # 耳机插入检测
-  - platform: gpio
-    id: headphone_detect
-    name: "耳机检测"
-    pin:
-      pi4ioe5v6408: pi4ioe1
-      number: 7
-
-  # Home Assistant API连接状态
-  - platform: status
-    name: "HA API 状态"
-    id: status_ha
-    on_state:
-      - lambda: |-
-          if (id(icon_ha) == nullptr) return;
-          if(x) {
-            lv_obj_set_style_text_color(id(icon_ha), lv_color_hex(UIColor::INFO), LV_PART_MAIN);
-          } else {
-            lv_obj_set_style_text_color(id(icon_ha), lv_color_hex(UIColor::INACTIVE), LV_PART_MAIN);
-          }
-
-  # 小米智能插座1开关状态同步
+  # 传感器：小米插座1开关
   - platform: homeassistant
     id: chuangmi_socket1_status
     entity_id: switch.chuangmi_cn_125697630_m3_on_p_2_1
@@ -124,7 +12,7 @@ binary_sensor:
           state:
             checked: !lambda return x;
 
-  # 小米智能插座2开关状态同步
+  # 传感器：小米插座2开关
   - platform: homeassistant
     id: chuangmi_socket2_status
     entity_id: switch.chuangmi_cn_125796823_m3_on_p_2_1
@@ -136,7 +24,7 @@ binary_sensor:
           state:
             checked: !lambda return x;
 
-  # 小米智能插座3开关状态同步
+  # 传感器：小米插座3开关
   - platform: homeassistant
     id: chuangmi_socket3_status
     entity_id: switch.chuangmi_cn_125520813_m3_on_p_2_1
@@ -148,147 +36,9 @@ binary_sensor:
           state:
             checked: !lambda return x;
 
-# ==================== 文本传感器 ====================
+# 文本传感器
 # 用于获取设备状态等文本信息
 text_sensor:
-  # PC设备在线状态（从HA获取设备追踪器状态）
-  - platform: homeassistant
-    id: pc_status
-    entity_id: ${entity_tracker_pc}
-    on_value:
-      - lambda: |-
-          if (id(icon_pc) == nullptr || id(icon_card_pc) == nullptr) return;
-          if(x == "home") {
-            lv_obj_set_style_text_color(id(icon_pc), lv_color_hex(UIColor::SUCCESS), LV_PART_MAIN);
-            lv_obj_set_style_text_color(id(icon_card_pc), lv_color_hex(UIColor::SUCCESS), LV_PART_MAIN);
-            if (id(icon_sw0) != nullptr && id(lbl_sw0_state) != nullptr) {
-              lv_obj_set_style_text_color(id(icon_sw0), lv_color_hex(UIColor::SUCCESS), LV_PART_MAIN);
-              lv_label_set_text(id(lbl_sw0_state), "已开启");
-              lv_obj_set_style_text_color(id(lbl_sw0_state), lv_color_hex(UIColor::SUCCESS), LV_PART_MAIN);
-            }
-          } else {
-            lv_obj_set_style_text_color(id(icon_pc), lv_color_hex(0xFFFFFF), LV_PART_MAIN);
-            lv_obj_set_style_text_color(id(icon_card_pc), lv_color_hex(0xFFFFFF), LV_PART_MAIN);
-            if (id(icon_sw0) != nullptr && id(lbl_sw0_state) != nullptr) {
-              lv_obj_set_style_text_color(id(icon_sw0), lv_color_hex(UIColor::TEXT_DIM), LV_PART_MAIN);
-              lv_label_set_text(id(lbl_sw0_state), "已关闭");
-              lv_obj_set_style_text_color(id(lbl_sw0_state), lv_color_hex(UIColor::TEXT_DIM), LV_PART_MAIN);
-            }
-          }
-
-  # 卧室灯状态同步
-  - platform: homeassistant
-    id: light_chambre_state
-    entity_id: ${entity_light_chambre}
-    on_value:
-      - lambda: |-
-          if (id(icon_card_lit_j2) == nullptr || id(icon_card_light_j2) == nullptr) return;
-          if(x == "on") {
-            lv_obj_set_style_text_color(id(icon_card_lit_j2), lv_color_hex(UIColor::WARNING), LV_PART_MAIN);
-            lv_obj_set_style_text_color(id(icon_card_light_j2), lv_color_hex(UIColor::WARNING), LV_PART_MAIN);
-            lv_label_set_text(id(icon_card_light_j2), "\U000F06E8");
-            if (id(icon_sw2) != nullptr && id(lbl_sw2_state) != nullptr) {
-              lv_obj_set_style_text_color(id(icon_sw2), lv_color_hex(UIColor::WARNING), LV_PART_MAIN);
-              lv_label_set_text(id(lbl_sw2_state), "已开启");
-              lv_obj_set_style_text_color(id(lbl_sw2_state), lv_color_hex(UIColor::WARNING), LV_PART_MAIN);
-            }
-            if (id(btn_light_power_icon) != nullptr && id(current_light_entity) == "${entity_light_chambre}") {
-              lv_obj_set_style_text_color(id(btn_light_power_icon), lv_color_hex(UIColor::WARNING), LV_PART_MAIN);
-            }
-
-          } else {
-            lv_obj_set_style_text_color(id(icon_card_lit_j2), lv_color_hex(UIColor::TEXT_DIM), LV_PART_MAIN);
-            lv_obj_set_style_text_color(id(icon_card_light_j2), lv_color_hex(UIColor::TEXT_DIM), LV_PART_MAIN);
-            lv_label_set_text(id(icon_card_light_j2), "\U000F0335");
-            if (id(icon_sw2) != nullptr && id(lbl_sw2_state) != nullptr) {
-              lv_obj_set_style_text_color(id(icon_sw2), lv_color_hex(UIColor::TEXT_DIM), LV_PART_MAIN);
-              lv_label_set_text(id(lbl_sw2_state), "已关闭");
-              lv_obj_set_style_text_color(id(lbl_sw2_state), lv_color_hex(UIColor::TEXT_DIM), LV_PART_MAIN);
-            }
-            if (id(btn_light_power_icon) != nullptr && id(current_light_entity) == "${entity_light_chambre}") {
-              lv_obj_set_style_text_color(id(btn_light_power_icon), lv_color_hex(UIColor::TEXT_DIM), LV_PART_MAIN);
-            }
-          }
-
-  # 客厅灯状态同步
-  - platform: homeassistant
-    id: light_salon_state
-    entity_id: ${entity_light_salon}
-    on_value:
-      - lambda: |-
-          if (id(icon_card_salon_j3) == nullptr || id(icon_card_light_j3) == nullptr) return;
-          if(x == "on") {
-            lv_obj_set_style_text_color(id(icon_card_salon_j3), lv_color_hex(UIColor::WARNING), LV_PART_MAIN);
-            lv_obj_set_style_text_color(id(icon_card_light_j3), lv_color_hex(UIColor::WARNING), LV_PART_MAIN);
-            lv_label_set_text(id(icon_card_light_j3), "\U000F06E8");
-            if (id(icon_sw3) != nullptr && id(lbl_sw3_state) != nullptr) {
-              lv_obj_set_style_text_color(id(icon_sw3), lv_color_hex(UIColor::WARNING), LV_PART_MAIN);
-              lv_label_set_text(id(lbl_sw3_state), "已开启");
-              lv_obj_set_style_text_color(id(lbl_sw3_state), lv_color_hex(UIColor::WARNING), LV_PART_MAIN);
-            }
-            if (id(btn_light_power_icon) != nullptr && id(current_light_entity) == "${entity_light_salon}") {
-              lv_obj_set_style_text_color(id(btn_light_power_icon), lv_color_hex(UIColor::WARNING), LV_PART_MAIN);
-            }
-
-          } else {
-            lv_obj_set_style_text_color(id(icon_card_salon_j3), lv_color_hex(UIColor::TEXT_DIM), LV_PART_MAIN);
-            lv_obj_set_style_text_color(id(icon_card_light_j3), lv_color_hex(UIColor::TEXT_DIM), LV_PART_MAIN);
-            lv_label_set_text(id(icon_card_light_j3), "\U000F0335");
-            if (id(icon_sw3) != nullptr && id(lbl_sw3_state) != nullptr) {
-              lv_obj_set_style_text_color(id(icon_sw3), lv_color_hex(UIColor::TEXT_DIM), LV_PART_MAIN);
-              lv_label_set_text(id(lbl_sw3_state), "已关闭");
-              lv_obj_set_style_text_color(id(lbl_sw3_state), lv_color_hex(UIColor::TEXT_DIM), LV_PART_MAIN);
-            }
-            if (id(btn_light_power_icon) != nullptr && id(current_light_entity) == "${entity_light_salon}") {
-              lv_obj_set_style_text_color(id(btn_light_power_icon), lv_color_hex(UIColor::TEXT_DIM), LV_PART_MAIN);
-            }
-
-          }
-
-  # LED灯状态同步
-  - platform: homeassistant
-    id: light_led_state
-    entity_id: ${entity_light_bureau}
-    on_value:
-      - lambda: |-
-          if (id(icon_card_led_j4) == nullptr || id(icon_card_light_j4) == nullptr) return;
-          if(x == "on") {
-            lv_obj_set_style_text_color(id(icon_card_led_j4), lv_color_hex(UIColor::WARNING), LV_PART_MAIN);
-            lv_obj_set_style_text_color(id(icon_card_light_j4), lv_color_hex(UIColor::WARNING), LV_PART_MAIN);
-            lv_label_set_text(id(icon_card_light_j4), "\U000F06E8");
-            if (id(icon_sw4) != nullptr && id(lbl_sw4_state) != nullptr) {
-              lv_obj_set_style_text_color(id(icon_sw4), lv_color_hex(UIColor::WARNING), LV_PART_MAIN);
-              lv_label_set_text(id(lbl_sw4_state), "已开启");
-              lv_obj_set_style_text_color(id(lbl_sw4_state), lv_color_hex(UIColor::WARNING), LV_PART_MAIN);
-            }
-            if (id(btn_light_power_icon) != nullptr && id(current_light_entity) == "${entity_light_bureau}") {
-              lv_obj_set_style_text_color(id(btn_light_power_icon), lv_color_hex(UIColor::WARNING), LV_PART_MAIN);
-            }
-
-          } else {
-            lv_obj_set_style_text_color(id(icon_card_led_j4), lv_color_hex(UIColor::TEXT_DIM), LV_PART_MAIN);
-            lv_obj_set_style_text_color(id(icon_card_light_j4), lv_color_hex(UIColor::TEXT_DIM), LV_PART_MAIN);
-            lv_label_set_text(id(icon_card_light_j4), "\U000F0335");
-            if (id(icon_sw4) != nullptr && id(lbl_sw4_state) != nullptr) {
-              lv_obj_set_style_text_color(id(icon_sw4), lv_color_hex(UIColor::TEXT_DIM), LV_PART_MAIN);
-              lv_label_set_text(id(lbl_sw4_state), "已关闭");
-              lv_obj_set_style_text_color(id(lbl_sw4_state), lv_color_hex(UIColor::TEXT_DIM), LV_PART_MAIN);
-            }
-            if (id(btn_light_power_icon) != nullptr && id(current_light_entity) == "${entity_light_bureau}") {
-              lv_obj_set_style_text_color(id(btn_light_power_icon), lv_color_hex(UIColor::TEXT_DIM), LV_PART_MAIN);
-            }
-
-          }
-
-  # Tab5系统信息（IP地址和WiFi名称）
-  - platform: wifi_info
-    ip_address:
-      id: sys_wifi_ip
-      name: "Tab5 IP地址"
-    ssid:
-      id: sys_wifi_ssid
-      name: "Tab5 SSID"
-
   # 厦门天气预警信息
   - platform: homeassistant
     id: xiamen_weather
@@ -300,13 +50,36 @@ text_sensor:
             text: !lambda |-
               return "预警: " + x;
 
-# ==================== 数值传感器 ====================
-# 用于获取温度、湿度、电量等数值数据
+# 数值传感器
 sensor:
-  # ==================== 气象传感器（从HA获取） ====================
-  # 室外温度（厦门气象站）
+  # INA226 电池电压电流传感器
+  - platform: ina226
+    address: 0x41
+    adc_averaging: 16
+    max_current: 8.192A
+    shunt_resistance: 0.005ohm
+    bus_voltage:
+      id: battery_voltage
+      name: Battery Voltage
+    current:
+      id: battery_current
+      name: Battery Current
+      # 正值表示放电，负值表示充电
+  
+  # Home Assistant 环境传感器
   - platform: homeassistant
-    name: 厦门温度
+    id: cur_temp
+    entity_id: sensor.bme668_temperature
+    on_value:
+      - lvgl.label.update:
+          id: temp_label
+          text:
+            format: "%.1f °C"
+            args: [ 'x' ]
+
+  # 室外温度
+  - platform: homeassistant
+    name: xiamen temperature
     entity_id: sensor.xiamen_temperature
     id: xiamen_temp
     unit_of_measurement: "°C"
@@ -317,9 +90,9 @@ sensor:
             text: !lambda |-
               return str_sprintf("室外：温度%.1f℃/湿度%.0f%%", x, id(xiamen_humi).state);
 
-  # 室外湿度（厦门气象站）
+  # 室外湿度
   - platform: homeassistant
-    name: 厦门湿度
+    name: xiamen humidity
     id: xiamen_humi
     entity_id: sensor.xiamen_humidity
     on_value:
@@ -329,9 +102,9 @@ sensor:
             text: !lambda |-
               return str_sprintf("室外：温度%.1f℃/湿度%.0f%%", id(xiamen_temp).state, x);
 
-  # 大气压力（厦门气象站）
+  # 气压
   - platform: homeassistant
-    name: 厦门气压
+    name: xiamen pressure
     id: xiamen_pressure
     entity_id: sensor.xiamen_atmospheric_pressure
     unit_of_measurement: "hPa"
@@ -342,9 +115,9 @@ sensor:
             text: !lambda |-
               return str_sprintf("          气压%.0fhPa", x);
 
-  # 室内温度（小米蓝牙温湿度计）
+  # 室内温度
   - platform: homeassistant
-    name: 小米温度
+    name: xiaomi temperature
     entity_id: sensor.cleargras_cn_blt_3_u5c2qgggk400_dk1_temperature_p_2_1
     id: xiaomi_temp
     unit_of_measurement: "°C"
@@ -355,9 +128,9 @@ sensor:
             text: !lambda |-
               return str_sprintf("室内：温度%.1f℃/湿度%.0f%%", x, id(xiaomi_humi).state);
 
-  # 室内湿度（小米蓝牙温湿度计）
+  # 室内湿度
   - platform: homeassistant
-    name: 小米湿度
+    name: xiaomi humidity
     id: xiaomi_humi
     entity_id: sensor.cleargras_cn_blt_3_u5c2qgggk400_dk1_relative_humidity_p_2_2
     on_value:
@@ -366,222 +139,4 @@ sensor:
             id: indoor_info
             text: !lambda |-
               return str_sprintf("室内：温度%.1f℃/湿度%.0f%%", id(xiaomi_temp).state, x);
-
-  # ==================== 系统传感器 ====================
-  # Tab5运行时间（显示在系统控制台）
-  - platform: uptime
-    id: sys_uptime
-    name: "Tab5 运行时间"
-    update_interval: 60s
-    on_value:
-      - lambda: |-
-          if (id(lbl_sys_uptime_val) != nullptr) {
-            int days = x / 86400;
-            int hours = ((int)x % 86400) / 3600;
-            int mins = ((int)x % 3600) / 60;
-            char buf[32];
-            if(days > 0) sprintf(buf, "%d天 %02d小时%02d分", days, hours, mins);
-            else sprintf(buf, "%02d小时%02d分", hours, mins);
-            lv_label_set_text(id(lbl_sys_uptime_val), buf);
-          }
-
-  # WiFi信号强度（显示在系统控制台）
-  - platform: wifi_signal
-    id: sys_wifi_rssi
-    name: "Tab5 WiFi信号"
-    update_interval: 60s
-    on_value:
-      - lambda: |-
-          if (id(lbl_sys_rssi_val) != nullptr) {
-            char buf[16];
-            sprintf(buf, "%.0f dBm", x);
-            lv_label_set_text(id(lbl_sys_rssi_val), buf);
-          }
-
-  # ESP32核心温度（显示在系统控制台）
-  - platform: internal_temperature
-    id: sys_core_temp
-    name: "Tab5 核心温度"
-    update_interval: 60s
-    on_value:
-      - lambda: |-
-          if (id(lbl_sys_temp_val) != nullptr) {
-            char buf[16];
-            sprintf(buf, "%.1f \xC2\xB0", x);
-            lv_label_set_text(id(lbl_sys_temp_val), buf);
-          }
-
-  # 内存和循环时间（调试信息）
-  - platform: debug
-    free:
-      id: sys_free_heap
-      name: "Tab5 可用内存"
-    loop_time:
-      id: sys_loop_time
-      name: "Tab5 循环时间"
-
-# ==================== 选择器配置 ====================
-# WiFi天线选择（内置/外置）
-select:
-  - platform: template
-    id: wifi_antenna_select
-    name: "WiFi天线"
-    options:
-      - "内置"
-      - "外置"
-    optimistic: true
-    on_value:
-      - if:
-          condition:
-            lambda: return i == 0;
-          then:
-            - switch.turn_off: wifi_antenna_int_ext
-          else:
-            - switch.turn_on: wifi_antenna_int_ext
-
-# ==================== 时间同步配置 ====================
-# 从ha获取时间
-time:
-  - platform: homeassistant
-    id: ha_time
-    timezone: Asia/Shanghai
-    on_time:
-      - seconds: 0
-        minutes: "*"
-        then:
-          - lambda: |-
-              auto t_now = id(ha_time).now();
-              if (t_now.is_valid()) {
-                // 更新时钟显示
-                char buf_time[16];
-                sprintf(buf_time, "%02d:%02d", t_now.hour, t_now.minute);
-                lv_label_set_text(id(lbl_time), buf_time);
-             
-                // 更新日期显示（中文格式）
-                const char* days[] = {"日", "一", "二", "三", "四", "五", "六"};
-                const char* months[] = {"1月", "2月", "3月", "4月", "5月", "6月", "7月", "8月", "9月", "10月", "11月", "12月"};
-                char buf_date[64];
-
-                sprintf(buf_date, "星期%s %d月%d日", days[t_now.day_of_week - 1], t_now.month, t_now.day_of_month);
-
-                lv_label_set_text(id(lbl_date), buf_date);
-
-              }
-
-# ==================== 定时任务配置 ====================
-interval:
-  # 每5秒检查WiFi连接状态，更新WiFi图标颜色
-  - interval: 5s
-    then:
-      - if:
-          condition:
-            wifi.connected:
-          then:
-            - lambda: 'lv_obj_set_style_text_color(id(icon_wifi), lv_color_hex(UIColor::SUCCESS), LV_PART_MAIN);'
-          else:
-            - lambda: 'lv_obj_set_style_text_color(id(icon_wifi), lv_color_hex(UIColor::INACTIVE), LV_PART_MAIN);'
-  
-  # 每2秒更新系统控制台信息（仅在控制台可见时执行）
-  - interval: 2s
-    then:
-      - lambda: |-
-          // 检查系统控制台是否显示
-          if (id(layer_console_sys) != nullptr && !lv_obj_has_flag(id(layer_console_sys), LV_OBJ_FLAG_HIDDEN)) {
-
-             // 更新内存信息（SRAM、PSRAM、碎片率）
-             if (id(lbl_sys_sram_val) != nullptr) {
-
-                #ifdef USE_ESP_IDF
-                // ESP-IDF框架下的内存获取方式
-                float sram_free = heap_caps_get_free_size(MALLOC_CAP_INTERNAL) / 1024.0f;
-                float sram_total = heap_caps_get_total_size(MALLOC_CAP_INTERNAL) / 1024.0f;
-                float psram_free = heap_caps_get_free_size(MALLOC_CAP_SPIRAM) / 1024.0f / 1024.0f;
-                float psram_total = heap_caps_get_total_size(MALLOC_CAP_SPIRAM) / 1024.0f / 1024.0f;
-
-                float frag = heap_caps_get_largest_free_block(MALLOC_CAP_INTERNAL) / 1024.0f;
-
-                #else
-                // Arduino框架下的内存获取方式
-                float sram_free = ESP.getFreeHeap() / 1024.0f;
-                float sram_total = ESP.getHeapSize() / 1024.0f;
-                float psram_free = ESP.getFreePsram() / (1024.0f * 1024.0f);
-                float psram_total = ESP.getPsramSize() / (1024.0f * 1024.0f);
-
-                float frag = ESP.getMaxAllocHeap() / 1024.0f;
-
-                #endif
-
-                // 计算已使用内存和百分比
-                float sram_used = sram_total - sram_free;
-                if(sram_used < 0) sram_used = 0;
-                float psram_used = psram_total - psram_free;
-                if(psram_used < 0) psram_used = 0;
-
-                int sram_pct = (int)((sram_used / sram_total) * 100.0f);
-                int psram_pct = (int)((psram_used / psram_total) * 100.0f);
-
-                // 更新SRAM显示
-                char b_sram[32]; sprintf(b_sram, "%d%% (%.1f KB)", sram_pct, sram_used);
-
-                lv_label_set_text(id(lbl_sys_sram_val), b_sram);
-                lv_bar_set_value(id(bar_sys_sram), sram_pct, LV_ANIM_ON);
-
-                // 更新PSRAM显示
-                char b_psram[32]; sprintf(b_psram, "%d%% (%.2f MB)", psram_pct, psram_used);
-
-                lv_label_set_text(id(lbl_sys_psram_val), b_psram);
-                lv_bar_set_value(id(bar_sys_psram), psram_pct, LV_ANIM_ON);
-                
-                // 根据内存使用率设置进度条颜色（绿->蓝->橙->红）
-                auto set_bar_color = [](lv_obj_t* bar, int pct) {
-                    lv_color_t color = lv_color_hex(UIColor::SUCCESS);  // 绿色（正常）
-                    if(pct > 50) color = lv_color_hex(UIColor::INFO);   // 蓝色（较高）
-                    if(pct > 75) color = lv_color_hex(UIColor::WARNING); // 橙色（警告）
-                    if(pct > 90) color = lv_color_hex(UIColor::ERROR);   // 红色（危险）
-                    lv_obj_set_style_bg_color(bar, color, LV_PART_INDICATOR);
-                };
-                set_bar_color(id(bar_sys_sram), sram_pct);
-                set_bar_color(id(bar_sys_psram), psram_pct);
-
-                // 更新最大分配块大小
-                char b_frag[32]; sprintf(b_frag, "%.1f KB", frag);
-
-                lv_label_set_text(id(lbl_sys_frag_val), b_frag);
-
-                // Flash容量（固定值）
-                lv_label_set_text(id(lbl_sys_flash_val), "16.0 MB");
-
-             }
-
-             // 更新循环时间
-             if (id(sys_loop_time).has_state() && id(lbl_sys_loop_val) != nullptr) {
-
-                float ltime = id(sys_loop_time).state;
-
-                char buf[32];
-
-                sprintf(buf, "%.0f ms", ltime);
-
-                lv_label_set_text(id(lbl_sys_loop_val), buf);
-
-             }
-
-             // 更新IP地址
-             if (id(sys_wifi_ip).has_state() && id(lbl_sys_ip_val) != nullptr) {
-
-                std::string ip = id(sys_wifi_ip).state;
-
-                lv_label_set_text(id(lbl_sys_ip_val), ip.c_str());
-
-             }
-
-             // 更新WiFi名称
-             if (id(sys_wifi_ssid).has_state() && id(lbl_sys_ssid_val) != nullptr) {
-
-                std::string ssid = id(sys_wifi_ssid).state;
-
-                lv_label_set_text(id(lbl_sys_ssid_val), ssid.c_str());
-
-             }
-
-          }
+         }

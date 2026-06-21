@@ -8,8 +8,8 @@ esphome:
 esp32:
   variant: esp32p4
   flash_size: 16MB
-  engineering_sample: true
-  cpu_frequency: 360MHz
+  engineering_sample: true                 # P4芯片版本为V1.3,属于工程样机
+  cpu_frequency: 360MHz                    # 工程样机最高频率为360
   framework:
     type: esp-idf
     advanced:
@@ -54,7 +54,7 @@ api:
 external_components:
   - source:
       type: local
-      path: components/           # 自定义组件目录（相对于本 YAML 文件）
+      path: components/           # 自定义组件目录（相对于本文件位置）
     
 # OTA 远程更新配置
 ota:
@@ -103,6 +103,7 @@ pi4ioe5v6408:
 
 # GPIO 开关配置
 switch:
+  # WiFi电源
   - platform: gpio
     id: wifi_power
     name: "WiFi Power"
@@ -110,12 +111,14 @@ switch:
       pi4ioe5v6408: pi4ioe2
       number: 0
     restore_mode: ALWAYS_ON
+  # USB 5V电源
   - platform: gpio
     id: usb_5v_power
     name: "USB Power"
     pin:
       pi4ioe5v6408: pi4ioe2
       number: 3
+  # 快充使能（低电平有效）
   - platform: gpio
     id: quick_charge
     name: "Quick Charge"
@@ -123,6 +126,7 @@ switch:
       pi4ioe5v6408: pi4ioe2
       number: 5
       inverted: true
+  # 充电使能
   - platform: gpio
     id: charge_enable
     name: "Charge Enable"
@@ -130,11 +134,13 @@ switch:
       pi4ioe5v6408: pi4ioe2
       number: 7
     restore_mode: ALWAYS_ON
+  # WiFi天线切换（内置/外置）
   - platform: gpio
     id: wifi_antenna_int_ext
     pin:
       pi4ioe5v6408: pi4ioe1
       number: 0
+  # 扬声器使能
   - platform: gpio
     id: speaker_enable
     name: "Speaker Enable"
@@ -142,6 +148,7 @@ switch:
       pi4ioe5v6408: pi4ioe1
       number: 1
     restore_mode: ALWAYS_ON
+  # 外部5V电源
   - platform: gpio
     id: external_5v_power
     name: "External 5V Power"
@@ -151,6 +158,7 @@ switch:
 
 # 二进制传感器配置
 binary_sensor:
+  # 充电状态
   - platform: gpio
     id: charging
     name: "Charging Status"
@@ -162,7 +170,7 @@ binary_sensor:
       - lambda: id(battery_percent).update();
     on_release:
       - lambda: id(battery_percent).update();
-
+  # 耳机检测
   - platform: gpio
     id: headphone_detect
     name: "Headphone Detect"
@@ -172,27 +180,41 @@ binary_sensor:
 
 # 选择器配置, DAC输出需要手动或通过自动化切换到 LINE1 以使用板载扬声器
 select:
+  # ES8388 音频编解码器配置，支持输出选择
   - platform: es8388
     dac_output:
-      name: DAC Output
-    adc_input_mic:
-      name: ADC Input Mic
-
+      id: es8388_dac_output
+      internal: true
+  - platform: template
+    name: "Tab5 DAC Output"
+    id: tab5_dac_output_template
+    options:
+      - "LINE1"
+      - "LINE2"
+      - "BOTH"
+    restore_value: true
+    optimistic: true
+    on_value:
+      then:
+        - select.set:
+            id: es8388_dac_output
+            option: !lambda "return x;"
+  # WiFi 天线切换
   - platform: template
     id: wifi_antenna_select
     name: "WiFi Antenna"
     options:
-      - "Internal"
-      - "External"
+      - "Internal"    # 内置天线
+      - "External"    # 外置天线
     optimistic: true
     on_value:
       - if:
           condition:
-            lambda: return i == 0;
+            lambda: return i == 0;    # 如果选择了第0项（Internal）
           then:
-            - switch.turn_off: wifi_antenna_int_ext
+            - switch.turn_off: wifi_antenna_int_ext   # 关闭外置天线开关
           else:
-            - switch.turn_on: wifi_antenna_int_ext
+            - switch.turn_on: wifi_antenna_int_ext    # 打开外置天线开关
 
 # 传感器配置
 sensor:
@@ -213,7 +235,7 @@ sensor:
   # Home Assistant 环境传感器
   - platform: homeassistant
     id: cur_temp
-    entity_id: sensor.bme668_temperature
+    entity_id: sensor.xiamen_temperature
     on_value:
       - lvgl.label.update:
           id: temp_label
@@ -223,7 +245,7 @@ sensor:
   
   - platform: homeassistant
     id: cur_humi
-    entity_id: sensor.bme668_humidity
+    entity_id: sensor.xiamen_humidity
     on_value:
       - lvgl.label.update:
           id: humi_label
@@ -233,7 +255,7 @@ sensor:
 
   - platform: homeassistant
     id: cur_pres
-    entity_id: sensor.bme668_pressure
+    entity_id: sensor.xiamen_atmospheric_pressure
     on_value:
       - lvgl.label.update:
           id: pres_label
@@ -243,7 +265,7 @@ sensor:
             
   - platform: homeassistant
     id: cur_co2
-    entity_id: sensor.espressif_zigbeescd41_carbon_dioxide
+    entity_id: sensor.xiamen_pm25
     on_value:
       - lvgl.label.update:
           id: co2_label
