@@ -7,8 +7,6 @@ esphome:
     priority: 600
     then:
       - light.turn_on: backlight
-      - lambda: |-
-          id(main_display).update();
 
 # ESP32-P4 主控芯片配置
 esp32:
