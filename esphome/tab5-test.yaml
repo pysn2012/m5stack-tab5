@@ -24,7 +24,7 @@ esp32:
 # ESP32-C6 WiFi 协处理器配置
 esp32_hosted:
   variant: esp32c6
-  active: true              # 控制复位引脚电平，true=高电平有效
+  active_high: true
   clk_pin: GPIO12
   cmd_pin: GPIO13
   d0_pin: GPIO11
