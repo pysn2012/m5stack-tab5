@@ -1,0 +1,349 @@
+# ESPHOME 基础配置
+esphome:
+  name: tab5-ha-hmi-ew
+  friendly_name: M5Stack Tab5
+  min_version: 2025.12.0
+  on_boot:
+    priority: 600
+    then:
+      - light.turn_on: backlight
+      - lambda: |-
+          id(main_display).update();
+
+# ESP32-P4 主控芯片配置
+esp32:
+  variant: esp32p4
+  flash_size: 16MB
+  engineering_sample: true
+  cpu_frequency: 360MHz
+  framework:
+    type: esp-idf
+    advanced:
+      enable_idf_experimental_features: true
+
+# ESP32-C6 WiFi 协处理器配置
+esp32_hosted:
+  variant: esp32c6
+  active: true              # 控制复位引脚电平，true=高电平有效
+  clk_pin: GPIO12
+  cmd_pin: GPIO13
+  d0_pin: GPIO11
+  d1_pin: GPIO10
+  d2_pin: GPIO9
+  d3_pin: GPIO8
+  reset_pin: GPIO15
+  slot: 1
+
+# 日志配置
+logger:
+  hardware_uart: USB_SERIAL_JTAG
+  level: DEBUG
+  logs:
+    sensor: INFO
+    binary_sensor: INFO
+
+# PSRAM 配置
+psram:
+  mode: hex
+  speed: 200MHz
+
+# Home Assistant API 配置
+api:
+
+# OTA 远程更新配置
+ota:
+  platform: esphome
+
+# WiFi 网络配置
+wifi:
+  id: wifi_id
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+
+# I2C 总线配置
+i2c:
+  - id: bsp_bus
+    sda: GPIO31
+    scl: GPIO32
+    frequency: 400kHz
+
+# PI4IOE5V6408 GPIO 扩展器配置
+pi4ioe5v6408:
+  - id: pi4ioe1
+    address: 0x43
+  - id: pi4ioe2
+    address: 0x44
+
+# GPIO 开关配置
+switch:
+  - platform: gpio
+    id: wifi_power
+    name: "WiFi Power"
+    pin:
+      pi4ioe5v6408: pi4ioe2
+      number: 0
+    restore_mode: ALWAYS_ON
+
+
+# LDO 稳压器配置（为触摸屏等供电）
+esp_ldo:
+  - voltage: 2.5V
+    channel: 3
+
+# ========== 字体配置（显示文字必需）==========
+font:
+  - file: "gfonts://Roboto"
+    id: font_small
+    size: 16
+  - file: "gfonts://Roboto"
+    id: font_medium
+    size: 24
+  - file: "gfonts://Roboto"
+    id: font_large
+    size: 36
+
+# ========== 颜色定义 ==========
+color:
+  - id: color_white
+    red: 100%
+    green: 100%
+    blue: 100%
+  - id: color_black
+    red: 0%
+    green: 0%
+    blue: 0%
+  - id: color_red
+    red: 100%
+    green: 0%
+    blue: 0%
+  - id: color_green
+    red: 0%
+    green: 100%
+    blue: 0%
+  - id: color_blue
+    red: 0%
+    green: 50%
+    blue: 100%
+  - id: color_gray
+    red: 50%
+    green: 50%
+    blue: 50%
+
+# ========== 传感器配置 ==========
+sensor:
+  # INA226 电池电压电流传感器
+  - platform: ina226
+    address: 0x41
+    adc_averaging: 16
+    max_current: 8.192A
+    shunt_resistance: 0.005ohm
+    bus_voltage:
+      id: battery_voltage
+      name: "Battery Voltage"
+      unit_of_measurement: "V"
+      accuracy_decimals: 2
+    current:
+      id: battery_current
+      name: "Battery Current"
+      unit_of_measurement: "A"
+      accuracy_decimals: 3
+
+  # 电池电量百分比
+  - platform: template
+    id: battery_percent
+    name: "Battery Percentage"
+    unit_of_measurement: "%"
+    accuracy_decimals: 0
+    lambda: |-
+      float voltage = id(battery_voltage).state;
+      float min_voltage = 6.0;
+      float max_voltage = 8.4;
+      
+      if (isnan(voltage) || voltage < 5.0) return 0.0;
+      if (voltage <= min_voltage) return 0.0;
+      if (voltage >= max_voltage) return 100.0;
+      
+      return ((voltage - min_voltage) / (max_voltage - min_voltage)) * 100.0;
+    update_interval: 5s
+
+  # WiFi 信号强度
+  - platform: wifi_signal
+    id: wifi_rssi
+    name: "WiFi Signal"
+    unit_of_measurement: "dBm"
+    update_interval: 5s
+
+  # 运行时间
+  - platform: uptime
+    id: device_uptime
+    name: "Uptime"
+    unit_of_measurement: "s"
+    update_interval: 5s
+
+# ========== 二进制传感器 ==========
+binary_sensor:
+  - platform: gpio
+    id: charging
+    name: "Charging Status"
+    pin:
+      pi4ioe5v6408: pi4ioe2
+      number: 6
+      mode: INPUT_PULLDOWN
+
+# ========== 文本传感器 ==========
+text_sensor:
+  - platform: wifi_info
+    ip_address:
+      id: wifi_ip
+      name: "WiFi IP"
+    ssid:
+      id: wifi_ssid_text
+      name: "WiFi SSID"
+
+# ========== MIPI DSI 显示屏配置 ==========
+display:
+  - platform: mipi_dsi
+    id: main_display
+    model: M5STACK-TAB5-V2
+    reset_pin:
+      pi4ioe5v6408: pi4ioe1
+      number: 4
+    update_interval: 1s
+    rotation: 270
+    auto_clear_enabled: true
+    lambda: |-
+      // 背景
+      it.fill(id(color_black));
+      
+      // 标题
+      it.print(360, 10, id(font_large), id(color_white), TextAlign::TOP_CENTER, "M5Stack Tab5");
+      it.print(360, 55, id(font_small), id(color_gray), TextAlign::TOP_CENTER, "Sensor Monitor");
+      
+      // 分隔线
+      it.rectangle(20, 80, 680, 2, id(color_gray));
+      
+      // 电池信息区域
+      it.print(40, 100, id(font_medium), id(color_green), "BATTERY");
+      
+      // 电池电压
+      char buf[64];
+      float voltage = id(battery_voltage).state;
+      if (isnan(voltage)) {
+        snprintf(buf, sizeof(buf), "Voltage: -- V");
+      } else {
+        snprintf(buf, sizeof(buf), "Voltage: %.2f V", voltage);
+      }
+      it.print(40, 140, id(font_small), id(color_white), buf);
+      
+      // 电池电流
+      float current = id(battery_current).state;
+      if (isnan(current)) {
+        snprintf(buf, sizeof(buf), "Current: -- A");
+      } else {
+        snprintf(buf, sizeof(buf), "Current: %.3f A", current);
+      }
+      it.print(40, 170, id(font_small), id(color_white), buf);
+      
+      // 电池百分比
+      float percent = id(battery_percent).state;
+      if (isnan(percent)) {
+        snprintf(buf, sizeof(buf), "Percent: -- %%");
+      } else {
+        snprintf(buf, sizeof(buf), "Percent: %.0f %%", percent);
+      }
+      it.print(40, 200, id(font_small), id(color_white), buf);
+      
+      // 电池进度条背景
+      it.rectangle(40, 235, 300, 30, id(color_gray));
+      // 电池进度条填充
+      if (!isnan(percent)) {
+        int fill_width = (int)(percent * 3.0);  // 300 * percent/100
+        if (fill_width > 300) fill_width = 300;
+        if (fill_width < 0) fill_width = 0;
+        Color bar_color = percent > 20 ? id(color_green) : id(color_red);
+        it.filled_rectangle(40, 235, fill_width, 30, bar_color);
+      }
+      
+      // 充电状态
+      bool is_charging = id(charging).state;
+      it.print(40, 280, id(font_small), is_charging ? id(color_green) : id(color_gray), 
+               is_charging ? "Status: CHARGING" : "Status: Discharging");
+      
+      // WiFi 信息区域
+      it.print(380, 100, id(font_medium), id(color_blue), "WIFI");
+      
+      // WiFi SSID
+      std::string ssid = id(wifi_ssid_text).state;
+      snprintf(buf, sizeof(buf), "SSID: %s", ssid.c_str());
+      it.print(380, 140, id(font_small), id(color_white), buf);
+      
+      // WiFi IP
+      std::string ip = id(wifi_ip).state;
+      snprintf(buf, sizeof(buf), "IP: %s", ip.c_str());
+      it.print(380, 170, id(font_small), id(color_white), buf);
+      
+      // WiFi RSSI
+      int rssi = id(wifi_rssi).state;
+      if (isnan(rssi)) {
+        snprintf(buf, sizeof(buf), "RSSI: -- dBm");
+      } else {
+        snprintf(buf, sizeof(buf), "RSSI: %d dBm", rssi);
+      }
+      it.print(380, 200, id(font_small), id(color_white), buf);
+      
+      // WiFi 信号强度指示
+      int signal_bars = 0;
+      if (!isnan(rssi)) {
+        if (rssi > -50) signal_bars = 4;
+        else if (rssi > -60) signal_bars = 3;
+        else if (rssi > -70) signal_bars = 2;
+        else if (rssi > -80) signal_bars = 1;
+      }
+      for (int i = 0; i < 4; i++) {
+        int bar_height = 10 + i * 8;
+        Color bar_color = i < signal_bars ? id(color_green) : id(color_gray);
+        it.filled_rectangle(380 + i * 15, 240 - bar_height, 10, bar_height, bar_color);
+      }
+      
+      // 系统信息区域
+      it.print(40, 330, id(font_medium), id(color_red), "SYSTEM");
+      
+      // 运行时间
+      int uptime_sec = id(device_uptime).state;
+      int hours = uptime_sec / 3600;
+      int mins = (uptime_sec % 3600) / 60;
+      int secs = uptime_sec % 60;
+      snprintf(buf, sizeof(buf), "Uptime: %02d:%02d:%02d", hours, mins, secs);
+      it.print(40, 370, id(font_small), id(color_white), buf);
+      
+      // ESPHome 版本
+      it.print(40, 400, id(font_small), id(color_white), "ESPHome: 2026.6.2");
+      
+      // 芯片信息
+      it.print(40, 430, id(font_small), id(color_white), "Chip: ESP32-P4 rev1.3");
+      
+      // 刷新时间
+      it.print(40, 460, id(font_small), id(color_gray), "Display updating...");
+      
+      // 底部状态栏
+      it.rectangle(0, 500, 720, 2, id(color_gray));
+      it.print(360, 510, id(font_small), id(color_gray), TextAlign::TOP_CENTER, 
+               "Tab5 Sensor Test v1.0");
+
+# ========== 背光 PWM 输出配置 ==========
+output:
+  - platform: ledc
+    pin: GPIO22
+    id: backlight_pwm
+    frequency: 1000Hz
+
+# ========== 背光亮度控制 ==========
+light:
+  - platform: monochromatic
+    output: backlight_pwm
+    name: "Display Backlight"
+    id: backlight
+    restore_mode: RESTORE_DEFAULT_ON
+    default_transition_length: 250ms
+    initial_state:
+      brightness: "80%"

@@ -1,391 +1,796 @@
 lvgl:
+  rotation: 270
+  on_boot:
+    - light.turn_on: backlight
+    - rx8130.read_time:
+    - script.execute: expand_nav_btn_click_area    # 扩展导航按钮点击区域
+    - script.execute: nav_rail_update              # 更新导航栏 UI
+    - script.execute: sync_ha                      # 同步 Home Assistant 状态
 
+  byte_order: little_endian
+  color_depth: 16
+  
+  # LVGL 样式定义  
+  style_definitions:
+    # 侧边栏样式
+    - id: sidebar
+      bg_color: 0xE9EFEE
+      bg_opa: COVER
+      border_opa: TRANSP
+      pad_top: 30
+      pad_left: 0
+      pad_right: 0
+      radius: 0
+      width: 192
+      height: 100%
+
+    # 导航按钮容器样式
+    - id: nav_btn_container
+      bg_opa: TRANSP
+      border_opa: TRANSP
+      width: 180
+      height: 150
+
+    # 导航按钮未激活样式
+    - id: nav_btn_inactivate
+      bg_opa: TRANSP
+      align: CENTER
+      width: 112
+      height: 64
+      radius: 48
+      border_opa: TRANSP
+      shadow_opa: TRANSP
+
+    # 导航图标激活样式
+    - id: nav_icon_activate
+      align: CENTER
+      text_font: extra_icon
+      text_color: 0x4A6363
+
+    # 导航图标未激活样式
+    - id: nav_icon_inactivate
+      align: CENTER
+      text_font: extra_icon
+      text_color: 0x3F4948
+
+    # 导航标签激活样式
+    - id: nav_label_activate
+      align: BOTTOM_MID
+      text_color: 0x4A6363
+      text_font: montserrat_24
+
+    # 导航标签未激活样式
+    - id: nav_label_inactivate
+      align: BOTTOM_MID
+      text_color: 0x3F4948
+      text_font: montserrat_24
+
+    # 内容容器样式
+    - id: content_container
+      align: CENTER
+      bg_opa: COVER
+      border_opa: TRANSP
+      height: 100%
+      width: 1080
+      x: 96
+      pad_top: 120
+      pad_left: 30
+
+    # 小型控制卡片样式（与 Home Assistant 风格匹配）
+    - id: card_sm
+      width: 400
+      height: 112
+      radius: 24
+
+    # 小卡片图标按钮样式
+    - id: card_sm_icon_btn
+      width: 72
+      height: 72
+      radius: 50
+      bg_color: 0xECECEC
+      shadow_opa: TRANSP
+      align: LEFT_MID
+
+    # 小卡片主标签样式
+    - id: card_sm_main_label
+      text_font: montserrat_32
+      align: TOP_LEFT
+      x: 92
+      y: 5
+      
+    # 小卡片副标签样式
+    - id: card_sm_sub_label
+      text_font: montserrat_24
+      align: BOTTOM_LEFT
+      x: 92
+    
+    # 中型卡片样式
+    - id: card_md
+      width: 400
+      height: 240
+      radius: 24
+
+    # 中卡片图标按钮样式
+    - id: card_md_icon_btn
+      width: 72
+      height: 72
+      radius: 50
+      bg_color: 0xECECEC
+      shadow_opa: TRANSP
+      align: TOP_LEFT
+
+    # 中卡片主标签样式
+    - id: card_md_main_label
+      text_font: montserrat_32
+      align: TOP_LEFT
+      x: 92
+      y: 5
+      
+    # 中卡片副标签样式
+    - id: card_md_sub_label
+      text_font: montserrat_24
+      x: 92
+      y: 60
+    
+    # 大卡片容器样式（用于模态框）
+    - id: card_lg
+      width: 800
+      height: 600
+      radius: 24
+      align: CENTER
+      opa: 1
+
+    # 大卡片图标按钮样式
+    - id: card_lg_icon_btn
+      width: 72
+      height: 72
+      radius: 50
+      bg_color: 0xECECEC
+      shadow_opa: TRANSP
+      align: TOP_LEFT
+    
+    # 大卡片透明图标按钮样式
+    - id: card_lg_icon_btn_transp
+      width: 72
+      height: 72
+      radius: 50
+      bg_opa: TRANSP
+      shadow_opa: TRANSP
+      align: TOP_LEFT
+
+    # 大卡片主标签样式
+    - id: card_lg_main_label
+      text_font: montserrat_32
+      align: TOP_LEFT
+      
+    # 大卡片副标签样式
+    - id: card_lg_sub_label
+      text_font: montserrat_24
+    
+    # 模态框容器样式（全屏半透明遮罩）
+    - id: modal_container
+      width: 1280
+      height: 720
+      bg_color: 0xA9A9A9
+      bg_opa: 0.7
+      align: CENTER
+  
+  # 顶层导航栏和模态框  
+  top_layer:
+    widgets:
+      # 侧边导航栏
+      - obj:
+          align: TOP_LEFT
+          styles: sidebar
+          id: sidebars
+          layout:
+            type: flex
+            flex_flow: COLUMN
+            pad_row: 12
+            flex_align_main: start
+            flex_align_cross: center
+            flex_align_track: center
+          widgets:
+            # 仪表盘导航按钮
+            - obj:
+                styles: nav_btn_container
+                widgets:
+                  - button:
+                      align: center
+                      styles: nav_btn_inactivate
+                      id: dash_panel_btn
+                      checkable: true
+                      state:
+                        checked: false
+                      checked:
+                        bg_color: 0xCCE8E7
+                      widgets:
+                        - label:
+                            id: dash_btn_icon
+                            align: CENTER
+                            styles: nav_icon_inactivate
+                            text: "\U000F056E" # 仪表盘图标
+                      on_value:
+                        - lambda: id(page_num) = 0;
+                        - script.execute: nav_rail_update
+                      on_press:
+                        - lvgl.page.show: dashboard_page
+                  - label:
+                      styles: nav_label_inactivate
+                      id: dash_btn_label
+                      text: "仪表盘"
+
+            # 灯光控制导航按钮
+            - obj:
+                styles: nav_btn_container
+                widgets:
+                  - button:
+                      align: center
+                      styles: nav_btn_inactivate
+                      id: light_panel_btn
+                      checkable: true
+                      state:
+                        checked: false
+                      checked:
+                        bg_color: 0xCCE8E7
+                      widgets:
+                        - label:
+                            id: light_btn_icon
+                            align: CENTER
+                            styles: nav_icon_inactivate
+                            text: "\U000F0336" # 灯泡图标（轮廓）
+                      on_value:
+                        - lambda: id(page_num) = 1;
+                        - script.execute: nav_rail_update
+                      on_press:
+                        - lvgl.page.show: light_page
+                  - label:
+                      styles: nav_label_inactivate
+                      id: light_btn_label
+                      text: "灯光"
+
+      # RGB 彩灯控制模态框
+      - obj:
+          align: CENTER
+          id: rgb_light_card_modal_container
+          styles: modal_container
+          clickable: true
+          hidden: true
+          on_press:
+            - lvgl.widget.hide: rgb_light_card_modal_container
+          widgets:
+            - obj:
+                styles: card_lg
+                widgets:
+                  # 关闭按钮
+                  - button:
+                      styles: card_lg_icon_btn_transp
+                      align: TOP_LEFT
+                      widgets:
+                        - label:
+                            text_color: 0x3F4948
+                            text_font: extra_icon
+                            text: "\U000F0156"
+                            align: CENTER
+                      on_press:
+                        - lvgl.widget.hide: rgb_light_card_modal_container
+                  # 亮度百分比标签
+                  - label:
+                      id: rgb_light_bright_label
+                      text_font: montserrat_48
+                      align: TOP_MID
+                      y: 30
+                      text: "关闭"
+                  # 亮度调节滑块
+                  - slider:
+                      align: CENTER
+                      width: 130
+                      height: 360
+                      radius: 42
+                      min_value: 0
+                      max_value: 255
+                      id: rgb_light_slider
+                      bg_color: 0xECECEC
+                      bg_opa: COVER
+                      indicator:
+                        radius: 12
+                        bg_color: 0xFFB90B
+                      knob:
+                        bg_opa: TRANSP
+                      on_boot:
+                        - lambda: |-
+                            lv_obj_move_foreground(id(rgb_light_slider));
+                      on_release:
+                        - homeassistant.action:
+                            action: light.turn_on
+                            data:
+                              entity_id: light.matter_rgb
+                              brightness: !lambda return int(x);
+                        - lvgl.label.update:
+                            id: rgb_light_bright_label
+                            text: !lambda |-
+                              int percent = int(x) * 100 / 255;
+                              return std::to_string(percent) + " %";
+                        - logger.log: 
+                            format: ">>>>>>>>>>>>   彩灯亮度: %d%%"
+                            args: [int((x*100)/255)]
+                  # 调色板画布
+                  - canvas:
+                      id: color_palette_canvas
+                      width: 320
+                      height: 320
+                      hidden: true
+                      align: CENTER
+                      on_boot:
+                        # 绘制圆形调色板
+                        - lvgl.canvas.fill:
+                            id: color_palette_canvas
+                            color: white
+                        - script.execute: draw_color_palette
+
+                  # 调色板可点击区域
+                  - obj:
+                      id: color_palette_click_area
+                      align: CENTER
+                      width: 320
+                      height: 320
+                      bg_opa: TRANSP
+                      border_opa: TRANSP
+                      radius: 50
+                      clickable: true
+                      on_click:
+                        - lvgl.widget.show: color_palette_indicator
+                        - script.execute: move_color_palette_indicator
+                        - text_sensor.template.publish:
+                            id: device_rgb_color
+                            state: !lambda |-
+                              char buf[32];
+                              snprintf(buf, sizeof(buf), "%d,%d,%d", id(light_r), id(light_g), id(light_b));
+                              return std::string(buf);
+                        - logger.log: 
+                            format: "可点击调色板颜色变化 RGB: (%d, %d, %d)"
+                            args: [id(light_r), id(light_g), id(light_b)]
+
+                  # 调色板指示器（可拖动）
+                  - obj:
+                      id: color_palette_indicator
+                      align: CENTER
+                      width: 50
+                      height: 50
+                      radius: 50
+                      hidden: true
+                      clickable: true
+                      bg_color: white
+                      border_width: 3
+                      border_color: white
+                      on_boot:
+                        - script.execute: draw_color_palette_indicator
+                      on_release:
+                        - text_sensor.template.publish:
+                            id: device_rgb_color
+                            state: !lambda |-
+                              char buf[32];
+                              snprintf(buf, sizeof(buf), "%d,%d,%d", id(light_r), id(light_g), id(light_b));
+                              return std::string(buf);
+                        - logger.log: 
+                            format: "可拖动调色板颜色变化 RGB: (%d, %d, %d)"
+                            args: [id(light_r), id(light_g), id(light_b)]
+                      
+                  # 按钮组（电源/亮度/调色板切换）
+                  - obj:
+                      width: 280
+                      height: 84
+                      radius: 50
+                      scrollable: false
+                      align: BOTTOM_MID
+                      bg_color: 0xF3F4F4
+                      border_opa: TRANSP
+                      layout:
+                        type: flex
+                        flex_align_main: CENTER
+                        flex_align_cross: CENTER
+                        flex_align_track: CENTER
+                      widgets:
+                        # 电源开关按钮
+                        - button:
+                            id: demo_rgb_light_pwr_btn
+                            styles: card_md_icon_btn
+                            bg_opa: TRANSP
+                            widgets:
+                              - label:
+                                  text_color: 0x3F4948
+                                  text_font: extra_icon
+                                  text: "\U000F0425"
+                                  align: CENTER
+                            on_short_click:
+                              - logger.log: "切换 RGB 彩灯!"
+                              - homeassistant.action:
+                                  action: light.toggle
+                                  data:
+                                    entity_id: light.matter_rgb
+                        # 亮度控制按钮
+                        - button:
+                            id: rgb_bright_ctrl_btn
+                            styles: card_md_icon_btn
+                            bg_opa: TRANSP
+                            widgets:
+                              - label:
+                                  align: CENTER
+                                  text_color: 0x3F4948
+                                  text_font: extra_icon
+                                  text: "\U000F00DF"
+                            on_press:
+                              - lvgl.widget.hide: color_palette_canvas
+                              - lvgl.widget.hide: color_palette_indicator
+                              - lvgl.widget.show: rgb_light_slider
+                        # 调色板按钮
+                        - button:
+                            id: color_palette_btn
+                            styles: card_md_icon_btn
+                            bg_opa: TRANSP
+                            widgets:
+                              - label:
+                                  id: color_palette_icon
+                                  align: CENTER
+                                  text_color: 0x3F4948
+                                  text_font: extra_icon
+                                  text: "\U000F03D8"
+                            on_press:
+                              - lvgl.widget.hide: rgb_light_slider
+                              - lvgl.widget.show: color_palette_canvas
+                              - lvgl.widget.show: color_palette_indicator
+
+      # 手电筒控制模态框
+      - obj:
+          align: CENTER
+          id: flash_light_card_modal_container
+          styles: modal_container
+          clickable: true
+          hidden: true
+          on_press:
+            - lvgl.widget.hide: flash_light_card_modal_container
+          widgets:
+            - obj:
+                styles: card_lg
+                widgets:
+                  # 关闭按钮
+                  - button:
+                      styles: card_lg_icon_btn_transp
+                      align: TOP_LEFT
+                      widgets:
+                        - label:
+                            text_color: 0x3F4948
+                            text_font: extra_icon
+                            text: "\U000F0156"
+                            align: CENTER
+                      on_press:
+                        - lvgl.widget.hide: flash_light_card_modal_container
+                  # 亮度百分比标签
+                  - label:
+                      id: flash_light_bright_label
+                      text_font: montserrat_48
+                      align: TOP_MID
+                      y: 30
+                      text: "关闭"
+                  # 亮度调节滑块
+                  - slider:
+                      align: CENTER
+                      width: 130
+                      height: 360
+                      radius: 42
+                      min_value: 0
+                      max_value: 255
+                      id: flash_light_slider
+                      bg_color: 0xECECEC
+                      bg_opa: COVER
+                      indicator:
+                        radius: 12
+                        bg_color: 0xFFB90B
+                      knob:
+                        bg_opa: TRANSP
+                      on_boot:
+                        - lambda: |-
+                            lv_obj_move_foreground(id(flash_light_slider));
+                      on_release:
+                        - homeassistant.action:
+                            action: light.turn_on
+                            data:
+                              entity_id: light.matter_flashlight
+                              brightness: !lambda return int(x);
+                        - lvgl.label.update:
+                            id: flash_light_bright_label
+                            text: !lambda |-
+                              int percent = int(x) * 100 / 255;
+                              return std::to_string(percent) + " %";
+                        - logger.log: 
+                            format: "手电筒亮度: %d%%"
+                            args: [int((x*100)/255)]
+                  # 按钮组（电源开关）
+                  - obj:
+                      width: 280
+                      height: 84
+                      radius: 50
+                      scrollable: false
+                      align: BOTTOM_MID
+                      bg_color: 0xF3F4F4
+                      border_opa: TRANSP
+                      layout:
+                        type: flex
+                        flex_align_main: CENTER
+                        flex_align_cross: CENTER
+                        flex_align_track: CENTER
+                      widgets:
+                        # 电源开关按钮
+                        - button:
+                            id: demo_flash_light_pwr_btn
+                            styles: card_md_icon_btn
+                            bg_opa: TRANSP
+                            widgets:
+                              - label:
+                                  text_color: 0x3F4948
+                                  text_font: extra_icon
+                                  text: "\U000F0425"
+                                  align: CENTER
+                            on_short_click:
+                              - logger.log: "切换手电筒!"
+                              - homeassistant.action:
+                                  action: light.toggle
+                                  data:
+                                    entity_id: light.matter_flashlight
+
+      # 状态栏（显示电池/WiFi/API 状态图标）
+      - obj:
+          align: TOP_RIGHT
+          id: status_bar
+          width: 1280
+          height: 90
+          bg_opa: TRANSP
+          border_opa: TRANSP
+          layout:
+            type: FLEX
+            flex_flow: ROW_REVERSE
+            flex_align_main: END
+            flex_align_cross: CENTER
+            flex_align_track: CENTER
+            pad_column: 20
+          widgets:
+            - label:
+                id: pwr_bat_icon_label
+                text_font: extra_icon
+                text: "\U000F06A5"
+            - label:
+                id: wifi_icon_label
+                hidden: true
+                text_font: extra_icon
+                text: "\U000F05A9"
+            - label:
+                id: api_icon_label
+                hidden: true
+                text_font: extra_icon
+                text: "\U000F109B"
+  
+  # LVGL 页面定义 
   pages:
-
-    # ==================== 主页面 ====================
-    - id: page_main
-      scrollbar_mode: "OFF"
-
-      # ==================== 手势处理 ====================
-      # 上滑：显示系统控制台
-      # 下滑：隐藏系统控制台
-      # 左右滑动（下半屏）：切换天气预报页面
-      on_gesture:
-        then:
-          - lambda: |-
-              lv_indev_t * indev = lv_indev_get_act();
-              if (indev) {
-                  lv_point_t pt;
-                  lv_indev_get_point(indev, &pt);
-                  lv_dir_t d = lv_indev_get_gesture_dir(indev);
-
-                  // 上滑显示系统控制台
-                  if (d == LV_DIR_TOP) {
-                      lv_obj_clear_flag(id(layer_console_sys), LV_OBJ_FLAG_HIDDEN);
-                      lv_obj_move_foreground(id(layer_console_sys));
-                  // 下滑隐藏系统控制台
-                  } else if (d == LV_DIR_BOTTOM) {
-                      lv_obj_add_flag(id(layer_console_sys), LV_OBJ_FLAG_HIDDEN);
-                  // 下半屏左右滑动切换天气预报页面
-                  } else if (pt.y > 400) {
-                      int page = id(forecast_page_index);
-                      if (d == LV_DIR_LEFT) {
-                          if (page >= 4) page = 2;
-                          else page = page + 1;
-                      } else if (d == LV_DIR_RIGHT) {
-                          if (page <= 0) page = 2;
-                          else page = page - 1;
-                      }
-                      id(forecast_page_index) = page;
-
-                      // 切换到每日预报或逐小时预报
-                      if (page >= 2) {
-                          lv_obj_clear_flag(id(layer_forecast_daily), LV_OBJ_FLAG_HIDDEN);
-                          lv_obj_add_flag(id(layer_forecast_hourly), LV_OBJ_FLAG_HIDDEN);
-                          
-                          // 刷新每日预报数据
-                          WeatherDaySlot slots[] = {
-                              {id(j0_day), id(j0_max), id(j0_min), id(j0_icon_layer1), id(j0_icon_layer2), id(btn_j0_action), id(icon_card_pc), nullptr, nullptr},
-                              {id(j1_day), id(j1_max), id(j1_min), id(j1_icon_layer1), id(j1_icon_layer2), id(btn_j1_action), id(icon_card_shutter1), id(icon_card_shutter_arrow), id(btn_j1_dir)},
-                              {id(j2_day), id(j2_max), id(j2_min), id(j2_icon_layer1), id(j2_icon_layer2), id(btn_j2_action), id(icon_card_lit_j2), id(icon_card_light_j2), nullptr},
-                              {id(j3_day), id(j3_max), id(j3_min), id(j3_icon_layer1), id(j3_icon_layer2), id(btn_j3_action), id(icon_card_salon_j3), id(icon_card_light_j3), nullptr},
-                              {id(j4_day), id(j4_max), id(j4_min), id(j4_icon_layer1), id(j4_icon_layer2), id(btn_j4_action), id(icon_card_led_j4), id(icon_card_light_j4), nullptr}
-                          };
-                          refresh_daily_forecast(slots, page - 2, id(font_meteo_main), id(font_meteo_card), id(font_meteo_main_small), id(font_meteo_card_small));
-                      } else {
-                          lv_obj_add_flag(id(layer_forecast_daily), LV_OBJ_FLAG_HIDDEN);
-                          lv_obj_clear_flag(id(layer_forecast_hourly), LV_OBJ_FLAG_HIDDEN);
-
-                          // 刷新逐小时预报数据
-                          WeatherHourSlot slots[] = {
-                              {id(h4_time), id(h4_temp), id(h4_prob), id(h4_icon_layer1), id(h4_icon_layer2)},
-                              {id(h3_time), id(h3_temp), id(h3_prob), id(h3_icon_layer1), id(h3_icon_layer2)},
-                              {id(h2_time), id(h2_temp), id(h2_prob), id(h2_icon_layer1), id(h2_icon_layer2)},
-                              {id(h1_time), id(h1_temp), id(h1_prob), id(h1_icon_layer1), id(h1_icon_layer2)},
-                              {id(h0_time), id(h0_temp), id(h0_prob), id(h0_icon_layer1), id(h0_icon_layer2)}
-                          };
-                          refresh_hourly_forecast(slots, 1 - page, id(font_meteo_main), id(font_meteo_card), id(font_meteo_main_small), id(font_meteo_card_small));
-                      }
-
-                      // 更新分页指示器
-                      lv_obj_t* bars[] = {id(pbar_0), id(pbar_1), id(pbar_2), id(pbar_3), id(pbar_4)};
-                      for(int i = 0; i < 5; i++) {
-                        if(i == page) {
-                          lv_obj_set_width(bars[i], 30);
-                          lv_obj_set_style_bg_opa(bars[i], 255, LV_PART_MAIN);
-                        } else {
-                          lv_obj_set_width(bars[i], 16);
-                          lv_obj_set_style_bg_opa(bars[i], 100, LV_PART_MAIN);
-                        }
-                      }
-                  }
-              }
-
-      # ==================== UI组件 ====================
+    # 仪表盘页面（显示时间、日期和环境传感器数据）
+    - id: dashboard_page
       widgets:
-
-        # ==================== 左上角：状态图标 ====================
-        # 显示PC、手机、WiFi连接状态
-        - label: { id: icon_pc, text: "\U000F0379", align: TOP_LEFT, x: 10, y: 10, text_font: mdi_font_26, text_color: color_text_dim }
-        - label: { id: icon_phone, text: "\U000F011E", align: TOP_LEFT, x: 45, y: 10, text_font: mdi_font_26, text_color: color_text_dim }
-        - label: { id: icon_wifi, text: "\U000F05A9", align: TOP_LEFT, x: 80, y: 10, text_font: mdi_font_26, text_color: color_text_dim }
-
-        # ==================== 语音助手面板 ====================
-        # 麦克风图标和语音助手触发按钮
-        - label: { id: icon_mic_status, text: "\U000F036C", align: TOP_LEFT, x: 146, y: 85, text_font: mdi_font_120, text_color: color_text_dim }
-        - button:
-            id: btn_assist_trigger
-            align: TOP_LEFT
-            x: 146
-            y: 85
-            width: 120
-            height: 120
-            styles: style_invisible
-            on_short_click:
-              - voice_assistant.start:
-                  id: va
-        
-        # ==================== 模式切换按钮 ====================
-        # 智能家居模式按钮（控制Home Assistant设备）
-        - button:
-            id: btn_mode_domo
-            align: TOP_LEFT
-            x: 30
-            y: 120
-            width: 85
-            height: 60
-            styles: style_clim_btn
-            on_short_click:
-              - globals.set:
-                  id: conversation_mode
-                  value: 'false'
-              - lambda: |-
-                  lv_label_set_text(id(icon_mode_status), "\U000F07D0");
-                  lv_obj_set_style_text_color(id(icon_mode_status), lv_color_hex(UIColor::TEXT_DIM), LV_PART_MAIN);
-              - homeassistant.service:
-                  service: select.select_option
-                  data:
-                    entity_id: ${entity_tab5_pipeline_select}
-                    option: "preferred"
-            widgets:
-              - label: { text: "\U000F07D0", align: CENTER, y: -10, text_font: mdi_font_32, text_color: color_text }
-              - label: { text: "智能家居", align: CENTER, y: 15, text_font: roboto_22, text_color: color_text }
-
-        # 对话模式按钮（启用LLM对话功能）
-        - button:
-            id: btn_mode_discu
-            align: TOP_LEFT
-            x: 298
-            y: 120
-            width: 85
-            height: 60
-            styles: style_clim_btn
-            on_short_click:
-              - globals.set:
-                  id: conversation_mode
-                  value: 'true'
-              - lambda: |-
-                  lv_label_set_text(id(icon_mode_status), "\U000F0450");
-                  lv_obj_set_style_text_color(id(icon_mode_status), lv_color_hex(UIColor::INFO), LV_PART_MAIN);
-              - homeassistant.service:
-                  service: select.select_option
-                  data:
-                    entity_id: ${entity_tab5_pipeline_select}
-                    option: "Discussion LLM"
-            widgets:
-              - label: { text: "\U000F0450", align: CENTER, y: -10, text_font: mdi_font_32, text_color: color_text }
-              - label: { text: "对话", align: CENTER, y: 15, text_font: roboto_22, text_color: color_text }
-
-        # Ok Nabu唤醒词开关按钮
-        - button:
-            id: btn_ok_nabu
-            align: TOP_LEFT
-            x: 126
-            y: 220
-            width: 160
-            height: 50
-            styles: style_clim_btn
-            on_short_click:
-              - switch.toggle: tab5_wake_word_active
-            widgets:
-              - label: { id: lbl_ok_nabu, text: "Ok Nabu: 开启", align: CENTER, text_font: roboto_22, text_color: color_success }
-
-        # 隐藏的状态标签（兼容性保留）
-        - label: { id: icon_mode_status, text: "", hidden: true }
-
-
-        # ==================== 中央：时钟显示 ====================
-        # 显示当前时间和日期（中文格式）
         - obj:
-            id: clock_tile
-            align: TOP_MID
-            x: 0
-            y: 10
-            width: 413
-            height: 210
-            styles: style_meteo_card
-            scrollbar_mode: "OFF"
+            styles: content_container
             widgets:
-              - label: { id: lbl_time, text: "19:50", align: TOP_MID, y: 10, text_font: roboto_130_b, text_color: color_text }
-              - label: { id: lbl_date, text: "星期三 4月2日", align: TOP_MID, y: 145, text_font: roboto_45, text_color: color_text }
-
-        # ==================== 右上角控制按钮 ====================
-        # Home Assistant控制按钮（显示/隐藏开关面板）
-        - button:
-            id: btn_control_ha
-            align: TOP_LEFT
-            x: 855
-            y: 20
-            width: 125
-            height: 90
-            radius: 15
-            styles: style_meteo_tab
-            on_short_click:
-              - lambda: |-
-                  bool state = id(show_switches);
-                  id(show_switches) = !state;
-                  if (id(show_switches)) {
-                      lv_obj_add_flag(id(layer_forecast_daily), LV_OBJ_FLAG_HIDDEN);
-                      lv_obj_add_flag(id(layer_forecast_hourly), LV_OBJ_FLAG_HIDDEN);
-                      lv_obj_clear_flag(id(layer_switches), LV_OBJ_FLAG_HIDDEN);
-                  } else {
-                      if (id(forecast_page_index) >= 2) {
-                          lv_obj_clear_flag(id(layer_forecast_daily), LV_OBJ_FLAG_HIDDEN);
-                      } else {
-                          lv_obj_clear_flag(id(layer_forecast_hourly), LV_OBJ_FLAG_HIDDEN);
-                      }
-                      lv_obj_add_flag(id(layer_switches), LV_OBJ_FLAG_HIDDEN);
-                  }
-            widgets:
-              - label: { id: icon_ha, text: "\U000F07D0", align: CENTER, text_font: mdi_font_56, text_color: color_text }
-
-        # 系统控制台按钮（显示系统信息面板）
-        - button:
-            id: btn_control_console
-            align: TOP_LEFT
-            x: 999
-            y: 20
-            width: 125
-            height: 90
-            radius: 15
-            styles: style_meteo_tab
-            on_short_click:
-              - lambda: |-
-                  lv_obj_clear_flag(id(layer_console_sys), LV_OBJ_FLAG_HIDDEN);
-                  lv_obj_move_foreground(id(layer_console_sys));
-            widgets:
-              - label: { text: "\U000F0717", align: CENTER, text_font: mdi_font_56, text_color: color_text }
-
-        # 未使用按钮（预留）
-        - button:
-            id: btn_control_inactive
-            align: TOP_LEFT
-            x: 1143
-            y: 20
-            width: 125
-            height: 90
-            radius: 15
-            styles: style_meteo_tab
-            widgets:
-              - label: { text: "\U000F02E4", align: CENTER, text_font: mdi_font_56, text_color: 0x555555 }
-
-        # ==================== 植物湿度传感器显示 ====================
-        # 显示5个植物的土壤湿度，自动排序显示前4个最缺水的
-        - !include ui_components/moisture_sensors.yaml
-
-        # ==================== 温湿度控制卡片 ====================
-        # 显示温室、客厅的温度和湿度信息
-        - !include ui_components/climate_card.yaml
-
-        # ==================== 中央信息卡片 ====================
-        # 显示天气预警、降雨概率、日程安排等信息
-        - obj:
-            id: central_card
-            x: 20
-            y: 333
-            width: 1240
-            height: 84
-            styles: style_meteo_card
-            scrollbar_mode: "OFF"
-            pad_left: 20
-            pad_right: 20
-            widgets:
-              # 天气预警容器（最多显示4个预警）
-              - obj:
-                  id: alert_container
+              # 时间显示
+              - label:
+                  id: time_label
+                  text_font: montserrat_96
+                  text: "14:07"
                   align: CENTER
-                  width: SIZE_CONTENT
-                  height: SIZE_CONTENT
-                  styles: style_transparent
-                  hidden: true
+                  y: -100
+              # 日期显示
+              - label:
+                  id: date_label
+                  text_font: montserrat_32
+                  text: "2026-03-11 Thu"
+                  align: CENTER
+                  y: 30
+              # 环境数据网格（温度/湿度/CO2/气压）
+              - obj:
+                  width: 800
+                  height: 200
+                  bg_opa: TRANSP
+                  border_opa: TRANSP
+                  align: CENTER
+                  y: 200
                   layout:
-                    type: FLEX
-                    flex_flow: ROW
-                    flex_align_main: CENTER
-                    flex_align_cross: CENTER
-                    pad_column: 15
+                    type: GRID
+                    grid_columns: [FR(20), FR(30), FR(20), FR(30)]
+                    grid_rows: [FR(1), FR(1)]
+                    pad_row: 24
+                    pad_column: 24
                   widgets:
-                    - label: { id: alerte_slot_0, text: "", text_font: mdi_font_alert, text_color: color_text, hidden: true }
-                    - label: { id: alerte_slot_1, text: "", text_font: mdi_font_alert, text_color: color_text, hidden: true }
-                    - label: { id: alerte_slot_2, text: "", text_font: mdi_font_alert, text_color: color_text, hidden: true }
-                    - label: { id: alerte_slot_3, text: "", text_font: mdi_font_alert, text_color: color_text, hidden: true }
+                    # 温度图标
+                    - label:
+                        text_font: extra_icon
+                        text: "\U000F050F"
+                        grid_cell_column_pos: 0 
+                        grid_cell_row_pos: 0 
+                        grid_cell_x_align: CENTER
+                        grid_cell_y_align: CENTER
+                    # 温度值
+                    - label:
+                        id: temp_label
+                        text_font: montserrat_32
+                        text: "- °C"
+                        grid_cell_column_pos: 1 
+                        grid_cell_row_pos: 0 
+                        grid_cell_x_align: START
+                        grid_cell_y_align: CENTER
+                    # 湿度图标
+                    - label:
+                        text_font: extra_icon
+                        text: "\U000F058E"
+                        grid_cell_column_pos: 2 
+                        grid_cell_row_pos: 0 
+                        grid_cell_x_align: CENTER
+                        grid_cell_y_align: CENTER
+                    # 湿度值
+                    - label:
+                        text_font: montserrat_32
+                        id: humi_label
+                        text: "- %"
+                        grid_cell_column_pos: 3 
+                        grid_cell_row_pos: 0 
+                        grid_cell_x_align: START
+                        grid_cell_y_align: CENTER
+                    # CO2 图标
+                    - label:
+                        text_font: extra_icon
+                        text: "\U000F07E4"
+                        grid_cell_column_pos: 0 
+                        grid_cell_row_pos: 1 
+                        grid_cell_x_align: CENTER
+                        grid_cell_y_align: CENTER
+                    # CO2 值
+                    - label:
+                        text_font: montserrat_32
+                        id: co2_label
+                        text: "- ppm"
+                        grid_cell_column_pos: 1 
+                        grid_cell_row_pos: 1 
+                        grid_cell_x_align: START
+                        grid_cell_y_align: CENTER
+                    # 气压图标
+                    - label:
+                        text_font: extra_icon
+                        text: "\U000F029A"
+                        grid_cell_column_pos: 2 
+                        grid_cell_row_pos: 1 
+                        grid_cell_x_align: CENTER
+                        grid_cell_y_align: CENTER
+                    # 气压值
+                    - label:
+                        text_font: montserrat_32
+                        id: pres_label
+                        text: "- hPa"
+                        grid_cell_column_pos: 3 
+                        grid_cell_row_pos: 1 
+                        grid_cell_x_align: START
+                        grid_cell_y_align: CENTER
+        # 页面标题
+        - label:
+            x: 220
+            y: 40
+            text_font: montserrat_48
+            text: "仪表盘"      
 
-              # 降雨概率显示容器（9个时间段的降雨条形图）
-              - obj:
-                  id: rain_wrapper
-                  align: CENTER
-                  width: SIZE_CONTENT
-                  height: SIZE_CONTENT
-                  styles: style_transparent
-                  hidden: true
-                  layout:
-                    type: FLEX
-                    flex_flow: ROW
-                    flex_align_main: CENTER
-                    flex_align_cross: CENTER
-                    pad_column: 15
-                  widgets:
-                    - label: { id: icon_rain_predict, text: "\U000F0597", text_font: mdi_font_alert, text_color: color_temp_min }
-                    # 降雨条形图容器
-                    - obj:
-                        id: rain_bar_container
-                        width: SIZE_CONTENT
-                        height: 50
-                        styles: style_transparent
-                        layout:
-                          type: FLEX
-                          flex_flow: ROW
-                          flex_align_main: CENTER
-                          flex_align_cross: END
-                        widgets:
-                          - obj: { id: rb_0, width: 25, height: 50, bg_color: color_bar_inactive, border_width: 0, pad_all: 0, widgets: [{ obj: { id: rb_0_in, align: BOTTOM_MID, width: 25, height: 0, bg_color: color_bar_inactive, border_width: 0, radius: 0 } }] }
-                          - obj: { id: rb_1, width: 25, height: 50, bg_color: color_bar_inactive, border_width: 0, pad_all: 0, widgets: [{ obj: { id: rb_1_in, align: BOTTOM_MID, width: 25, height: 0, bg_color: color_bar_inactive, border_width: 0, radius: 0 } }] }
-                          - obj: { id: rb_2, width: 25, height: 50, bg_color: color_bar_inactive, border_width: 0, pad_all: 0, widgets: [{ obj: { id: rb_2_in, align: BOTTOM_MID, width: 25, height: 0, bg_color: color_bar_inactive, border_width: 0, radius: 0 } }] }
-                          - obj: { id: rb_3, width: 25, height: 50, bg_color: color_bar_inactive, border_width: 0, pad_all: 0, widgets: [{ obj: { id: rb_3_in, align: BOTTOM_MID, width: 25, height: 0, bg_color: color_bar_inactive, border_width: 0, radius: 0 } }] }
-                          - obj: { id: rb_4, width: 25, height: 50, bg_color: color_bar_inactive, border_width: 0, pad_all: 0, widgets: [{ obj: { id: rb_4_in, align: BOTTOM_MID, width: 25, height: 0, bg_color: color_bar_inactive, border_width: 0, radius: 0 } }] }
-                          - obj: { id: rb_5, width: 25, height: 50, bg_color: color_bar_inactive, border_width: 0, pad_all: 0, widgets: [{ obj: { id: rb_5_in, align: BOTTOM_MID, width: 25, height: 0, bg_color: color_bar_inactive, border_width: 0, radius: 0 } }] }
-                          - obj: { id: rb_6, width: 55, height: 50, bg_color: color_bar_inactive, border_width: 0, pad_all: 0, widgets: [{ obj: { id: rb_6_in, align: BOTTOM_MID, width: 55, height: 0, bg_color: color_bar_inactive, border_width: 0, radius: 0 } }] }
-                          - obj: { id: rb_7, width: 55, height: 50, bg_color: color_bar_inactive, border_width: 0, pad_all: 0, widgets: [{ obj: { id: rb_7_in, align: BOTTOM_MID, width: 55, height: 0, bg_color: color_bar_inactive, border_width: 0, radius: 0 } }] }
-                          - obj: { id: rb_8, width: 55, height: 50, bg_color: color_bar_inactive, border_width: 0, pad_all: 0, widgets: [{ obj: { id: rb_8_in, align: BOTTOM_MID, width: 55, height: 0, bg_color: color_bar_inactive, border_width: 0, radius: 0 } }] }
-                    # 降雨数值显示
-                    - obj:
-                        width: SIZE_CONTENT
-                        height: 100%
-                        styles: style_transparent
-                        layout:
-                          type: FLEX
-                          flex_flow: ROW
-                          flex_align_main: CENTER
-                          flex_align_cross: END
-                          pad_column: 6
-                        widgets:
-                          - label: { id: lbl_proc_pluie, text: "同步中...", text_font: roboto_32_b, text_color: color_text, pad_bottom: 15 }
-                          - label: { id: lbl_pluie_val, text: "", text_font: roboto_45_b, text_color: color_orange_vif, pad_bottom: 10 }
-                          - label: { id: lbl_pluie_unit, text: "", text_font: roboto_32_b, text_color: color_text, pad_bottom: 15 }
-
-              # 日程安排显示容器
-              - obj:
-                  id: planning_wrapper
-                  align: CENTER
-                  width: SIZE_CONTENT
-                  height: 100%
-                  styles: style_transparent
-                  widgets:
-                    - label: { id: lbl_planning_text, text: "", align: CENTER, y: 4, text_font: roboto_45_b, text_color: color_text }
-
-        # ==================== 分页指示器 ====================
-        # 5个点表示5个可切换的页面（2个逐小时 + 3个每日预报）
+    # 灯光控制页面
+    - id: light_page
+      widgets:
         - obj:
-            id: pagination_container
-            x: 480
-            y: 424
-            width: 310
-            height: 10
-            styles: style_transparent
-            scrollbar_mode: "OFF"
+            styles: content_container
             layout:
-              type: FLEX
-              flex_flow: ROW
-              flex_align_main: CENTER
-              flex_align_cross: CENTER
-              pad_column: 8
-            widgets:
-              - obj: { id: pbar_0, width: 16, height: 4, radius: 2, bg_color: color_text_dim, bg_opa: 40%, border_width: 0 }
-              - obj: { id: pbar_1, width: 16, height: 4, radius: 2, bg_color: color_text_dim, bg_opa: 40%, border_width: 0 }
-              - obj: { id: pbar_2, width: 30, height: 4, radius: 2, bg_color: color_text, bg_opa: 100%, border_width: 0 }
-              - obj: { id: pbar_3, width: 16, height: 4, radius: 2, bg_color: color_text_dim, bg_opa: 40%, border_width: 0 }
-              - obj: { id: pbar_4, width: 16, height: 4, radius: 2, bg_color: color_text_dim, bg_opa: 40%, border_width: 0 }
+              type: grid
+              grid_rows: [fr(10), fr(30), fr(30), fr(30)]
+              grid_columns: [fr(1), fr(1)]
+              pad_row: 24
+              pad_column: 24
 
-        # ==================== 底部UI组件 ====================
-        # 每日天气预报卡片
-        - !include ui_components/forecast_daily.yaml
-        # 逐小时天气预报卡片
-        - !include ui_components/forecast_hourly.yaml
-        # 开关控制卡片（小米插座、灯光等）
-        - !include ui_components/switches_card.yaml
-        # 系统控制台（内存、CPU、网络等信息）
-        - !include ui_components/console_sys.yaml
-        # 温湿度控制弹窗
-        - !include ui_components/climate_popup.yaml
-        # 灯光控制弹窗
-        - !include ui_components/light_popup.yaml
+            widgets:
+              # RGB 彩灯控制卡片
+              - obj:
+                  id: demo_light_click_area
+                  styles: card_sm
+                  grid_cell_row_pos: 0
+                  grid_cell_column_pos: 0
+                  grid_cell_x_align: STRETCH
+                  clickable: true
+                  on_press:
+                    - logger.log: "彩灯区域被点击!"
+                    - lvgl.widget.show: rgb_light_card_modal_container
+                    - lvgl.widget.hide: color_palette_canvas
+                    - lvgl.widget.hide: color_palette_indicator
+                    - lvgl.widget.show: rgb_light_slider
+                  widgets:
+                    # 灯光开关按钮
+                    - button:
+                        styles: card_sm_icon_btn
+                        id: demo_light_btn
+                        checkable: true
+                        state:
+                          checked: false
+                        checked:
+                          bg_color: 0xFDF3D8    # 暗黄色
+                        widgets:
+                          - label:
+                              id: demo_rgb_light_label
+                              text_font: extra_icon
+                              text_color: 0X9E9E9E
+                              text: "\U000F18DE"
+                              align: CENTER
+                        on_short_click:
+                          - logger.log: "切换 RGB 彩灯!"
+                          - homeassistant.action:
+                              action: light.toggle
+                              data:
+                                entity_id: light.matter_rgb
+
+                    # 灯光名称标签
+                    - label:
+                        styles: card_sm_main_label
+                        text: "彩灯"
+                    # 灯光状态标签
+                    - label:
+                        styles: card_sm_sub_label
+                        id: demo_rgb_light_status
+                        text: "关闭"
+
+              # 手电筒控制卡片
+              - obj:
+                  id: demo_light_click_area2
+                  styles: card_sm
+                  grid_cell_row_pos: 2
+                  grid_cell_column_pos: 0
+                  grid_cell_x_align: STRETCH
+                  clickable: true
+                  on_press:
+                    - logger.log: "手电筒区域被点击!"
+                    - lvgl.widget.show: flash_light_card_modal_container
+                    - lvgl.widget.show: flash_light_slider
+                  widgets:
+                    # 手电筒开关按钮
+                    - button:
+                        styles: card_sm_icon_btn
+                        id: demo_light_btn2
+                        checkable: true
+                        state:
+                          checked: false
+                        checked:
+                          bg_color: 0xFDF3D8    # 暗黄色
+                        widgets:
+                          - label:
+                              id: demo_flash_light_label
+                              text_font: extra_icon
+                              text_color: 0X9E9E9E
+                              text: "\U000F18DE"
+                              align: CENTER
+                        on_short_click:
+                          - logger.log: "切换手电筒!"
+                          - homeassistant.action:
+                              action: light.toggle
+                              data:
+                                entity_id: light.matter_flashlight
+
+                    # 手电筒名称标签
+                    - label:
+                        styles: card_sm_main_label
+                        text: "手电筒"
+                    # 手电筒状态标签
+                    - label:
+                        styles: card_sm_sub_label
+                        id: demo_flash_light_status
+                        text: "关闭"
+
+        # 页面标题
+        - label:
+            x: 220
+            y: 40
+            text_font: montserrat_48
+            text: "灯光"

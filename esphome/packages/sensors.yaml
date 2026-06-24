@@ -66,17 +66,6 @@ sensor:
       name: Battery Current
       # 正值表示放电，负值表示充电
   
-  # Home Assistant 环境传感器
-  - platform: homeassistant
-    id: cur_temp
-    entity_id: sensor.bme668_temperature
-    on_value:
-      - lvgl.label.update:
-          id: temp_label
-          text:
-            format: "%.1f °C"
-            args: [ 'x' ]
-
   # 室外温度
   - platform: homeassistant
     name: xiamen temperature
