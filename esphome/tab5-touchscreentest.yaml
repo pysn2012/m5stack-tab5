@@ -620,12 +620,16 @@ font:
     id: noto_sans_sc_32
     size: 32
     bpp: 4
+    glyphs: "仪表盘亮度"
+    ignore_missing_glyphs: true
 
   # Noto Sans SC 中文字体（48px）
   - file: gfonts://Noto+Sans+SC
     id: noto_sans_sc_48
     size: 48
     bpp: 4
+    glyphs: "仪表盘亮度"
+    ignore_missing_glyphs: true
 
 # LVGL 图形库配置
 lvgl:
