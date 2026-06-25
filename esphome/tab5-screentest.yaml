@@ -7,6 +7,9 @@ esphome:
     priority: 600
     then:
       - light.turn_on: backlight
+      - rx8130.read_time:
+          id: rx8130_time
+      - logger.log: "Boot: time read from RX8130 RTC"
 
 # ESP32-P4 主控芯片配置
 esp32:
@@ -69,8 +72,24 @@ i2c:
 pi4ioe5v6408:
   - id: pi4ioe1
     address: 0x43
+    # 0: 输出 - WiFi天线切换（内置/外置）
+    # 1: 输出 - 扬声器使能
+    # 2: 输出 - 外部5V电源
+    # 3: 未连接
+    # 4: 输出 - LCD复位
+    # 5: 输出 - 触摸面板复位
+    # 6: 输出 - 摄像头复位
+    # 7: 输入 - 耳机检测
   - id: pi4ioe2
     address: 0x44
+    # 0: 输出 - WiFi电源
+    # 1: 未连接
+    # 2: 未连接
+    # 3: 输出 - USB 5V电源
+    # 4: 输出 - 关机脉冲
+    # 5: 输出 - 快充使能（低电平有效）
+    # 6: 输入 - 充电状态
+    # 7: 输出 - 充电使能
 
 # GPIO 开关配置
 switch:
@@ -82,6 +101,21 @@ switch:
       number: 0
     restore_mode: ALWAYS_ON
 
+# 同步时间
+time:
+  - platform: rx8130
+    id: rx8130_time
+    address: 0x32
+    update_interval: never
+    timezone: Asia/Shanghai
+
+  - platform: homeassistant
+    id: ha_time
+    on_time_sync:
+      then:
+        - rx8130.write_time:
+            id: rx8130_time
+        - logger.log: "RTC synced from Home Assistant"
 
 # LDO 稳压器配置（为触摸屏等供电）
 esp_ldo:
@@ -210,93 +244,73 @@ display:
     rotation: 270
     auto_clear_enabled: true
     lambda: |-
+      // 背景
       it.fill(id(color_black));
       
-      // 标题
-      it.print(640, 20, id(font_large), id(color_white), TextAlign::TOP_CENTER, "M5Stack Tab5");
-      it.print(640, 70, id(font_small), id(color_gray), TextAlign::TOP_CENTER, "Sensor Monitor");
-      it.rectangle(60, 110, 1160, 2, id(color_gray));
-      
-      // ========== 左列：电池信息 ==========
-      it.print(80, 140, id(font_medium), id(color_green), "BATTERY");
-      
       char buf[64];
-      float voltage = id(battery_voltage).state;
-      if (isnan(voltage)) snprintf(buf, sizeof(buf), "Voltage: -- V");
-      else snprintf(buf, sizeof(buf), "Voltage: %.2f V", voltage);
-      it.print(80, 190, id(font_small), id(color_white), buf);
+      auto time_now = id(rx8130_time).now();
       
-      float current = id(battery_current).state;
-      if (isnan(current)) snprintf(buf, sizeof(buf), "Current: -- A");
-      else snprintf(buf, sizeof(buf), "Current: %.3f A", current);
-      it.print(80, 230, id(font_small), id(color_white), buf);
-      
-      float percent = id(battery_percent).state;
-      if (isnan(percent)) snprintf(buf, sizeof(buf), "Percent: -- %%");
-      else snprintf(buf, sizeof(buf), "Percent: %.0f %%", percent);
-      it.print(80, 270, id(font_small), id(color_white), buf);
-      
-      // 电池进度条（宽480，高30）
-      it.rectangle(80, 320, 480, 30, id(color_gray));
-      if (!isnan(percent)) {
-        int fill_width = (int)(percent * 4.8);
-        if (fill_width > 480) fill_width = 480;
-        if (fill_width < 0) fill_width = 0;
-        Color bar_color = percent > 20 ? id(color_green) : id(color_red);
-        it.filled_rectangle(80, 320, fill_width, 30, bar_color);
+      // ========== 第1行：日期时间 ==========
+      if (time_now.is_valid()) {
+        it.strftime(640, 25, id(font_medium), id(color_white), TextAlign::TOP_CENTER,
+                    "%Y-%m-%d  %H:%M", time_now);
+      } else {
+        it.print(640, 25, id(font_medium), id(color_red), TextAlign::TOP_CENTER, "RTC: NO TIME");
       }
       
-      bool is_charging = id(charging).state;
-      it.print(80, 370, id(font_small), is_charging ? id(color_green) : id(color_gray), 
-               is_charging ? "Status: CHARGING" : "Status: Discharging");
+      // ========== 第2行：星期 ==========
+      if (time_now.is_valid()) {
+        it.strftime(640, 70, id(font_medium), id(color_gray), TextAlign::TOP_CENTER,
+                    "%A", time_now);
+      }
       
-      // ========== 右列：WiFi + 系统 ==========
-      it.print(720, 140, id(font_medium), id(color_blue), "WIFI");
+      // ========== 分隔线 ==========
+      it.rectangle(60, 115, 1160, 2, id(color_gray));
       
-      std::string ssid = id(wifi_ssid_text).state;
-      snprintf(buf, sizeof(buf), "SSID: %s", ssid.c_str());
-      it.print(720, 190, id(font_small), id(color_white), buf);
-      
+      // ========== 第3行：WIFI 信息（2列）==========
+      // 左列：IP
       std::string ip = id(wifi_ip).state;
       snprintf(buf, sizeof(buf), "IP: %s", ip.c_str());
-      it.print(720, 230, id(font_small), id(color_white), buf);
+      it.print(80, 140, id(font_small), id(color_white), buf);
       
+      // 右列：信号强度
       int rssi = id(wifi_rssi).state;
-      if (isnan(rssi)) snprintf(buf, sizeof(buf), "RSSI: -- dBm");
-      else snprintf(buf, sizeof(buf), "RSSI: %d dBm", rssi);
-      it.print(720, 270, id(font_small), id(color_white), buf);
-      
-      // WiFi 信号条
-      int signal_bars = 0;
-      if (!isnan(rssi)) {
-        if (rssi > -50) signal_bars = 4;
-        else if (rssi > -60) signal_bars = 3;
-        else if (rssi > -70) signal_bars = 2;
-        else if (rssi > -80) signal_bars = 1;
+      if (isnan(rssi)) {
+        snprintf(buf, sizeof(buf), "RSSI: -- dBm");
+      } else {
+        snprintf(buf, sizeof(buf), "RSSI: %d dBm", rssi);
       }
-      for (int i = 0; i < 4; i++) {
-        int bar_height = 12 + i * 10;
-        Color bar_color = i < signal_bars ? id(color_green) : id(color_gray);
-        it.filled_rectangle(720 + i * 18, 320 - bar_height, 12, bar_height, bar_color);
-      }
+      it.print(720, 140, id(font_small), id(color_white), buf);
       
-      // 系统信息
-      it.print(720, 370, id(font_medium), id(color_red), "SYSTEM");
+      // ========== 第4行：系统信息（2列）==========
+      // 左列：芯片型号
+      it.print(80, 185, id(font_small), id(color_white), "Chip: ESP32-P4 rev1.3");
       
+      // 右列：ESPHome 版本
+      it.print(720, 185, id(font_small), id(color_white), "ESPHome: 2026.6.2");
+      
+      // ========== 第5行：其他信息（2列）==========
+      // 左列：uptime
       int uptime_sec = id(device_uptime).state;
       int hours = uptime_sec / 3600;
       int mins = (uptime_sec % 3600) / 60;
       int secs = uptime_sec % 60;
       snprintf(buf, sizeof(buf), "Uptime: %02d:%02d:%02d", hours, mins, secs);
-      it.print(720, 420, id(font_small), id(color_white), buf);
+      it.print(80, 230, id(font_small), id(color_white), buf);
       
-      it.print(720, 460, id(font_small), id(color_white), "ESPHome: 2026.6.2");
-      it.print(720, 500, id(font_small), id(color_white), "Chip: ESP32-P4 rev1.3");
+      // 右列：电压
+      float voltage = id(battery_voltage).state;
+      if (isnan(voltage)) {
+        snprintf(buf, sizeof(buf), "Voltage: -- V");
+      } else {
+        snprintf(buf, sizeof(buf), "Voltage: %.2f V", voltage);
+      }
+      it.print(720, 230, id(font_small), id(color_white), buf);
       
-      // 底部
+      // ========== 底部状态栏 ==========
       it.rectangle(0, 680, 1280, 2, id(color_gray));
       it.print(640, 695, id(font_small), id(color_gray), TextAlign::TOP_CENTER, 
-               "Tab5 Sensor Test v1.0");
+               "M5Stack Tab5 - RX8130 RTC");
 
 # ========== 背光 PWM 输出配置 ==========
 output:
