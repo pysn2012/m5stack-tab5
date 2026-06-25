@@ -920,40 +920,30 @@ lvgl:
     - id: dashboard_page
       widgets:
         - obj:
-            align: TOP_LEFT
-            x: 96
-            y: 0
-            width: 1080
-            height: 1280
-            bg_opa: TRANSP
-            border_opa: TRANSP
-            layout:
-              type: flex
-              flex_flow: COLUMN
-              flex_align_main: START
-              flex_align_cross: CENTER
-              pad_row: 30
+            styles: content_container
             widgets:
-              # 页面标题
-              - label:
-                  text_font: noto_sans_sc_48
-                  text: "仪表盘"
               # 时间显示
               - label:
                   id: time_label
                   text_font: montserrat_96
                   text: "14:07"
+                  align: CENTER
+                  y: -100
               # 日期显示
               - label:
                   id: date_label
                   text_font: montserrat_32
                   text: "2026-03-11 Thu"
+                  align: CENTER
+                  y: 30
               # 环境数据网格（温度/湿度/CO2/气压）
               - obj:
                   width: 800
                   height: 200
                   bg_opa: TRANSP
                   border_opa: TRANSP
+                  align: CENTER
+                  y: 200
                   layout:
                     type: GRID
                     grid_columns: [FR(20), FR(30), FR(20), FR(30)]
@@ -1029,66 +1019,114 @@ lvgl:
                         grid_cell_row_pos: 1 
                         grid_cell_x_align: START
                         grid_cell_y_align: CENTER
+        # 页面标题
+        - label:
+            x: 220
+            y: 40
+            text_font: noto_sans_sc_48
+            text: "仪表盘"      
 
     # ========== 亮度控制页面 ==========
     - id: light_page
       widgets:
         - obj:
-            align: TOP_LEFT
-            x: 96
-            y: 0
-            width: 1080
-            height: 1280
-            bg_opa: TRANSP
-            border_opa: TRANSP
-            layout:
-              type: flex
-              flex_flow: ROW
-              flex_align_main: CENTER
-              flex_align_cross: CENTER
-              pad_column: 60
+            styles: content_container
             widgets:
-              # 亮度调节滑块（垂直方向）
-              - slider:
-                  width: 130
-                  height: 1000
-                  radius: 42
-                  min_value: 0
-                  max_value: 255
-                  id: backlight_slider
-                  bg_color: 0xECECEC
-                  bg_opa: COVER
-                  indicator:
-                    radius: 12
-                    bg_color: 0xFFB90B
-                  knob:
-                    bg_opa: TRANSP
-                  on_boot:
-                    - lambda: |-
-                        lv_obj_move_foreground(id(backlight_slider));
-                  on_release:
-                    - light.turn_on:
-                        id: backlight
-                        brightness: !lambda return x / 255.0;
-                    - lambda: id(backlight_brightness_val) = int(x);
-                    - lvgl.label.update:
-                        id: backlight_bright_label
-                        text: !lambda |-
-                          int percent = int(x) * 100 / 255;
-                          return std::to_string(percent) + " %";
-                    - logger.log:
-                        format: "屏幕亮度: %d%%"
-                        args: [int((x*100)/255)]
-                    - homeassistant.action:
-                        action: light.turn_on
-                        data:
-                          entity_id: light.tab5_display_backlight
-                          brightness: !lambda return int(x);
-              # 百分比显示
+              # 页面标题
               - label:
-                  id: backlight_bright_label
-                  text_font: montserrat_96
-                  text: "50 %"
+                  x: 0
+                  y: 40
+                  text_font: noto_sans_sc_48
+                  text: "亮度"
+              # 亮度控制主容器
+              - obj:
+                  width: 500
+                  height: 600
+                  align: CENTER
+                  y: 20
+                  bg_opa: TRANSP
+                  border_opa: TRANSP
+                  layout:
+                    type: flex
+                    flex_flow: COLUMN
+                    flex_align_main: CENTER
+                    flex_align_cross: CENTER
+                    pad_row: 30
+                  widgets:
+                    # 亮度图标
+                    - label:
+                        text_font: extra_icon
+                        text_color: 0xFFB90B
+                        text: "\U000F00DF"
+                    # 亮度百分比显示
+                    - label:
+                        id: backlight_bright_label
+                        text_font: montserrat_48
+                        text: "50 %"
+                    # 亮度调节滑块（垂直方向）
+                    - slider:
+                        width: 130
+                        height: 360
+                        radius: 42
+                        min_value: 0
+                        max_value: 255
+                        id: backlight_slider
+                        bg_color: 0xECECEC
+                        bg_opa: COVER
+                        indicator:
+                          radius: 12
+                          bg_color: 0xFFB90B
+                        knob:
+                          bg_opa: TRANSP
+                        on_boot:
+                          - lambda: |-
+                              lv_obj_move_foreground(id(backlight_slider));
+                        on_release:
+                          - light.turn_on:
+                              id: backlight
+                              brightness: !lambda return x / 255.0;
+                          - lambda: id(backlight_brightness_val) = int(x);
+                          - lvgl.label.update:
+                              id: backlight_bright_label
+                              text: !lambda |-
+                                int percent = int(x) * 100 / 255;
+                                return std::to_string(percent) + " %";
+                          - logger.log:
+                              format: "屏幕亮度: %d%%"
+                              args: [int((x*100)/255)]
+                          - homeassistant.action:
+                              action: light.turn_on
+                              data:
+                                entity_id: light.tab5_display_backlight
+                                brightness: !lambda return int(x);
+                    # 按钮组
+                    - obj:
+                        width: 280
+                        height: 84
+                        radius: 50
+                        scrollable: false
+                        bg_color: 0xF3F4F4
+                        border_opa: TRANSP
+                        layout:
+                          type: flex
+                          flex_align_main: CENTER
+                          flex_align_cross: CENTER
+                          flex_align_track: CENTER
+                        widgets:
+                          # 电源开关按钮
+                          - button:
+                              id: backlight_pwr_btn
+                              styles: card_md_icon_btn
+                              bg_opa: TRANSP
+                              widgets:
+                                - label:
+                                    text_color: 0x3F4948
+                                    text_font: extra_icon
+                                    text: "\U000F0425"
+                                    align: CENTER
+                              on_short_click:
+                                - logger.log: "切换背光!"
+                                - light.toggle: backlight
 
 # 脚本定义
 script:
