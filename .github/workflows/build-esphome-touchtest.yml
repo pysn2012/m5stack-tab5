@@ -1,5 +1,5 @@
 # 工作流名称
-name: build esphome screentest
+name: build esphome touchetest
 
 # 触发条件
 on:
@@ -39,7 +39,7 @@ jobs:
           # 进入配置文件目录
           cd esphome
           # 编译固件，生成bin文件
-          esphome compile tab5-screentest.yaml
+          esphome compile tab5-touchscreentest.yaml
 
       # 步骤5：动态查找编译产物
       - name: 动态查找 firmware.bin
@@ -68,5 +68,5 @@ jobs:
             ${{ steps.find_fw.outputs.FIRMWARE }}
             ${{ steps.find_fw.outputs.OTA }}
             ${{ steps.find_fw.outputs.FACTORY }}
-            esphome/tab5-screentest.yaml
+            esphome/tab5-touchscreentest.yaml
           retention-days: 30
