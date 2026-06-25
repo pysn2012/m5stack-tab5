@@ -126,13 +126,13 @@ esp_ldo:
 font:
   - file: "gfonts://Roboto"
     id: font_small
-    size: 16
+    size: 36
   - file: "gfonts://Roboto"
     id: font_medium
-    size: 24
+    size: 48
   - file: "gfonts://Roboto"
     id: font_large
-    size: 36
+    size: 56
 
 # ========== 颜色定义 ==========
 color:

@@ -315,7 +315,6 @@ sensor:
             int bracket = level / 10;
             
             if (is_charging) {
-              // 充电状态图标
               switch (bracket) {
                 case 10: case 9: return "\U000F0085";
                 case 8: return "\U000F008B";
@@ -329,7 +328,6 @@ sensor:
                 default: return "\U000F089C";
               }
             } else {
-              // 普通电池图标
               switch (bracket) {
                 case 10: case 9: return "\U000F0079";
                 case 8: return "\U000F0082";
@@ -408,7 +406,7 @@ light:
     restore_mode: RESTORE_DEFAULT_ON
     default_transition_length: 250ms
     initial_state:
-      brightness: "50%"
+      brightness: "20%"    # ← 降低初始亮度到20%，减少启动电流
 
 # I2S 音频总线配置
 i2s_audio:
@@ -522,7 +520,7 @@ text_sensor:
       return std::to_string(id(backlight_brightness_val));
 
 # =============================================================================
-# 字体配置
+# 字体配置 - 使用 Noto Sans SC 支持中文显示
 # =============================================================================
 font:
   # Material Design 图标字体（48px）
@@ -550,29 +548,33 @@ font:
     bpp: 4
     glyphs: [ "\U000F0D80" ]
   
-  # Montserrat 字体 - 96px (时间显示)
-  - file: gfonts://Montserrat@600
-    id: montserrat_96
+  # Noto Sans SC 中文字体 - 96px (时间显示)
+  - file: gfonts://Noto+Sans+SC@700
+    id: font_96
     size: 96
     bpp: 4
+    glyphs: "0123456789:-/°CF%hPam "  # 只包含数字和常用符号，减少内存
 
-  # Montserrat 字体 - 48px (亮度百分比/页面标题)
-  - file: gfonts://Montserrat@600
-    id: montserrat_48
+  # Noto Sans SC 中文字体 - 48px (页面标题/亮度百分比)
+  - file: gfonts://Noto+Sans+SC@700
+    id: font_48
     size: 48
     bpp: 4
+    glyphs: "0123456789:-/°CF%hPam亮度仪表盘 "  # 添加中文
 
-  # Montserrat 字体 - 32px (卡片主标签)
-  - file: gfonts://Montserrat@600
-    id: montserrat_32
+  # Noto Sans SC 中文字体 - 32px (卡片主标签/传感器数值)
+  - file: gfonts://Noto+Sans+SC@400
+    id: font_32
     size: 32
     bpp: 4
+    glyphs: "0123456789.-°CF%hPapm未连接 "
 
-  # Montserrat 字体 - 24px (导航标签/卡片副标签)
-  - file: gfonts://Montserrat@600
-    id: montserrat_24
+  # Noto Sans SC 中文字体 - 24px (导航标签/卡片副标签)
+  - file: gfonts://Noto+Sans+SC@400
+    id: font_24
     size: 24
     bpp: 4
+    glyphs: "0123456789.-°CF%hPapm "
 
 # =============================================================================
 # LVGL 图形库配置
@@ -582,6 +584,7 @@ lvgl:
   on_boot:
     - light.turn_on: backlight
     - rx8130.read_time:
+    - delay: 500ms                    # ← 添加延迟，分散启动负载
     - script.execute: expand_nav_btn_click_area
     - script.execute: nav_rail_update
     - script.execute: sync_ha
@@ -636,13 +639,13 @@ lvgl:
     - id: nav_label_activate
       align: BOTTOM_MID
       text_color: 0x4A6363
-      text_font: montserrat_24
+      text_font: font_24
 
     # 导航标签未激活样式
     - id: nav_label_inactivate
       align: BOTTOM_MID
       text_color: 0x3F4948
-      text_font: montserrat_24
+      text_font: font_24
 
     # 内容容器样式
     - id: content_container
@@ -672,14 +675,14 @@ lvgl:
 
     # 小卡片主标签样式
     - id: card_sm_main_label
-      text_font: montserrat_32
+      text_font: font_32
       align: TOP_LEFT
       x: 92
       y: 5
       
     # 小卡片副标签样式
     - id: card_sm_sub_label
-      text_font: montserrat_24
+      text_font: font_24
       align: BOTTOM_LEFT
       x: 92
     
@@ -700,14 +703,14 @@ lvgl:
 
     # 中卡片主标签样式
     - id: card_md_main_label
-      text_font: montserrat_32
+      text_font: font_32
       align: TOP_LEFT
       x: 92
       y: 5
       
     # 中卡片副标签样式
     - id: card_md_sub_label
-      text_font: montserrat_24
+      text_font: font_24
       x: 92
       y: 60
     
@@ -739,12 +742,12 @@ lvgl:
 
     # 大卡片主标签样式
     - id: card_lg_main_label
-      text_font: montserrat_32
+      text_font: font_32
       align: TOP_LEFT
       
     # 大卡片副标签样式
     - id: card_lg_sub_label
-      text_font: montserrat_24
+      text_font: font_24
     
     # 模态框容器样式（全屏半透明遮罩）
     - id: modal_container
@@ -870,14 +873,14 @@ lvgl:
               # 时间显示
               - label:
                   id: time_label
-                  text_font: montserrat_96
+                  text_font: font_96
                   text: "14:07"
                   align: CENTER
                   y: -100
               # 日期显示
               - label:
                   id: date_label
-                  text_font: montserrat_32
+                  text_font: font_32
                   text: "2026-03-11 Thu"
                   align: CENTER
                   y: 30
@@ -906,7 +909,7 @@ lvgl:
                         grid_cell_y_align: CENTER
                     - label:
                         id: temp_label
-                        text_font: montserrat_32
+                        text_font: font_32
                         text: "- °C"
                         grid_cell_column_pos: 1 
                         grid_cell_row_pos: 0 
@@ -921,7 +924,7 @@ lvgl:
                         grid_cell_x_align: CENTER
                         grid_cell_y_align: CENTER
                     - label:
-                        text_font: montserrat_32
+                        text_font: font_32
                         id: humi_label
                         text: "- %"
                         grid_cell_column_pos: 3 
@@ -937,7 +940,7 @@ lvgl:
                         grid_cell_x_align: CENTER
                         grid_cell_y_align: CENTER
                     - label:
-                        text_font: montserrat_32
+                        text_font: font_32
                         id: co2_label
                         text: "- ppm"
                         grid_cell_column_pos: 1 
@@ -953,7 +956,7 @@ lvgl:
                         grid_cell_x_align: CENTER
                         grid_cell_y_align: CENTER
                     - label:
-                        text_font: montserrat_32
+                        text_font: font_32
                         id: pres_label
                         text: "- hPa"
                         grid_cell_column_pos: 3 
@@ -964,7 +967,7 @@ lvgl:
         - label:
             x: 220
             y: 40
-            text_font: montserrat_48
+            text_font: font_48
             text: "仪表盘"      
 
     # ========== 亮度控制页面 ==========
@@ -977,7 +980,7 @@ lvgl:
               - label:
                   x: 0
                   y: 40
-                  text_font: montserrat_48
+                  text_font: font_48
                   text: "亮度"
               # 亮度控制主容器
               - obj:
@@ -1002,7 +1005,7 @@ lvgl:
                     # 亮度百分比显示
                     - label:
                         id: backlight_bright_label
-                        text_font: montserrat_48
+                        text_font: font_48
                         text: "50 %"
                     # 亮度调节滑块（垂直方向）
                     - slider:
@@ -1035,11 +1038,7 @@ lvgl:
                           - logger.log:
                               format: "屏幕亮度: %d%%"
                               args: [int((x*100)/255)]
-                          - homeassistant.action:
-                              action: light.turn_on
-                              data:
-                                entity_id: light.tab5_display_backlight
-                                brightness: !lambda return int(x);
+                          # ← 删除 homeassistant.action，避免HA未连接时阻塞
                     # 按钮组
                     - obj:
                         width: 280
@@ -1104,7 +1103,7 @@ script:
           };
           const char* icon_unchecked[] = {
               "\U000F0A1D", // 仪表盘（轮廓）
-              "\U000F00DF", // 亮度（轮廓）← 修复：统一为亮度图标
+              "\U000F00DF", // 亮度（轮廓）
           };
           const char* icon_checked[] = {
               "\U000F056E", // 仪表盘
