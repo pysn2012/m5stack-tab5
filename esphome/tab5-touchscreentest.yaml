@@ -1,10 +1,4 @@
-# =============================================================================
-# M5Stack Tab5 ESPHome 配置
-# 硬件: ESP32-P4 + ESP32-C6(WiFi协处理器) + MIPI DSI 显示屏 + 触摸屏
-# 功能: 仪表盘(时间/环境传感器) + 屏幕亮度控制
-# =============================================================================
-
-# ESPHome 基础配置
+# ESPHOME 基础配置
 esphome:
   name: tab5-ha-hmi-ew
   friendly_name: M5Stack Tab5
@@ -21,7 +15,7 @@ esp32:
     advanced:
       enable_idf_experimental_features: true
 
-# ESP32-C6 WiFi 协处理器配置 (通过SDIO连接)
+# ESP32-C6 WiFi 协处理器配置
 esp32_hosted:
   variant: esp32c6
   active_high: true
@@ -42,7 +36,7 @@ logger:
     sensor: INFO
     binary_sensor: INFO
 
-# PSRAM 配置 (32MB)
+# PSRAM 配置
 psram:
   mode: hex
   speed: 200MHz
@@ -85,17 +79,31 @@ i2c:
     frequency: 400kHz
 
 # PI4IOE5V6408 GPIO 扩展器配置
-# 地址0x43: WiFi天线/扬声器/外部5V/LCD复位/触摸复位/摄像头复位/耳机检测
-# 地址0x44: WiFi电源/USB 5V/关机脉冲/快充/充电状态/充电使能
 pi4ioe5v6408:
   - id: pi4ioe1
     address: 0x43
+    # 0: 输出 - WiFi天线切换（内置/外置）
+    # 1: 输出 - 扬声器使能
+    # 2: 输出 - 外部5V电源
+    # 3: 未连接
+    # 4: 输出 - LCD复位
+    # 5: 输出 - 触摸面板复位
+    # 6: 输出 - 摄像头复位
+    # 7: 输入 - 耳机检测
   - id: pi4ioe2
     address: 0x44
+    # 0: 输出 - WiFi电源
+    # 1: 未连接
+    # 2: 未连接
+    # 3: 输出 - USB 5V电源
+    # 4: 输出 - 关机脉冲
+    # 5: 输出 - 快充使能（低电平有效）
+    # 6: 输入 - 充电状态
+    # 7: 输出 - 充电使能
 
 # GPIO 开关配置
 switch:
-  # WiFi电源 (默认开启)
+  # WiFi电源
   - platform: gpio
     id: wifi_power
     name: "WiFi Power"
@@ -103,7 +111,6 @@ switch:
       pi4ioe5v6408: pi4ioe2
       number: 0
     restore_mode: ALWAYS_ON
-  
   # USB 5V电源
   - platform: gpio
     id: usb_5v_power
@@ -111,7 +118,6 @@ switch:
     pin:
       pi4ioe5v6408: pi4ioe2
       number: 3
-  
   # 快充使能（低电平有效）
   - platform: gpio
     id: quick_charge
@@ -120,8 +126,7 @@ switch:
       pi4ioe5v6408: pi4ioe2
       number: 5
       inverted: true
-  
-  # 充电使能 (默认开启)
+  # 充电使能
   - platform: gpio
     id: charge_enable
     name: "Charge Enable"
@@ -129,16 +134,13 @@ switch:
       pi4ioe5v6408: pi4ioe2
       number: 7
     restore_mode: ALWAYS_ON
-  
   # WiFi天线切换（内置/外置）
   - platform: gpio
     id: wifi_antenna_int_ext
-    name: "WiFi Antenna"
     pin:
       pi4ioe5v6408: pi4ioe1
       number: 0
-  
-  # 扬声器使能 (默认开启)
+  # 扬声器使能
   - platform: gpio
     id: speaker_enable
     name: "Speaker Enable"
@@ -146,7 +148,6 @@ switch:
       pi4ioe5v6408: pi4ioe1
       number: 1
     restore_mode: ALWAYS_ON
-  
   # 外部5V电源
   - platform: gpio
     id: external_5v_power
@@ -169,7 +170,6 @@ binary_sensor:
       - lambda: id(battery_percent).update();
     on_release:
       - lambda: id(battery_percent).update();
-  
   # 耳机检测
   - platform: gpio
     id: headphone_detect
@@ -178,15 +178,13 @@ binary_sensor:
       pi4ioe5v6408: pi4ioe1
       number: 7
 
-# 选择器配置
+# 选择器配置, DAC输出需要手动或通过自动化切换到 LINE1 以使用板载扬声器
 select:
-  # ES8388 音频编解码器DAC输出选择
+  # ES8388 音频编解码器配置，支持输出选择
   - platform: es8388
     dac_output:
       id: es8388_dac_output
       internal: true
-  
-  # Tab5 DAC输出模板选择 (LINE1/LINE2/BOTH)
   - platform: template
     name: "Tab5 DAC Output"
     id: tab5_dac_output_template
@@ -201,8 +199,7 @@ select:
         - select.set:
             id: es8388_dac_output
             option: !lambda "return x;"
-  
-  # WiFi天线切换选择器
+  # WiFi 天线切换
   - platform: template
     id: wifi_antenna_select
     name: "WiFi Antenna"
@@ -213,11 +210,11 @@ select:
     on_value:
       - if:
           condition:
-            lambda: return i == 0;
+            lambda: return i == 0;    # 如果选择了第0项（Internal）
           then:
-            - switch.turn_off: wifi_antenna_int_ext
+            - switch.turn_off: wifi_antenna_int_ext   # 关闭外置天线开关
           else:
-            - switch.turn_on: wifi_antenna_int_ext
+            - switch.turn_on: wifi_antenna_int_ext    # 打开外置天线开关
 
 # 传感器配置
 sensor:
@@ -229,12 +226,13 @@ sensor:
     shunt_resistance: 0.005ohm
     bus_voltage:
       id: battery_voltage
-      name: "Battery Voltage"
+      name: Battery Voltage
     current:
       id: battery_current
-      name: "Battery Current"
+      name: Battery Current
+      # 正值表示放电，负值表示充电
   
-  # Home Assistant 环境传感器 - 温度
+  # Home Assistant 环境传感器
   - platform: homeassistant
     id: cur_temp
     entity_id: sensor.xiamen_temperature
@@ -245,7 +243,6 @@ sensor:
             format: "%.1f °C"
             args: [ 'x' ]
   
-  # Home Assistant 环境传感器 - 湿度
   - platform: homeassistant
     id: cur_humi
     entity_id: sensor.xiamen_humidity
@@ -256,7 +253,6 @@ sensor:
             format: "%.1f %%"
             args: [ 'x' ]
 
-  # Home Assistant 环境传感器 - 气压
   - platform: homeassistant
     id: cur_pres
     entity_id: sensor.xiamen_atmospheric_pressure
@@ -267,7 +263,6 @@ sensor:
             format: "%.2f hPa"
             args: [ 'x' ]
             
-  # Home Assistant 环境传感器 - PM2.5
   - platform: homeassistant
     id: cur_co2
     entity_id: sensor.xiamen_pm25
@@ -312,37 +307,63 @@ sensor:
             
             // 根据充电状态选择图标集
             bool is_charging = (current < -0.1 || charging_pin);
+            
+            // 使用 level/10 分档：0-9=0, 10-19=1, 20-29=2, 等等
             int bracket = level / 10;
             
             if (is_charging) {
+              // 充电状态图标
               switch (bracket) {
-                case 10: case 9: return "\U000F0085";
-                case 8: return "\U000F008B";
-                case 7: return "\U000F008A";
-                case 6: return "\U000F089E";
-                case 5: return "\U000F0089";
-                case 4: return "\U000F089D";
-                case 3: return "\U000F0088";
-                case 2: return "\U000F0087";
-                case 1: return "\U000F0086";
-                default: return "\U000F089C";
+                case 10:
+                case 9:
+                  return "\U000F0085";  // 充电-100%
+                case 8:
+                  return "\U000F008B";  // 充电-90%
+                case 7:
+                  return "\U000F008A";  // 充电-80%
+                case 6:
+                  return "\U000F089E";  // 充电-70%
+                case 5:
+                  return "\U000F0089";  // 充电-60%
+                case 4:
+                  return "\U000F089D";  // 充电-50%
+                case 3:
+                  return "\U000F0088";  // 充电-40%
+                case 2:
+                  return "\U000F0087";  // 充电-30%
+                case 1:
+                  return "\U000F0086";  // 充电-20%
+                default:
+                  return "\U000F089C";  // 充电-10%
               }
             } else {
+              // 普通电池图标
               switch (bracket) {
-                case 10: case 9: return "\U000F0079";
-                case 8: return "\U000F0082";
-                case 7: return "\U000F0081";
-                case 6: return "\U000F0080";
-                case 5: return "\U000F007F";
-                case 4: return "\U000F007E";
-                case 3: return "\U000F007D";
-                case 2: return "\U000F007C";
-                case 1: return "\U000F007B";
-                default: return "\U000F007A";
+                case 10:
+                case 9:
+                  return "\U000F0079";  // 电池-100%
+                case 8:
+                  return "\U000F0082";  // 电池-90%
+                case 7:
+                  return "\U000F0081";  // 电池-80%
+                case 6:
+                  return "\U000F0080";  // 电池-70%
+                case 5:
+                  return "\U000F007F";  // 电池-60%
+                case 4:
+                  return "\U000F007E";  // 电池-50%
+                case 3:
+                  return "\U000F007D";  // 电池-40%
+                case 2:
+                  return "\U000F007C";  // 电池-30%
+                case 1:
+                  return "\U000F007B";  // 电池-20%
+                default:
+                  return "\U000F007A";  // 电池-10%
               }
             }
 
-# 触摸屏配置 (ST7123)
+# 触摸屏配置
 touchscreen:
   - platform: st7123
     id: my_touchscreen
@@ -370,12 +391,12 @@ touchscreen:
             - lvgl.widget.redraw:
             - light.turn_on: backlight
 
-# LDO 稳压器配置（为触摸屏等供电2.5V）
+# LDO 稳压器配置（为触摸屏等供电）
 esp_ldo:
   - voltage: 2.5V
     channel: 3
 
-# MIPI DSI 显示屏配置 (720x1280, 旋转270度横屏显示)
+# MIPI DSI 显示屏配置
 display:
   - platform: mipi_dsi
     id: main_display
@@ -389,8 +410,9 @@ display:
     show_test_card: false
     auto_clear_enabled: false
     update_interval: never
+    #rotation: 270
 
-# 背光 PWM 输出配置 (GPIO22)
+# 背光 PWM 输出配置
 output:
   - platform: ledc
     pin: GPIO22
@@ -406,7 +428,7 @@ light:
     restore_mode: RESTORE_DEFAULT_ON
     default_transition_length: 250ms
     initial_state:
-      brightness: "20%"    # ← 降低初始亮度到20%，减少启动电流
+      brightness: "50%"
 
 # I2S 音频总线配置
 i2s_audio:
@@ -415,7 +437,7 @@ i2s_audio:
     i2s_bclk_pin: GPIO27
     i2s_mclk_pin: GPIO30
 
-# ES7210 音频ADC配置（麦克风输入）
+# ES7210 音频 ADC 配置（麦克风输入）
 audio_adc:
   - platform: es7210
     id: es7210_adc
@@ -431,7 +453,7 @@ microphone:
     bits_per_sample: 16bit
     adc_type: external
 
-# ES8388 音频DAC配置（扬声器输出）
+# ES8388 音频 DAC 配置（扬声器输出）
 audio_dac:
   - platform: es8388
     id: es8388_dac
@@ -461,19 +483,16 @@ media_player:
 
 # 时间同步配置（Home Assistant + RX8130 实时时钟）
 time:
-  # Home Assistant 网络时间同步
   - platform: homeassistant
     id: ha_time
     on_time_sync:
       then:
         rx8130.write_time:
-  
-  # RX8130 硬件RTC（断电保持时间）
   - platform: rx8130
     id: rx8130_time
     update_interval: never
     on_time:
-      # 每3秒更新一次时间显示
+      # 就绪后每3秒更新一次
       - seconds: /3
         then:
           - lvgl.label.update:
@@ -481,15 +500,16 @@ time:
               text: !lambda |-
                 auto t = id(ha_time).now();
                 return t.strftime("%H:%M").c_str();
+
           - lvgl.label.update:
               id: date_label
               text: !lambda |-
                 auto t = id(ha_time).now();
                 return t.strftime("%Y-%m-%d %a").c_str();
 
-# 文本传感器配置
+# 文本传感器配置（同步 Home Assistant 设备状态）
 text_sensor:
-  # 背光亮度值同步（从HA获取当前亮度）
+  # 背光亮度值同步（从 HA 获取当前亮度）
   - platform: homeassistant
     id: backlight_brightness
     entity_id: light.tab5_display_backlight
@@ -511,7 +531,7 @@ text_sensor:
               return std::to_string(percent) + " %";
             }
 
-  # 设备端背光亮度值（用于同步到HA）
+  # 设备端背光亮度值（用于同步到 HA）
   - platform: template
     id: device_backlight_brightness
     name: "Device Backlight Brightness"
@@ -519,80 +539,108 @@ text_sensor:
     lambda: |-
       return std::to_string(id(backlight_brightness_val));
 
-# =============================================================================
-# 字体配置 - 使用 Noto Sans SC 支持中文显示
-# =============================================================================
+# 字体配置
 font:
   # Material Design 图标字体（48px）
   - file: "https://raw.githubusercontent.com/Templarian/MaterialDesign-Webfont/master/fonts/materialdesignicons-webfont.ttf"
     id: extra_icon
     size: 48
     bpp: 4
+    # 图标列表：https://pictogrammers.com/library/mdi/
     glyphs: [
-      "\U000F050F", "\U000F058E", "\U000F0F30", "\U000F056E", "\U000F0A1D",
-      "\U000F0335", "\U000F0336", "\U000F0F54", "\U000F0F55", "\U000F001B",
-      "\U000F0493", "\U000F08BB", "\U000F0142", "\U000F1805", "\U000F1804",
-      "\U000F18DE", "\U000F18DD", "\U000F0425", "\U000F07E4", "\U000F029A",
-      "\U000F05A9", "\U000F007A", "\U000F007B", "\U000F007C", "\U000F007D",
-      "\U000F007E", "\U000F007F", "\U000F0080", "\U000F0081", "\U000F0082",
-      "\U000F0079", "\U000F089C", "\U000F0086", "\U000F0087", "\U000F0088",
-      "\U000F089D", "\U000F0089", "\U000F089E", "\U000F008A", "\U000F008B",
-      "\U000F0085", "\U000F06A5", "\U000F109B", "\U000F0064", "\U000F0004",
-      "\U000F0156", "\U000F0415", "\U000F0374", "\U000F00DF", "\U000F03D8",
+      "\U000F050F", # 温度计
+      "\U000F058E", # 湿度百分比
+      "\U000F0F30", # 雾霾天气
+      "\U000F056E", # 仪表盘
+      "\U000F0A1D", # 仪表盘（轮廓）
+      "\U000F0335", # 灯泡
+      "\U000F0336", # 灯泡（轮廓）
+      "\U000F0F54", # 室内温度计
+      "\U000F0F55", # 室内温度计（轮廓）
+      "\U000F001B", # 空调
+      "\U000F0493", # 齿轮
+      "\U000F08BB", # 齿轮（轮廓）
+      "\U000F0142", # 右箭头
+      "\U000F1805", # 荧光灯管（轮廓）
+      "\U000F1804", # 荧光灯管
+      "\U000F18DE", # 吸顶灯（轮廓）
+      "\U000F18DD", # 吸顶灯
+      "\U000F0425", # 电源
+      "\U000F07E4", # CO2
+      "\U000F029A", # 气压表（用于显示 hPa 气压）
+      "\U000F05A9", # WiFi
+      "\U000F007A", # 电池-10%
+      "\U000F007B", # 电池-20%
+      "\U000F007C", # 电池-30%
+      "\U000F007D", # 电池-40%
+      "\U000F007E", # 电池-50%
+      "\U000F007F", # 电池-60%
+      "\U000F0080", # 电池-70%
+      "\U000F0081", # 电池-80%
+      "\U000F0082", # 电池-90%
+      "\U000F0079", # 电池-100%
+      "\U000F089C", # 充电-10%
+      "\U000F0086", # 充电-20%
+      "\U000F0087", # 充电-30%
+      "\U000F0088", # 充电-40%
+      "\U000F089D", # 充电-50%
+      "\U000F0089", # 充电-60%
+      "\U000F089E", # 充电-70%
+      "\U000F008A", # 充电-80%
+      "\U000F008B", # 充电-90%
+      "\U000F0085", # 充电-100%
+      "\U000F06A5", # 电源插头（表示无电池，使用 USB-C 供电）
+      "\U000F109B", # Home Assistant API
+      "\U000F0064", # 助手
+      "\U000F0004", # 账户
+      "\U000F0156", # 关闭
+      "\U000F0415", # 加号
+      "\U000F0374", # 减号
+      "\U000F00DF", # 亮度调节
+      "\U000F03D8", # 调色板
     ]
 
-  # Material Design 图标字体（64px）
+  # Material Design 图标字体（64px，用于较大图标）
   - file: "https://raw.githubusercontent.com/Templarian/MaterialDesign-Webfont/master/fonts/materialdesignicons-webfont.ttf"
     id: extra_icon_64
     size: 64
     bpp: 4
-    glyphs: [ "\U000F0D80" ]
+    glyphs: [
+      "\U000F0D80", # 楼层1
+    ]
   
-  # Noto Sans SC 中文字体 - 96px (时间显示)
-  - file: gfonts://Noto+Sans+SC@700
-    id: font_96
+  # Montserrat 字体（96px，用于时间显示）
+  - file: gfonts://Montserrat@600
+    id: montserrat_96
     size: 96
     bpp: 4
-    glyphs: "0123456789:-/°CF%hPam "  # 只包含数字和常用符号，减少内存
 
-  # Noto Sans SC 中文字体 - 48px (页面标题/亮度百分比)
-  - file: gfonts://Noto+Sans+SC@700
-    id: font_48
-    size: 48
-    bpp: 4
-    glyphs: "0123456789:-/°CF%hPam亮度仪表盘 "  # 添加中文
-
-  # Noto Sans SC 中文字体 - 32px (卡片主标签/传感器数值)
-  - file: gfonts://Noto+Sans+SC@400
-    id: font_32
+  # Noto Sans SC 中文字体（32px）
+  - file: gfonts://Noto+Sans+SC
+    id: noto_sans_sc_32
     size: 32
     bpp: 4
-    glyphs: "0123456789.-°CF%hPapm未连接 "
 
-  # Noto Sans SC 中文字体 - 24px (导航标签/卡片副标签)
-  - file: gfonts://Noto+Sans+SC@400
-    id: font_24
-    size: 24
+  # Noto Sans SC 中文字体（48px）
+  - file: gfonts://Noto+Sans+SC
+    id: noto_sans_sc_48
+    size: 48
     bpp: 4
-    glyphs: "0123456789.-°CF%hPapm "
 
-# =============================================================================
 # LVGL 图形库配置
-# =============================================================================
 lvgl:
   rotation: 270
   on_boot:
     - light.turn_on: backlight
     - rx8130.read_time:
-    - delay: 500ms                    # ← 添加延迟，分散启动负载
-    - script.execute: expand_nav_btn_click_area
-    - script.execute: nav_rail_update
-    - script.execute: sync_ha
+    - script.execute: expand_nav_btn_click_area    # 扩展导航按钮点击区域
+    - script.execute: nav_rail_update              # 更新导航栏 UI
+    - script.execute: sync_ha                      # 同步 Home Assistant 状态
 
   byte_order: little_endian
   color_depth: 16
   
-  # LVGL 样式定义
+  # LVGL 样式定义  
   style_definitions:
     # 侧边栏样式
     - id: sidebar
@@ -639,13 +687,13 @@ lvgl:
     - id: nav_label_activate
       align: BOTTOM_MID
       text_color: 0x4A6363
-      text_font: font_24
+      text_font: noto_sans_sc_32
 
     # 导航标签未激活样式
     - id: nav_label_inactivate
       align: BOTTOM_MID
       text_color: 0x3F4948
-      text_font: font_24
+      text_font: noto_sans_sc_32
 
     # 内容容器样式
     - id: content_container
@@ -658,7 +706,7 @@ lvgl:
       pad_top: 120
       pad_left: 30
 
-    # 小型控制卡片样式
+    # 小型控制卡片样式（与 Home Assistant 风格匹配）
     - id: card_sm
       width: 400
       height: 112
@@ -675,14 +723,14 @@ lvgl:
 
     # 小卡片主标签样式
     - id: card_sm_main_label
-      text_font: font_32
+      text_font: montserrat_32
       align: TOP_LEFT
       x: 92
       y: 5
       
     # 小卡片副标签样式
     - id: card_sm_sub_label
-      text_font: font_24
+      text_font: montserrat_24
       align: BOTTOM_LEFT
       x: 92
     
@@ -703,14 +751,14 @@ lvgl:
 
     # 中卡片主标签样式
     - id: card_md_main_label
-      text_font: font_32
+      text_font: montserrat_32
       align: TOP_LEFT
       x: 92
       y: 5
       
     # 中卡片副标签样式
     - id: card_md_sub_label
-      text_font: font_24
+      text_font: montserrat_24
       x: 92
       y: 60
     
@@ -742,12 +790,12 @@ lvgl:
 
     # 大卡片主标签样式
     - id: card_lg_main_label
-      text_font: font_32
+      text_font: montserrat_32
       align: TOP_LEFT
       
     # 大卡片副标签样式
     - id: card_lg_sub_label
-      text_font: font_24
+      text_font: montserrat_24
     
     # 模态框容器样式（全屏半透明遮罩）
     - id: modal_container
@@ -757,7 +805,7 @@ lvgl:
       bg_opa: 0.7
       align: CENTER
   
-  # 顶层导航栏和模态框
+  # 顶层导航栏和模态框  
   top_layer:
     widgets:
       # 侧边导航栏
@@ -791,7 +839,7 @@ lvgl:
                             id: dash_btn_icon
                             align: CENTER
                             styles: nav_icon_inactivate
-                            text: "\U000F056E"
+                            text: "\U000F056E" # 仪表盘图标
                       on_value:
                         - lambda: id(page_num) = 0;
                         - script.execute: nav_rail_update
@@ -820,7 +868,7 @@ lvgl:
                             id: light_btn_icon
                             align: CENTER
                             styles: nav_icon_inactivate
-                            text: "\U000F00DF"
+                            text: "\U000F00DF"  # 亮度图标
                       on_value:
                         - lambda: id(page_num) = 1;
                         - script.execute: nav_rail_update
@@ -862,9 +910,9 @@ lvgl:
                 text_font: extra_icon
                 text: "\U000F109B"
   
-  # LVGL 页面定义
+  # LVGL 页面定义 
   pages:
-    # ========== 仪表盘页面 ==========
+    # 仪表盘页面（显示时间、日期和环境传感器数据）
     - id: dashboard_page
       widgets:
         - obj:
@@ -873,14 +921,14 @@ lvgl:
               # 时间显示
               - label:
                   id: time_label
-                  text_font: font_96
+                  text_font: montserrat_96
                   text: "14:07"
                   align: CENTER
                   y: -100
               # 日期显示
               - label:
                   id: date_label
-                  text_font: font_32
+                  text_font: montserrat_32
                   text: "2026-03-11 Thu"
                   align: CENTER
                   y: 30
@@ -899,7 +947,7 @@ lvgl:
                     pad_row: 24
                     pad_column: 24
                   widgets:
-                    # 温度
+                    # 温度图标
                     - label:
                         text_font: extra_icon
                         text: "\U000F050F"
@@ -907,15 +955,16 @@ lvgl:
                         grid_cell_row_pos: 0 
                         grid_cell_x_align: CENTER
                         grid_cell_y_align: CENTER
+                    # 温度值
                     - label:
                         id: temp_label
-                        text_font: font_32
+                        text_font: montserrat_32
                         text: "- °C"
                         grid_cell_column_pos: 1 
                         grid_cell_row_pos: 0 
                         grid_cell_x_align: START
                         grid_cell_y_align: CENTER
-                    # 湿度
+                    # 湿度图标
                     - label:
                         text_font: extra_icon
                         text: "\U000F058E"
@@ -923,15 +972,16 @@ lvgl:
                         grid_cell_row_pos: 0 
                         grid_cell_x_align: CENTER
                         grid_cell_y_align: CENTER
+                    # 湿度值
                     - label:
-                        text_font: font_32
+                        text_font: montserrat_32
                         id: humi_label
                         text: "- %"
                         grid_cell_column_pos: 3 
                         grid_cell_row_pos: 0 
                         grid_cell_x_align: START
                         grid_cell_y_align: CENTER
-                    # CO2
+                    # CO2 图标
                     - label:
                         text_font: extra_icon
                         text: "\U000F07E4"
@@ -939,15 +989,16 @@ lvgl:
                         grid_cell_row_pos: 1 
                         grid_cell_x_align: CENTER
                         grid_cell_y_align: CENTER
+                    # CO2 值
                     - label:
-                        text_font: font_32
+                        text_font: montserrat_32
                         id: co2_label
                         text: "- ppm"
                         grid_cell_column_pos: 1 
                         grid_cell_row_pos: 1 
                         grid_cell_x_align: START
                         grid_cell_y_align: CENTER
-                    # 气压
+                    # 气压图标
                     - label:
                         text_font: extra_icon
                         text: "\U000F029A"
@@ -955,8 +1006,9 @@ lvgl:
                         grid_cell_row_pos: 1 
                         grid_cell_x_align: CENTER
                         grid_cell_y_align: CENTER
+                    # 气压值
                     - label:
-                        text_font: font_32
+                        text_font: montserrat_32
                         id: pres_label
                         text: "- hPa"
                         grid_cell_column_pos: 3 
@@ -967,7 +1019,7 @@ lvgl:
         - label:
             x: 220
             y: 40
-            text_font: font_48
+            text_font: noto_sans_sc_48
             text: "仪表盘"      
 
     # ========== 亮度控制页面 ==========
@@ -980,7 +1032,7 @@ lvgl:
               - label:
                   x: 0
                   y: 40
-                  text_font: font_48
+                  text_font: noto_sans_sc_48
                   text: "亮度"
               # 亮度控制主容器
               - obj:
@@ -1005,7 +1057,7 @@ lvgl:
                     # 亮度百分比显示
                     - label:
                         id: backlight_bright_label
-                        text_font: font_48
+                        text_font: montserrat_48
                         text: "50 %"
                     # 亮度调节滑块（垂直方向）
                     - slider:
@@ -1038,7 +1090,11 @@ lvgl:
                           - logger.log:
                               format: "屏幕亮度: %d%%"
                               args: [int((x*100)/255)]
-                          # ← 删除 homeassistant.action，避免HA未连接时阻塞
+                          - homeassistant.action:
+                              action: light.turn_on
+                              data:
+                                entity_id: light.tab5_display_backlight
+                                brightness: !lambda return int(x);
                     # 按钮组
                     - obj:
                         width: 280
@@ -1068,11 +1124,11 @@ lvgl:
                                 - logger.log: "切换背光!"
                                 - light.toggle: backlight
 
-# =============================================================================
 # 脚本定义
-# =============================================================================
 script:
-  # 扩展导航按钮点击区域
+  # 扩展导航按钮点击区域脚本
+  # 为导航按钮扩展可点击区域，使图标附近的触摸也能被识别
+  # 提升侧边导航栏在小触摸目标上的可用性
   - id: expand_nav_btn_click_area
     then:
       - lambda: |-
@@ -1084,7 +1140,9 @@ script:
             lv_obj_set_ext_click_area(btn, 180);
           }
 
-  # 更新导航栏 UI 状态
+  # 更新导航栏 UI 脚本
+  # 根据当前页面选择更新导航栏状态：设置选中按钮的选中状态、
+  # 更新图标为激活/未激活样式、应用相应的标签样式（激活/未激活颜色）
   - id: nav_rail_update
     then:
       - lambda: |-
@@ -1103,7 +1161,7 @@ script:
           };
           const char* icon_unchecked[] = {
               "\U000F0A1D", // 仪表盘（轮廓）
-              "\U000F00DF", // 亮度（轮廓）
+              "\U000F0336", // 亮度（轮廓）
           };
           const char* icon_checked[] = {
               "\U000F056E", // 仪表盘
@@ -1112,6 +1170,7 @@ script:
 
           const int count = sizeof(buttons) / sizeof(buttons[0]);
           
+          // 更新按钮 UI 状态
           for (int i = 0; i < count; i++) {
               if (i == id(page_num)) {
                 lv_obj_add_state(buttons[i], LV_STATE_CHECKED);
@@ -1123,23 +1182,23 @@ script:
               lv_label_set_text(icons[i], selected ? icon_checked[i] : icon_unchecked[i]);
           }
     
-  # 同步 Home Assistant 状态
+  # 同步 Home Assistant 状态脚本
+  # 当 UI 绘制在屏幕上时，同步 Home Assistant 实体状态到 LVGL UI
   - id: sync_ha
     then:
       - logger.log: "与 Home Assistant 同步"
 
-# =============================================================================
 # 全局变量定义
-# =============================================================================
 globals:
   # 当前页面编号（0=仪表盘, 1=亮度）
   - id: page_num
     type: int
     restore_value: no
     initial_value: '0'
-  
   # 背光亮度值 (0-255)
   - id: backlight_brightness_val
     type: int
     restore_value: yes
     initial_value: '128'  # 默认 50%
+
+
