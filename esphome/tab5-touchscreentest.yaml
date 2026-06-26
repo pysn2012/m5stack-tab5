@@ -573,10 +573,12 @@ text_sensor:
     ip_address:
       id: wifi_ip
       name: "WiFi IP Address"
-    on_value:
-      - lvgl.label.update:
-          id: sys_ip_label
-          text: !lambda return x;
+      on_value:
+        then:
+          - lvgl.label.update:
+              id: network_ip
+              text: !lambda |-
+                return "IP: " + x;
 
   # 天气预警（从 Home Assistant 获取，请根据实际实体 ID 修改）
   - platform: homeassistant
