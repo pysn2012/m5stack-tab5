@@ -55,7 +55,7 @@ external_components:
   - source:
       type: local
       path: components/           # 自定义组件目录（相对于本文件位置）
-    
+
 # OTA 远程更新配置
 ota:
   platform: esphome
@@ -231,7 +231,7 @@ sensor:
       id: battery_current
       name: Battery Current
       # 正值表示放电，负值表示充电
-  
+
   # Home Assistant 环境传感器
   - platform: homeassistant
     id: cur_temp
@@ -242,7 +242,7 @@ sensor:
           text:
             format: "%.1f °C"
             args: [ 'x' ]
-  
+
   - platform: homeassistant
     id: cur_humi
     entity_id: sensor.xiamen_humidity
@@ -262,7 +262,7 @@ sensor:
           text:
             format: "%.2f hPa"
             args: [ 'x' ]
-            
+
   - platform: homeassistant
     id: cur_co2
     entity_id: sensor.xiamen_pm25
@@ -272,6 +272,35 @@ sensor:
           text:
             format: "%.0f ppm"
             args: [ 'x' ]
+
+  # WiFi 信号强度
+  - platform: wifi_signal
+    id: wifi_rssi
+    name: "WiFi Signal"
+    update_interval: 60s
+    on_value:
+      - lvgl.label.update:
+          id: sys_rssi_label
+          text: !lambda |-
+            return std::to_string(int(x)) + " dBm";
+
+  # 设备运行时间
+  - platform: uptime
+    id: device_uptime
+    name: "Uptime"
+    update_interval: 60s
+    on_value:
+      - lvgl.label.update:
+          id: sys_uptime_label
+          text: !lambda |-
+            int total = int(x);
+            int days = total / 86400;
+            int hours = (total % 86400) / 3600;
+            int mins = (total % 3600) / 60;
+            char buf[32];
+            if (days > 0) snprintf(buf, sizeof(buf), "%dd %02d:%02d", days, hours, mins);
+            else snprintf(buf, sizeof(buf), "%02d:%02d", hours, mins);
+            return std::string(buf);
 
   # 电池电量百分比计算（基于电压）
   - platform: template
@@ -283,11 +312,11 @@ sensor:
       float voltage = id(battery_voltage).state;
       float min_voltage = 6.0;
       float max_voltage = 8.4;
-      
+
       if (voltage < 5.0) return 0.0;
       if (voltage <= min_voltage) return 0.0;
       if (voltage >= max_voltage) return 100.0;
-      
+
       float percent = ((voltage - min_voltage) / (max_voltage - min_voltage)) * 100.0;
       return percent;
     update_interval: 30s
@@ -299,18 +328,18 @@ sensor:
             float current = id(battery_current).state;
             bool charging_pin = id(charging).state;
             int level = int(x);
-            
+
             // 未检测到电池
             if (voltage < 5.0) {
               return "\U000F06A5";  // 电源插头图标
             }
-            
+
             // 根据充电状态选择图标集
             bool is_charging = (current < -0.1 || charging_pin);
-            
+
             // 使用 level/10 分档：0-9=0, 10-19=1, 20-29=2, 等等
             int bracket = level / 10;
-            
+
             if (is_charging) {
               // 充电状态图标
               switch (bracket) {
@@ -539,6 +568,28 @@ text_sensor:
     lambda: |-
       return std::to_string(id(backlight_brightness_val));
 
+  # WiFi IP 地址
+  - platform: wifi_info
+    ip_address:
+      id: wifi_ip
+      name: "WiFi IP Address"
+    on_value:
+      - lvgl.label.update:
+          id: sys_ip_label
+          text: !lambda return x;
+
+  # 天气预警（从 Home Assistant 获取，请根据实际实体 ID 修改）
+  - platform: homeassistant
+    id: weather_alert
+    entity_id: sensor.xiamen_forecast_minutely
+    on_value:
+      - lvgl.label.update:
+          id: weather_alert_label
+          text: !lambda |-
+            if (x.empty() || x == "None" || x == "null" || x == "unknown" || x == "unavailable") 
+                return "天气: 无预警";
+            return "\u26A0 " + x;
+
 # 字体配置
 font:
   # Material Design 图标字体（48px）
@@ -608,11 +659,17 @@ font:
     glyphs: [
       "\U000F0D80", # 楼层1
     ]
-  
+
   # Montserrat 字体（96px，用于时间显示）
   - file: gfonts://Montserrat@600
     id: montserrat_96
     size: 96
+    bpp: 4
+
+  # Montserrat 字体（32px，用于数值显示）
+  - file: gfonts://Montserrat@600
+    id: montserrat_32
+    size: 32
     bpp: 4
 
   # Noto Sans SC 中文字体（32px）
@@ -620,7 +677,7 @@ font:
     id: noto_sans_sc_32
     size: 32
     bpp: 4
-    glyphs: "仪表盘亮度"
+    glyphs: "仪表盘亮度系统信号运行地址天气预警无小时下雨大中有"
     ignore_missing_glyphs: true
 
   # Noto Sans SC 中文字体（48px）
@@ -628,7 +685,7 @@ font:
     id: noto_sans_sc_48
     size: 48
     bpp: 4
-    glyphs: "仪表盘亮度"
+    glyphs: "仪表盘亮度系统"
     ignore_missing_glyphs: true
 
 # LVGL 图形库配置
@@ -643,7 +700,7 @@ lvgl:
 
   byte_order: little_endian
   color_depth: 16
-  
+
   # LVGL 样式定义  
   style_definitions:
     # 侧边栏样式
@@ -731,13 +788,13 @@ lvgl:
       align: TOP_LEFT
       x: 92
       y: 5
-      
+
     # 小卡片副标签样式
     - id: card_sm_sub_label
-      text_font: montserrat_24
+      text_font: montserrat_32
       align: BOTTOM_LEFT
       x: 92
-    
+
     # 中型卡片样式
     - id: card_md
       width: 400
@@ -759,13 +816,13 @@ lvgl:
       align: TOP_LEFT
       x: 92
       y: 5
-      
+
     # 中卡片副标签样式
     - id: card_md_sub_label
-      text_font: montserrat_24
+      text_font: montserrat_32
       x: 92
       y: 60
-    
+
     # 大卡片容器样式（用于模态框）
     - id: card_lg
       width: 800
@@ -782,7 +839,7 @@ lvgl:
       bg_color: 0xECECEC
       shadow_opa: TRANSP
       align: TOP_LEFT
-    
+
     # 大卡片透明图标按钮样式
     - id: card_lg_icon_btn_transp
       width: 72
@@ -796,11 +853,11 @@ lvgl:
     - id: card_lg_main_label
       text_font: montserrat_32
       align: TOP_LEFT
-      
+
     # 大卡片副标签样式
     - id: card_lg_sub_label
-      text_font: montserrat_24
-    
+      text_font: montserrat_32
+
     # 模态框容器样式（全屏半透明遮罩）
     - id: modal_container
       width: 1280
@@ -808,7 +865,7 @@ lvgl:
       bg_color: 0xA9A9A9
       bg_opa: 0.7
       align: CENTER
-  
+
   # 顶层导航栏和模态框  
   top_layer:
     widgets:
@@ -854,7 +911,7 @@ lvgl:
                       id: dash_btn_label
                       text: "仪表盘"
 
-            # 屏幕背光控制导航按钮
+            # 系统设置导航按钮
             - obj:
                 styles: nav_btn_container
                 widgets:
@@ -872,16 +929,16 @@ lvgl:
                             id: light_btn_icon
                             align: CENTER
                             styles: nav_icon_inactivate
-                            text: "\U000F00DF"  # 亮度图标
+                            text: "\U000F08BB"  # 齿轮（轮廓）图标
                       on_value:
                         - lambda: id(page_num) = 1;
                         - script.execute: nav_rail_update
                       on_press:
-                        - lvgl.page.show: light_page
+                        - lvgl.page.show: system_page
                   - label:
                       styles: nav_label_inactivate
                       id: light_btn_label
-                      text: "亮度"
+                      text: "系统"
 
       # 状态栏（显示电池/WiFi/API 状态图标）
       - obj:
@@ -913,10 +970,10 @@ lvgl:
                 hidden: true
                 text_font: extra_icon
                 text: "\U000F109B"
-  
+
   # LVGL 页面定义 
   pages:
-    # 仪表盘页面（显示时间、日期和环境传感器数据）
+    # 仪表盘页面（显示时间、日期、环境传感器数据和天气预警）
     - id: dashboard_page
       widgets:
         - obj:
@@ -928,14 +985,14 @@ lvgl:
                   text_font: montserrat_96
                   text: "14:07"
                   align: CENTER
-                  y: -100
+                  y: -160
               # 日期显示
               - label:
                   id: date_label
                   text_font: montserrat_32
                   text: "2026-03-11 Thu"
                   align: CENTER
-                  y: 30
+                  y: -40
               # 环境数据网格（温度/湿度/CO2/气压）
               - obj:
                   width: 800
@@ -943,7 +1000,7 @@ lvgl:
                   bg_opa: TRANSP
                   border_opa: TRANSP
                   align: CENTER
-                  y: 200
+                  y: 130
                   layout:
                     type: GRID
                     grid_columns: [FR(20), FR(30), FR(20), FR(30)]
@@ -1019,6 +1076,14 @@ lvgl:
                         grid_cell_row_pos: 1 
                         grid_cell_x_align: START
                         grid_cell_y_align: CENTER
+              # 天气预警
+              - label:
+                  id: weather_alert_label
+                  text_font: noto_sans_sc_32
+                  text_color: 0xE74C3C
+                  text: "天气: 无预警"
+                  align: CENTER
+                  y: 280
         # 页面标题
         - label:
             x: 220
@@ -1026,8 +1091,8 @@ lvgl:
             text_font: noto_sans_sc_48
             text: "仪表盘"      
 
-    # ========== 亮度控制页面 ==========
-    - id: light_page
+    # ========== 系统页面 ==========
+    - id: system_page
       widgets:
         - obj:
             styles: content_container
@@ -1037,13 +1102,79 @@ lvgl:
                   x: 0
                   y: 40
                   text_font: noto_sans_sc_48
-                  text: "亮度"
-              # 亮度控制主容器
+                  text: "系统"
+              # 系统信息区域
               - obj:
-                  width: 500
-                  height: 600
+                  width: 700
+                  height: 280
                   align: CENTER
-                  y: 20
+                  y: -80
+                  bg_opa: TRANSP
+                  border_opa: TRANSP
+                  layout:
+                    type: GRID
+                    grid_columns: [140, FR(1)]
+                    grid_rows: [80, 80, 80]
+                    pad_row: 16
+                    pad_column: 20
+                  widgets:
+                    # IP 标签
+                    - label:
+                        text_font: noto_sans_sc_32
+                        text: "地址:"
+                        grid_cell_column_pos: 0
+                        grid_cell_row_pos: 0
+                        grid_cell_x_align: END
+                        grid_cell_y_align: CENTER
+                    # IP 值
+                    - label:
+                        id: sys_ip_label
+                        text_font: montserrat_32
+                        text: "0.0.0.0"
+                        grid_cell_column_pos: 1
+                        grid_cell_row_pos: 0
+                        grid_cell_x_align: START
+                        grid_cell_y_align: CENTER
+                    # 信号标签
+                    - label:
+                        text_font: noto_sans_sc_32
+                        text: "信号:"
+                        grid_cell_column_pos: 0
+                        grid_cell_row_pos: 1
+                        grid_cell_x_align: END
+                        grid_cell_y_align: CENTER
+                    # 信号值
+                    - label:
+                        id: sys_rssi_label
+                        text_font: montserrat_32
+                        text: "- dBm"
+                        grid_cell_column_pos: 1
+                        grid_cell_row_pos: 1
+                        grid_cell_x_align: START
+                        grid_cell_y_align: CENTER
+                    # 运行时间标签
+                    - label:
+                        text_font: noto_sans_sc_32
+                        text: "运行:"
+                        grid_cell_column_pos: 0
+                        grid_cell_row_pos: 2
+                        grid_cell_x_align: END
+                        grid_cell_y_align: CENTER
+                    # 运行时间值
+                    - label:
+                        id: sys_uptime_label
+                        text_font: montserrat_32
+                        text: "-"
+                        grid_cell_column_pos: 1
+                        grid_cell_row_pos: 2
+                        grid_cell_x_align: START
+                        grid_cell_y_align: CENTER
+              # 亮度控制区域（横向滑块，置于底部）
+              - obj:
+                  width: 800
+                  height: 200
+                  align: BOTTOM_MID
+                  y: -10
                   bg_opa: TRANSP
                   border_opa: TRANSP
                   layout:
@@ -1051,30 +1182,57 @@ lvgl:
                     flex_flow: COLUMN
                     flex_align_main: CENTER
                     flex_align_cross: CENTER
-                    pad_row: 30
+                    pad_row: 20
                   widgets:
-                    # 亮度图标
-                    - label:
-                        text_font: extra_icon
-                        text_color: 0xFFB90B
-                        text: "\U000F00DF"
-                    # 亮度百分比显示
-                    - label:
-                        id: backlight_bright_label
-                        text_font: montserrat_48
-                        text: "50 %"
-                    # 亮度调节滑块（垂直方向）
+                    # 亮度图标 + 百分比 + 电源按钮
+                    - obj:
+                        width: 400
+                        height: 60
+                        bg_opa: TRANSP
+                        border_opa: TRANSP
+                        layout:
+                          type: flex
+                          flex_flow: ROW
+                          flex_align_main: CENTER
+                          flex_align_cross: CENTER
+                          pad_column: 20
+                        widgets:
+                          - label:
+                              text_font: extra_icon
+                              text_color: 0xFFB90B
+                              text: "\U000F00DF"
+                          - label:
+                              id: backlight_bright_label
+                              text_font: montserrat_32
+                              text: "50 %"
+                          - button:
+                              id: backlight_pwr_btn
+                              width: 56
+                              height: 56
+                              radius: 50
+                              bg_opa: TRANSP
+                              border_opa: TRANSP
+                              widgets:
+                                - label:
+                                    text_color: 0x3F4948
+                                    text_font: extra_icon
+                                    text: "\U000F0425"
+                                    align: CENTER
+                              on_short_click:
+                                - logger.log: "切换背光!"
+                                - light.toggle: backlight
+                    # 横向亮度滑块
                     - slider:
-                        width: 130
-                        height: 360
-                        radius: 42
+                        width: 600
+                        height: 40
+                        radius: 20
                         min_value: 0
                         max_value: 255
                         id: backlight_slider
                         bg_color: 0xECECEC
                         bg_opa: COVER
                         indicator:
-                          radius: 12
+                          radius: 20
                           bg_color: 0xFFB90B
                         knob:
                           bg_opa: TRANSP
@@ -1099,34 +1257,6 @@ lvgl:
                               data:
                                 entity_id: light.tab5_display_backlight
                                 brightness: !lambda return int(x);
-                    # 按钮组
-                    - obj:
-                        width: 280
-                        height: 84
-                        radius: 50
-                        scrollable: false
-                        bg_color: 0xF3F4F4
-                        border_opa: TRANSP
-                        layout:
-                          type: flex
-                          flex_align_main: CENTER
-                          flex_align_cross: CENTER
-                          flex_align_track: CENTER
-                        widgets:
-                          # 电源开关按钮
-                          - button:
-                              id: backlight_pwr_btn
-                              styles: card_md_icon_btn
-                              bg_opa: TRANSP
-                              widgets:
-                                - label:
-                                    text_color: 0x3F4948
-                                    text_font: extra_icon
-                                    text: "\U000F0425"
-                                    align: CENTER
-                              on_short_click:
-                                - logger.log: "切换背光!"
-                                - light.toggle: backlight
 
 # 脚本定义
 script:
@@ -1165,15 +1295,15 @@ script:
           };
           const char* icon_unchecked[] = {
               "\U000F0A1D", // 仪表盘（轮廓）
-              "\U000F0336", // 亮度（轮廓）
+              "\U000F08BB", // 齿轮（轮廓）
           };
           const char* icon_checked[] = {
               "\U000F056E", // 仪表盘
-              "\U000F00DF", // 亮度
+              "\U000F0493", // 齿轮
           };
 
           const int count = sizeof(buttons) / sizeof(buttons[0]);
-          
+
           // 更新按钮 UI 状态
           for (int i = 0; i < count; i++) {
               if (i == id(page_num)) {
@@ -1185,7 +1315,7 @@ script:
               lv_obj_add_style(labels[i], selected ? id(nav_label_activate) : id(nav_label_inactivate), LV_PART_MAIN);
               lv_label_set_text(icons[i], selected ? icon_checked[i] : icon_unchecked[i]);
           }
-    
+
   # 同步 Home Assistant 状态脚本
   # 当 UI 绘制在屏幕上时，同步 Home Assistant 实体状态到 LVGL UI
   - id: sync_ha
@@ -1194,7 +1324,7 @@ script:
 
 # 全局变量定义
 globals:
-  # 当前页面编号（0=仪表盘, 1=亮度）
+  # 当前页面编号（0=仪表盘, 1=系统）
   - id: page_num
     type: int
     restore_value: no
@@ -1204,5 +1334,3 @@ globals:
     type: int
     restore_value: yes
     initial_value: '128'  # 默认 50%
-
-
