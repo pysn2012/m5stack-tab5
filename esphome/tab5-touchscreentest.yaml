@@ -679,7 +679,7 @@ font:
     id: noto_sans_sc_32
     size: 32
     bpp: 4
-    glyphs: "厦门未来不会仪表盘亮度系统设备信号运行地址天气预警无小时分钟下雨大中有渐停开始过就了的又: "
+    glyphs: "厦门未来不会仪表盘亮度系统设备信号运行地址天气预警无小时分钟下雨大中有渐停开始过就了的又·！@#￥%…&*（）—+-=、|【{}】；：‘“”，《。》/？℃℉￡ abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890~`!$^()_[]\;:'",<.>?"
     ignore_missing_glyphs: true
 
   # Noto Sans SC 中文字体（48px）
@@ -687,7 +687,7 @@ font:
     id: noto_sans_sc_48
     size: 48
     bpp: 4
-    glyphs: "仪表盘亮度系统"
+    glyphs: "仪表盘系统设置亮度"
     ignore_missing_glyphs: true
 
 # LVGL 图形库配置
@@ -994,7 +994,7 @@ lvgl:
                   text_font: montserrat_32
                   text: "2026-03-11 Thu"
                   align: CENTER
-                  y: -50
+                  y: -60
               # 环境数据网格（温度/湿度/CO2/气压）
               - obj:
                   width: 800
@@ -1102,7 +1102,7 @@ lvgl:
               # 系统信息区域
               - obj:
                   width: 700
-                  height: 280
+                  height: 300
                   align: CENTER
                   y: -160
                   bg_opa: TRANSP
@@ -1111,8 +1111,8 @@ lvgl:
                     type: GRID
                     grid_columns: [140, FR(1)]
                     grid_rows: [80, 80, 80]
-                    pad_row: 16
-                    pad_column: 20
+                    pad_row: 12
+                    pad_column: 12
                   widgets:
                     # IP 标签
                     - label:
@@ -1170,7 +1170,7 @@ lvgl:
                   width: 800
                   height: 200
                   align: BOTTOM_MID
-                  y: -10
+                  y: -50
                   bg_opa: TRANSP
                   border_opa: TRANSP
                   layout:
@@ -1180,10 +1180,10 @@ lvgl:
                     flex_align_cross: CENTER
                     pad_row: 20
                   widgets:
-                    # 亮度图标 + 百分比 + 电源按钮
+                    # 亮度图标 + 百分比
                     - obj:
                         width: 400
-                        height: 60
+                        height: 80
                         bg_opa: TRANSP
                         border_opa: TRANSP
                         layout:
