@@ -1,3 +1,8 @@
+substitutions:
+  # 允许显示的字符集。此列表非常庞大，包含了多语言字符。
+  allowed_characters: |-
+    厦门未来不会仪表盘亮度系统设备信号运行地址天气预警无小时分钟下雨大中有渐停开始过就了的又·！@#￥%…&*（）—+-=、|【{}】；：‘“”，《。》/？℃℉￡ abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890~`!$^()_[]\;:'",<.>?
+
 # ESPHOME 基础配置
 esphome:
   name: tab5-ha-hmi-ew
@@ -679,7 +684,7 @@ font:
     id: noto_sans_sc_32
     size: 32
     bpp: 4
-    glyphs: "厦门未来不会仪表盘亮度系统设备信号运行地址天气预警无小时分钟下雨大中有渐停开始过就了的又·！@#￥%…&*（）—+-=、|【{}】；：‘“”，《。》/？℃℉￡ abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890~`!$^()_[]\;:'",<.>?"
+    glyphs: ${allowed_characters}
     ignore_missing_glyphs: true
 
   # Noto Sans SC 中文字体（48px）
