@@ -252,7 +252,7 @@ display:
       
       // ========== 第1行：日期时间 ==========
       if (time_now.is_valid()) {
-        it.strftime(640, 25, id(font_medium), id(color_white), TextAlign::TOP_CENTER,
+        it.strftime(640, 35, id(font_medium), id(color_white), TextAlign::TOP_CENTER,
                     "%Y-%m-%d  %H:%M", time_now);
       } else {
         it.print(640, 25, id(font_medium), id(color_red), TextAlign::TOP_CENTER, "RTC: NO TIME");
@@ -260,18 +260,18 @@ display:
       
       // ========== 第2行：星期 ==========
       if (time_now.is_valid()) {
-        it.strftime(640, 70, id(font_medium), id(color_gray), TextAlign::TOP_CENTER,
+        it.strftime(640, 100, id(font_medium), id(color_gray), TextAlign::TOP_CENTER,
                     "%A", time_now);
       }
       
       // ========== 分隔线 ==========
-      it.rectangle(60, 115, 1160, 2, id(color_gray));
+      it.rectangle(60, 165, 1160, 2, id(color_gray));
       
       // ========== 第3行：WIFI 信息（2列）==========
       // 左列：IP
       std::string ip = id(wifi_ip).state;
       snprintf(buf, sizeof(buf), "IP: %s", ip.c_str());
-      it.print(80, 140, id(font_small), id(color_white), buf);
+      it.print(80, 180, id(font_small), id(color_white), buf);
       
       // 右列：信号强度
       int rssi = id(wifi_rssi).state;
@@ -280,14 +280,14 @@ display:
       } else {
         snprintf(buf, sizeof(buf), "RSSI: %d dBm", rssi);
       }
-      it.print(720, 140, id(font_small), id(color_white), buf);
+      it.print(720, 180, id(font_small), id(color_white), buf);
       
       // ========== 第4行：系统信息（2列）==========
       // 左列：芯片型号
-      it.print(80, 185, id(font_small), id(color_white), "Chip: ESP32-P4 rev1.3");
+      it.print(80, 240, id(font_small), id(color_white), "Chip: ESP32-P4 rev1.3");
       
       // 右列：ESPHome 版本
-      it.print(720, 185, id(font_small), id(color_white), "ESPHome: 2026.6.2");
+      it.print(720, 240, id(font_small), id(color_white), "ESPHome: 2026.6.2");
       
       // ========== 第5行：其他信息（2列）==========
       // 左列：uptime
@@ -296,7 +296,7 @@ display:
       int mins = (uptime_sec % 3600) / 60;
       int secs = uptime_sec % 60;
       snprintf(buf, sizeof(buf), "Uptime: %02d:%02d:%02d", hours, mins, secs);
-      it.print(80, 230, id(font_small), id(color_white), buf);
+      it.print(80, 300, id(font_small), id(color_white), buf);
       
       // 右列：电压
       float voltage = id(battery_voltage).state;
@@ -305,11 +305,11 @@ display:
       } else {
         snprintf(buf, sizeof(buf), "Voltage: %.2f V", voltage);
       }
-      it.print(720, 230, id(font_small), id(color_white), buf);
+      it.print(720, 300, id(font_small), id(color_white), buf);
       
       // ========== 底部状态栏 ==========
-      it.rectangle(0, 680, 1280, 2, id(color_gray));
-      it.print(640, 695, id(font_small), id(color_gray), TextAlign::TOP_CENTER, 
+      it.rectangle(0, 660, 1280, 2, id(color_gray));
+      it.print(640, 670, id(font_small), id(color_gray), TextAlign::TOP_CENTER, 
                "M5Stack Tab5 - RX8130 RTC");
 
 # ========== 背光 PWM 输出配置 ==========

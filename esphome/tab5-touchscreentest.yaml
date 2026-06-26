@@ -766,7 +766,7 @@ lvgl:
       height: 100%
       width: 1080
       x: 96
-      pad_top: 120
+      pad_top: 80
       pad_left: 30
 
     # 小型控制卡片样式（与 Home Assistant 风格匹配）
@@ -994,7 +994,7 @@ lvgl:
                   text_font: montserrat_32
                   text: "2026-03-11 Thu"
                   align: CENTER
-                  y: -40
+                  y: -50
               # 环境数据网格（温度/湿度/CO2/气压）
               - obj:
                   width: 800
@@ -1002,7 +1002,7 @@ lvgl:
                   bg_opa: TRANSP
                   border_opa: TRANSP
                   align: CENTER
-                  y: 130
+                  y: 50
                   layout:
                     type: GRID
                     grid_columns: [FR(20), FR(30), FR(20), FR(30)]
@@ -1085,7 +1085,7 @@ lvgl:
                   text_color: 0xE74C3C
                   text: "天气: 无预警"
                   align: CENTER
-                  y: 280
+                  y: 200
         # 页面标题
         - label:
             x: 220
@@ -1099,18 +1099,12 @@ lvgl:
         - obj:
             styles: content_container
             widgets:
-              # 页面标题
-              - label:
-                  x: 0
-                  y: 40
-                  text_font: noto_sans_sc_48
-                  text: "系统"
               # 系统信息区域
               - obj:
                   width: 700
                   height: 280
                   align: CENTER
-                  y: -80
+                  y: -160
                   bg_opa: TRANSP
                   border_opa: TRANSP
                   layout:
@@ -1207,25 +1201,9 @@ lvgl:
                               id: backlight_bright_label
                               text_font: montserrat_32
                               text: "50 %"
-                          - button:
-                              id: backlight_pwr_btn
-                              width: 56
-                              height: 56
-                              radius: 50
-                              bg_opa: TRANSP
-                              border_opa: TRANSP
-                              widgets:
-                                - label:
-                                    text_color: 0x3F4948
-                                    text_font: extra_icon
-                                    text: "\U000F0425"
-                                    align: CENTER
-                              on_short_click:
-                                - logger.log: "切换背光!"
-                                - light.toggle: backlight
                     # 横向亮度滑块
                     - slider:
-                        width: 600
+                        width: 500
                         height: 40
                         radius: 20
                         min_value: 0
@@ -1259,6 +1237,12 @@ lvgl:
                               data:
                                 entity_id: light.tab5_display_backlight
                                 brightness: !lambda return int(x);
+        # 页面标题
+        - label:
+            x: 220
+            y: 40
+            text_font: noto_sans_sc_48
+            text: "系统设置"  
 
 # 脚本定义
 script:
