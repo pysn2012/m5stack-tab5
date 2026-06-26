@@ -576,7 +576,7 @@ text_sensor:
       on_value:
         then:
           - lvgl.label.update:
-              id: network_ip
+              id: sys_ip_label
               text: !lambda |-
                 return "IP: " + x;
 
