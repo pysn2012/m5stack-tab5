@@ -57,7 +57,7 @@ api:
 
 # 语音助手包
 packages:
-  voice_assistant: !include voice-assistant.yaml
+  voice_assistant: !include packages/voice-assistant.yaml
 
 # 外部组件配置
 external_components:
@@ -279,7 +279,7 @@ sensor:
       - lvgl.label.update:
           id: pm25_label
           text:
-            format: "%.0f µg/m³"
+            format: "%.0f ppm"
             args: [ 'x' ]
 
   # WiFi 信号强度
@@ -960,7 +960,7 @@ lvgl:
     - id: dashboard_page
       widgets:
         - obj:
-            styles: content_container  # ── 应用样式: content_container (1080×100%, 左偏移96, 顶部内距30)
+            styles: content_container  # 应用样式: content_container (1080×100%, 左偏移96, 顶部内距30)
             widgets:
               # 时间显示
               - label:
@@ -1037,7 +1037,7 @@ lvgl:
                     - label:
                         text_font: montserrat_32
                         id: pm25_label
-                        text: "- µg/m³"
+                        text: "- ppm"
                         grid_cell_column_pos: 1 
                         grid_cell_row_pos: 1 
                         grid_cell_x_align: START
@@ -1133,14 +1133,14 @@ lvgl:
     - id: system_page
       widgets:
         - obj:
-            styles: content_container  # ── 应用样式: content_container (1080×100%, 左偏移96, 顶部内距30)
+            styles: content_container  # 应用样式: content_container (1080×100%, 左偏移96, 顶部内距30)
             widgets:
               # 系统信息区域
               - obj:
-                  width: 700
+                  width: 800
                   height: 300
                   align: CENTER
-                  y: -160
+                  y: -140
                   bg_opa: TRANSP
                   border_opa: TRANSP
                   layout:
@@ -1203,10 +1203,10 @@ lvgl:
                         grid_cell_y_align: CENTER
               # 亮度控制区域（GRID 2列，百分比覆盖在滑条正面）
               - obj:
-                  width: 700
-                  height: 100
+                  width: 800
+                  height: 120
                   align: CENTER
-                  y: 80
+                  y: 120
                   bg_opa: TRANSP
                   border_opa: TRANSP
                   layout:
@@ -1229,13 +1229,13 @@ lvgl:
                         grid_cell_row_pos: 0
                         grid_cell_x_align: START
                         grid_cell_y_align: CENTER
-                        width: 500
+                        width: 520
                         height: 60
                         bg_opa: TRANSP
                         border_opa: TRANSP
                         widgets:
                           - slider:
-                              width: 500
+                              width: 460
                               height: 40
                               radius: 20
                               align: CENTER
@@ -1279,7 +1279,7 @@ lvgl:
             x: 220
             y: 40
             text_font: noto_sans_sc_48
-            text: "系统设置"  
+            text: "系统"  
 
 # 脚本定义
 script:

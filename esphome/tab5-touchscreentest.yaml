@@ -718,7 +718,7 @@ lvgl:
   #   nav_icon_inactivate  → 导航图标-未选中态 (深灰绿文字)
   #   nav_label_activate   → 导航文字-选中态 (深青色, Noto Sans SC 32px)
   #   nav_label_inactivate → 导航文字-未选中态 (深灰绿, Noto Sans SC 32px)
-  #   content_container    → 右侧主内容区 (1080×100%, 左偏移96, 顶部内距80)
+  #   content_container    → 右侧主内容区 (1080×100%, 左偏移96, 顶部内距30)
   # ═══════════════════════════════════════════════════════════════
 
   style_definitions:
@@ -784,7 +784,7 @@ lvgl:
 
     # ── 内容容器样式 ─────────────────────────────────────────────
     # 宽1080 × 高100%, 居中对齐, 左偏移x=96(给侧边栏让位)
-    # 顶部内距80(给状态栏让位), 左侧内距30
+    # 顶部内距30, 左侧内距30
     - id: content_container
       align: CENTER
       bg_opa: COVER
@@ -1170,7 +1170,7 @@ lvgl:
             x: 220
             y: 40
             text_font: noto_sans_sc_48
-            text: "系统设置"
+            text: "系统"
 
 # 脚本定义
 script:
