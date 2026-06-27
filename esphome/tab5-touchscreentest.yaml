@@ -269,11 +269,11 @@ sensor:
             args: [ 'x' ]
 
   - platform: homeassistant
-    id: cur_co2
+    id: cur_pm25
     entity_id: sensor.xiamen_pm25
     on_value:
       - lvgl.label.update:
-          id: co2_label
+          id: pm25_label
           text:
             format: "%.0f ppm"
             args: [ 'x' ]
@@ -624,7 +624,6 @@ font:
       "\U000F18DE", # 吸顶灯（轮廓）
       "\U000F18DD", # 吸顶灯
       "\U000F0425", # 电源
-      "\U000F07E4", # CO2
       "\U000F029A", # 气压表（用于显示 hPa 气压）
       "\U000F05A9", # WiFi
       "\U000F007A", # 电池-10%
@@ -720,20 +719,6 @@ lvgl:
   #   nav_label_activate   → 导航文字-选中态 (深青色, Noto Sans SC 32px)
   #   nav_label_inactivate → 导航文字-未选中态 (深灰绿, Noto Sans SC 32px)
   #   content_container    → 右侧主内容区 (1080×100%, 左偏移96, 顶部内距80)
-  #   card_sm              → 小卡片容器 (400×112, 圆角24)
-  #   card_sm_icon_btn     → 小卡片左侧图标圆钮 (72×72, 圆角50, 灰底)
-  #   card_sm_main_label   → 小卡片主标签 (Montserrat 32px, 左上偏移92,5)
-  #   card_sm_sub_label    → 小卡片副标签 (Montserrat 32px, 左下偏移92)
-  #   card_md              → 中卡片容器 (400×240, 圆角24)
-  #   card_md_icon_btn     → 中卡片图标圆钮 (72×72, 圆角50, 灰底, 左上)
-  #   card_md_main_label   → 中卡片主标签 (Montserrat 32px, 左上偏移92,5)
-  #   card_md_sub_label    → 中卡片副标签 (Montserrat 32px, 偏移92,60)
-  #   card_lg              → 大卡片/模态面板 (800×600, 圆角24, 居中)
-  #   card_lg_icon_btn     → 大卡片图标圆钮 (72×72, 圆角50, 灰底, 左上)
-  #   card_lg_icon_btn_transp → 大卡片透明图标钮 (72×72, 圆角50, 透明, 左上)
-  #   card_lg_main_label   → 大卡片主标签 (Montserrat 32px, 左上)
-  #   card_lg_sub_label    → 大卡片副标签 (Montserrat 32px)
-  #   modal_container      → 全屏遮罩层 (1280×720, 深灰半透明70%)
   # ═══════════════════════════════════════════════════════════════
 
   style_definitions:
@@ -920,8 +905,14 @@ lvgl:
     # 仪表盘页面（显示时间、日期、环境传感器数据和天气预警）
     - id: dashboard_page
       widgets:
+        # 页面标题
+        - label:
+            x: 220
+            y: 40
+            text_font: noto_sans_sc_48
+            text: "仪表盘"     
         - obj:
-            styles: content_container  # ── 应用样式: content_container (1080×100%, 左偏移96, 顶部内距30)
+            styles: content_container  # 应用样式: content_container (1080×100%, 左偏移96, 顶部内距30)
             widgets:
               # 时间显示
               - label:
@@ -937,7 +928,7 @@ lvgl:
                   text: "2026-03-11 Thu"
                   align: CENTER
                   y: -110
-              # 环境数据网格（温度/湿度/CO2/气压）
+              # 环境数据网格（温度/湿度/PM2.5/气压）
               - obj:
                   width: 800
                   height: 200
@@ -986,18 +977,18 @@ lvgl:
                         grid_cell_row_pos: 0 
                         grid_cell_x_align: START
                         grid_cell_y_align: CENTER
-                    # CO2 图标
+                    # PM2.5 图标
                     - label:
                         text_font: extra_icon
-                        text: "\U000F07E4"
+                        text: "\U000F0F30"
                         grid_cell_column_pos: 0 
                         grid_cell_row_pos: 1 
                         grid_cell_x_align: CENTER
                         grid_cell_y_align: CENTER
-                    # CO2 值
+                    # PM2.5 值
                     - label:
                         text_font: montserrat_32
-                        id: co2_label
+                        id: pm25_label
                         text: "- ppm"
                         grid_cell_column_pos: 1 
                         grid_cell_row_pos: 1 
@@ -1028,23 +1019,24 @@ lvgl:
                   text: "天气: 无预警"
                   align: CENTER
                   y: 180
+
+
+    # ========== 系统页面 ==========
+    - id: system_page
+      widgets:
         # 页面标题
         - label:
             x: 220
             y: 40
             text_font: noto_sans_sc_48
-            text: "仪表盘"      
-
-    # ========== 系统页面 ==========
-    - id: system_page
-      widgets:
+            text: "系统"  
         - obj:
-            styles: content_container  # ── 应用样式: content_container (1080×100%, 左偏移96, 顶部内距30)
+            styles: content_container  # 应用样式: content_container (1080×100%, 左偏移96, 顶部内距30)
             widgets:
               # 系统信息区域
               - obj:
                   width: 700
-                  height: 300
+                  height: 200
                   align: CENTER
                   y: -160
                   bg_opa: TRANSP
@@ -1110,9 +1102,9 @@ lvgl:
               # 亮度控制区域（GRID 2列，百分比覆盖在滑条正面）
               - obj:
                   width: 700
-                  height: 100
+                  height: 150
                   align: CENTER
-                  y: 80
+                  y: 20
                   bg_opa: TRANSP
                   border_opa: TRANSP
                   layout:
@@ -1135,8 +1127,8 @@ lvgl:
                         grid_cell_row_pos: 0
                         grid_cell_x_align: START
                         grid_cell_y_align: CENTER
-                        width: 500
-                        height: 60
+                        width: 600
+                        height: 80
                         bg_opa: TRANSP
                         border_opa: TRANSP
                         widgets:
@@ -1180,12 +1172,6 @@ lvgl:
                               text: "50 %"
                               align: CENTER
                               y: 2
-        # 页面标题
-        - label:
-            x: 220
-            y: 40
-            text_font: noto_sans_sc_48
-            text: "系统设置"  
 
 # 脚本定义
 script:
