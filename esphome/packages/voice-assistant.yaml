@@ -1,8 +1,53 @@
-# ═══════════════════════════════════════════════════════════════
-# 语音助手配置包 (Voice Assistant Package)
-# 包含: micro_wake_word、voice_assistant、唤醒词开关、全局变量
-# 由 tab5-touchscreentest.yaml 通过 packages 引入
-# ═══════════════════════════════════════════════════════════════
+# I2S 音频总线配置
+i2s_audio:
+  - id: mic_bus
+    i2s_lrclk_pin: GPIO29
+    i2s_bclk_pin: GPIO27
+    i2s_mclk_pin: GPIO30
+
+# ES7210 音频 ADC 配置（麦克风输入）
+audio_adc:
+  - platform: es7210
+    id: es7210_adc
+    bits_per_sample: 16bit
+    sample_rate: 16000
+
+# 麦克风配置
+microphone:
+  - platform: i2s_audio
+    id: tab5_microphone
+    i2s_din_pin: GPIO28
+    sample_rate: 16000
+    bits_per_sample: 16bit
+    adc_type: external
+
+# ES8388 音频 DAC 配置（扬声器输出）
+audio_dac:
+  - platform: es8388
+    id: es8388_dac
+
+# 扬声器配置
+speaker:
+  - platform: i2s_audio
+    id: tab5_speaker
+    i2s_dout_pin: GPIO26
+    audio_dac: es8388_dac
+    dac_type: external
+    channel: mono
+    buffer_duration: 100ms
+    bits_per_sample: 16bit
+    sample_rate: 48000
+
+# 媒体播放器配置
+media_player:
+  - platform: speaker
+    name: tab5_media_player
+    id: speaker_player
+    announcement_pipeline:
+      speaker: tab5_speaker
+      format: FLAC
+      sample_rate: 48000
+      num_channels: 1
 
 # ── 唤醒词检测 ─────────────────────────────────────────────────
 micro_wake_word:

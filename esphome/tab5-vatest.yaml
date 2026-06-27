@@ -1230,7 +1230,7 @@ lvgl:
                         grid_cell_x_align: START
                         grid_cell_y_align: CENTER
                         width: 520
-                        height: 60
+                        height: 80
                         bg_opa: TRANSP
                         border_opa: TRANSP
                         widgets:
