@@ -1,0 +1,101 @@
+# ═══════════════════════════════════════════════════════════════
+# 语音助手配置包 (Voice Assistant Package)
+# 包含: micro_wake_word、voice_assistant、唤醒词开关、全局变量
+# 由 tab5-touchscreentest.yaml 通过 packages 引入
+# ═══════════════════════════════════════════════════════════════
+
+# ── 唤醒词检测 ─────────────────────────────────────────────────
+micro_wake_word:
+  id: mww
+  models:
+    - okay_nabu
+  on_wake_word_detected:
+    - if:
+        condition:
+          switch.is_on: voice_wake_word_switch
+        then:
+          - voice_assistant.start:
+              wake_word: !lambda return wake_word;
+
+# ── 语音助手 ───────────────────────────────────────────────────
+# 状态回调通过 lambda 修改 LVGL 麦克风图标颜色:
+#   空闲(灰) → 聆听(绿) → 识别完成(橙) → 播报(蓝) → 空闲(灰)
+#   出错(红) → 2秒后 → 空闲(灰)
+voice_assistant:
+  id: va
+  microphone: tab5_microphone
+  media_player: speaker_player
+  micro_wake_word: mww
+
+  on_listening:
+    - lambda: |-
+        lv_obj_set_style_text_color(id(voice_mic_icon), lv_color_hex(0x4CD964), LV_PART_MAIN);
+
+  on_stt_end:
+    - lambda: |-
+        lv_obj_set_style_text_color(id(voice_mic_icon), lv_color_hex(0xFFA500), LV_PART_MAIN);
+
+  on_tts_start:
+    - lambda: |-
+        lv_obj_set_style_text_color(id(voice_mic_icon), lv_color_hex(0x4D94FF), LV_PART_MAIN);
+
+  on_end:
+    - lambda: |-
+        lv_obj_set_style_text_color(id(voice_mic_icon), lv_color_hex(0xA3A8B5), LV_PART_MAIN);
+    - wait_until:
+        condition:
+          media_player.is_announcing:
+        timeout: 3s
+    - wait_until:
+        condition:
+          and:
+            - not:
+                media_player.is_announcing:
+            - not:
+                speaker.is_playing: tab5_speaker
+    - if:
+        condition:
+          switch.is_on: voice_wake_word_switch
+        then:
+          - micro_wake_word.start:
+
+  on_error:
+    - lambda: |-
+        lv_obj_set_style_text_color(id(voice_mic_icon), lv_color_hex(0xFF4D4D), LV_PART_MAIN);
+    - delay: 2s
+    - lambda: |-
+        lv_obj_set_style_text_color(id(voice_mic_icon), lv_color_hex(0xA3A8B5), LV_PART_MAIN);
+    - if:
+        condition:
+          switch.is_on: voice_wake_word_switch
+        then:
+          - micro_wake_word.start:
+
+# ── 唤醒词开关 ─────────────────────────────────────────────────
+switch:
+  - platform: template
+    name: "Voice Wake Word"
+    id: voice_wake_word_switch
+    icon: mdi:microphone
+    optimistic: true
+    restore_mode: RESTORE_DEFAULT_OFF
+    turn_on_action:
+      - micro_wake_word.start:
+    turn_off_action:
+      - micro_wake_word.stop:
+    on_state:
+      - lambda: |-
+          if (x) {
+            lv_label_set_text(id(voice_wake_label), "\U000F036C Ok Nabu");
+            lv_obj_set_style_text_color(id(voice_wake_label), lv_color_hex(0x4CD964), LV_PART_MAIN);
+          } else {
+            lv_label_set_text(id(voice_wake_label), "\U000F036C Ok Nabu");
+            lv_obj_set_style_text_color(id(voice_wake_label), lv_color_hex(0xA3A8B5), LV_PART_MAIN);
+          }
+
+# ── 全局变量 ───────────────────────────────────────────────────
+globals:
+  - id: voice_assistant_active
+    type: bool
+    initial_value: 'false'
+    restore_value: false

@@ -55,6 +55,10 @@ api:
     then:
       - lvgl.widget.hide: api_icon_label
 
+# 语音助手包
+packages:
+  voice_assistant: !include voice-assistant.yaml
+
 # 外部组件配置
 external_components:
   - source:
@@ -275,7 +279,7 @@ sensor:
       - lvgl.label.update:
           id: pm25_label
           text:
-            format: "%.0f ppm"
+            format: "%.0f µg/m³"
             args: [ 'x' ]
 
   # WiFi 信号强度
@@ -655,6 +659,18 @@ font:
       "\U000F0374", # 减号
       "\U000F00DF", # 亮度调节
       "\U000F03D8", # 调色板
+      "\U000F036C", # 麦克风（语音助手）
+      "\U000F0450", # 机器人（对话模式）
+      "\U000F07D0", # Home Assistant（家居模式）
+    ]
+
+  # Material Design 图标字体（120px，用于语音助手大图标）
+  - file: "https://raw.githubusercontent.com/Templarian/MaterialDesign-Webfont/master/fonts/materialdesignicons-webfont.ttf"
+    id: voice_icon_120
+    size: 120
+    bpp: 4
+    glyphs: [
+      "\U000F036C", # 麦克风
     ]
 
   # Material Design 图标字体（64px，用于较大图标）
@@ -691,7 +707,7 @@ font:
     id: noto_sans_sc_48
     size: 48
     bpp: 4
-    glyphs: "仪表盘系统设置亮度"
+    glyphs: "仪表盘系统设置语音助手亮度"
     ignore_missing_glyphs: true
 
 # LVGL 图形库配置
@@ -703,6 +719,15 @@ lvgl:
     - script.execute: expand_nav_btn_click_area    # 扩展导航按钮点击区域
     - script.execute: nav_rail_update              # 更新导航栏 UI
     - script.execute: sync_ha                      # 同步 Home Assistant 状态
+    # 同步唤醒词按钮 UI 状态
+    - lambda: |-
+        if (id(voice_wake_word_switch).state) {
+          lv_label_set_text(id(voice_wake_label), "\U000F036C Ok Nabu");
+          lv_obj_set_style_text_color(id(voice_wake_label), lv_color_hex(0x4CD964), LV_PART_MAIN);
+        } else {
+          lv_label_set_text(id(voice_wake_label), "\U000F036C Ok Nabu");
+          lv_obj_set_style_text_color(id(voice_wake_label), lv_color_hex(0xA3A8B5), LV_PART_MAIN);
+        }
 
   byte_order: little_endian
   color_depth: 16
@@ -718,7 +743,7 @@ lvgl:
   #   nav_icon_inactivate  → 导航图标-未选中态 (深灰绿文字)
   #   nav_label_activate   → 导航文字-选中态 (深青色, Noto Sans SC 32px)
   #   nav_label_inactivate → 导航文字-未选中态 (深灰绿, Noto Sans SC 32px)
-  #   content_container    → 右侧主内容区 (1080×100%, 左偏移96, 顶部内距80)
+  #   content_container    → 右侧主内容区 (1080×100%, 左偏移96, 顶部内距30)
   # ═══════════════════════════════════════════════════════════════
 
   style_definitions:
@@ -784,7 +809,7 @@ lvgl:
 
     # ── 内容容器样式 ─────────────────────────────────────────────
     # 宽1080 × 高100%, 居中对齐, 左偏移x=96(给侧边栏让位)
-    # 顶部内距80(给状态栏让位), 左侧内距30
+    # 顶部内距30, 左侧内距30
     - id: content_container
       align: CENTER
       bg_opa: COVER
@@ -869,6 +894,35 @@ lvgl:
                       id: light_btn_label
                       text: "系统"
 
+            # 语音助手导航按钮 ── 外层容器应用样式: nav_btn_container (180×150, 透明)
+            - obj:
+                styles: nav_btn_container
+                widgets:
+                  - button:
+                      align: center
+                      styles: nav_btn_inactivate  # 按钮本体: nav_btn_inactivate (112×64, 胶囊形圆角48)
+                      id: voice_panel_btn
+                      checkable: true
+                      state:
+                        checked: false
+                      checked:
+                        bg_color: 0xCCE8E7
+                      widgets:
+                        - label:
+                            id: voice_btn_icon
+                            align: CENTER
+                            styles: nav_icon_inactivate  # 图标: nav_icon_inactivate (extra_icon 48px, 深灰绿#3F4948)
+                            text: "\U000F036C"  # 麦克风（轮廓）图标
+                      on_value:
+                        - lambda: id(page_num) = 2;
+                        - script.execute: nav_rail_update
+                      on_press:
+                        - lvgl.page.show: voice_page
+                  - label:
+                      styles: nav_label_inactivate  # 文字: nav_label_inactivate (Noto Sans SC 32px, 深灰绿#3F4948)
+                      id: voice_btn_label
+                      text: "语音"
+
       # 状态栏（显示电池/WiFi/API 状态图标）
       - obj:
           align: TOP_RIGHT
@@ -906,7 +960,7 @@ lvgl:
     - id: dashboard_page
       widgets:
         - obj:
-            styles: content_container  # 应用样式: content_container (1080×100%, 左偏移96, 顶部内距30)
+            styles: content_container  # ── 应用样式: content_container (1080×100%, 左偏移96, 顶部内距30)
             widgets:
               # 时间显示
               - label:
@@ -983,7 +1037,7 @@ lvgl:
                     - label:
                         text_font: montserrat_32
                         id: pm25_label
-                        text: "- ppm"
+                        text: "- µg/m³"
                         grid_cell_column_pos: 1 
                         grid_cell_row_pos: 1 
                         grid_cell_x_align: START
@@ -1018,20 +1072,75 @@ lvgl:
             x: 220
             y: 40
             text_font: noto_sans_sc_48
-            text: "仪表盘"   
+            text: "仪表盘"      
+
+    # ========== 语音助手页面 ==========
+    - id: voice_page
+      widgets:
+        - obj:
+            styles: content_container  # ── 应用样式: content_container (1080×100%, 左偏移96, 顶部内距30)
+            widgets:
+              # 麦克风大图标（120px），颜色随语音状态变化:
+              #   空闲=灰(#A3A8B5)  聆听=绿(#4CD964)
+              #   识别完成=橙(#FFA500)  播报=蓝(#4D94FF)  出错=红(#FF4D4D)
+              - label:
+                  id: voice_mic_icon
+                  text_font: voice_icon_120
+                  text_color: 0xA3A8B5
+                  text: "\U000F036C"
+                  align: CENTER
+                  y: -120
+              # 麦克风透明触发按钮（叠在图标上方，点击启动语音助手）
+              - button:
+                  id: btn_voice_trigger
+                  align: CENTER
+                  y: -120
+                  width: 120
+                  height: 120
+                  bg_opa: TRANSP
+                  border_opa: TRANSP
+                  shadow_opa: TRANSP
+                  on_short_click:
+                    - voice_assistant.start:
+                        id: va
+              # 唤醒词开关按钮（显示 "Ok Nabu" 文字，点击切换开关）
+              - button:
+                  id: btn_wake_word
+                  align: CENTER
+                  width: 240
+                  height: 56
+                  radius: 28
+                  bg_color: 0xECECEC
+                  border_opa: TRANSP
+                  shadow_opa: TRANSP
+                  on_short_click:
+                    - switch.toggle: voice_wake_word_switch
+                  widgets:
+                    - label:
+                        id: voice_wake_label
+                        text_font: noto_sans_sc_32
+                        text_color: 0xA3A8B5
+                        text: "\U000F036C Ok Nabu"
+                        align: CENTER
+        # 页面标题
+        - label:
+            x: 220
+            y: 40
+            text_font: noto_sans_sc_48
+            text: "语音助手"
 
     # ========== 系统页面 ==========
     - id: system_page
       widgets:
         - obj:
-            styles: content_container
+            styles: content_container  # ── 应用样式: content_container (1080×100%, 左偏移96, 顶部内距30)
             widgets:
               # 系统信息区域
               - obj:
-                  width: 800
-                  height: 210
+                  width: 700
+                  height: 300
                   align: CENTER
-                  y: -140
+                  y: -160
                   bg_opa: TRANSP
                   border_opa: TRANSP
                   layout:
@@ -1094,8 +1203,8 @@ lvgl:
                         grid_cell_y_align: CENTER
               # 亮度控制区域（GRID 2列，百分比覆盖在滑条正面）
               - obj:
-                  width: 800
-                  height: 120
+                  width: 700
+                  height: 100
                   align: CENTER
                   y: 80
                   bg_opa: TRANSP
@@ -1120,13 +1229,13 @@ lvgl:
                         grid_cell_row_pos: 0
                         grid_cell_x_align: START
                         grid_cell_y_align: CENTER
-                        width: 640
+                        width: 500
                         height: 60
                         bg_opa: TRANSP
                         border_opa: TRANSP
                         widgets:
                           - slider:
-                              width: 520
+                              width: 500
                               height: 40
                               radius: 20
                               align: CENTER
@@ -1165,12 +1274,12 @@ lvgl:
                               text: "50 %"
                               align: CENTER
                               y: 2
-        # 页面标题（必须放在 obj 之后，否则会被覆盖）
+        # 页面标题
         - label:
             x: 220
             y: 40
             text_font: noto_sans_sc_48
-            text: "系统设置"
+            text: "系统设置"  
 
 # 脚本定义
 script:
@@ -1182,7 +1291,8 @@ script:
       - lambda: |-
           std::vector<lv_obj_t*> btns = {
             id(dash_panel_btn),
-            id(light_panel_btn)
+            id(light_panel_btn),
+            id(voice_panel_btn)
           };
           for (auto* btn : btns) {
             lv_obj_set_ext_click_area(btn, 180);
@@ -1198,22 +1308,27 @@ script:
           lv_obj_t* buttons[] = { 
               id(dash_panel_btn), 
               id(light_panel_btn), 
+              id(voice_panel_btn),
           };
           lv_obj_t* icons[] = { 
               id(dash_btn_icon), 
               id(light_btn_icon), 
+              id(voice_btn_icon),
           };
           lv_obj_t* labels[] = { 
               id(dash_btn_label), 
               id(light_btn_label), 
+              id(voice_btn_label),
           };
           const char* icon_unchecked[] = {
               "\U000F0A1D", // 仪表盘（轮廓）
               "\U000F08BB", // 齿轮（轮廓）
+              "\U000F036C", // 麦克风
           };
           const char* icon_checked[] = {
               "\U000F056E", // 仪表盘
               "\U000F0493", // 齿轮
+              "\U000F036C", // 麦克风（语音页无轮廓变体，保持不变）
           };
 
           const int count = sizeof(buttons) / sizeof(buttons[0]);
@@ -1228,6 +1343,8 @@ script:
               bool selected = (i == active);
               // 动态应用导航标签样式: nav_label_activate(深青色) / nav_label_inactivate(深灰绿)
               lv_obj_add_style(labels[i], selected ? id(nav_label_activate) : id(nav_label_inactivate), LV_PART_MAIN);
+              // 动态应用导航图标样式: nav_icon_activate(深青色) / nav_icon_inactivate(深灰绿)
+              lv_obj_add_style(icons[i], selected ? id(nav_icon_activate) : id(nav_icon_inactivate), LV_PART_MAIN);
               lv_label_set_text(icons[i], selected ? icon_checked[i] : icon_unchecked[i]);
           }
 
@@ -1239,7 +1356,7 @@ script:
 
 # 全局变量定义
 globals:
-  # 当前页面编号（0=仪表盘, 1=系统）
+  # 当前页面编号（0=仪表盘, 1=系统, 2=语音）
   - id: page_num
     type: int
     restore_value: no
