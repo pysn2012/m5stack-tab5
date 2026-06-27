@@ -1,7 +1,7 @@
 substitutions:
   # 允许显示的字符集。此列表非常庞大，包含了多语言字符。
   allowed_characters: |-
-    厦门未来不会仪表盘亮度系统设备信号运行地址天气预警无小时分钟下雨大中有渐停开始过就了的又·！@#￥%…&*（）—+-=、|【{}】；：‘“”，《。》/？℃℉￡ abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890~`!$^()_[]\;:'",<.>?
+    厦门未来不会仪表盘屏幕亮度系统设备信号运行地址天气预警无小时分钟下雨大中有渐停后转为开始过就了的又·！@#￥%…&*（）—+-=、|【{}】；：‘“”，《。》/？℃℉￡ abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890~`!$^()_[]\;:'",<.>?
 
 # ESPHOME 基础配置
 esphome:
@@ -585,7 +585,7 @@ text_sensor:
               text: !lambda |-
                 return "IP: " + x;
 
-  # 天气预警（从 Home Assistant 获取，请根据实际实体 ID 修改）
+  # 天气预警（从 Home Assistant 获取）
   - platform: homeassistant
     id: weather_alert
     entity_id: sensor.xiamen_forecast_minutely
@@ -595,7 +595,7 @@ text_sensor:
           text: !lambda |-
             if (x.empty() || x == "None" || x == "null" || x == "unknown" || x == "unavailable") 
                 return "天气: 无预警";
-            return "\u26A0 " + x;
+            return "天气预警: " + x;
 
 # 字体配置
 font:
@@ -708,9 +708,37 @@ lvgl:
   byte_order: little_endian
   color_depth: 16
 
-  # LVGL 样式定义  
+  # ═══════════════════════════════════════════════════════════════
+  # LVGL 样式定义
+  # ═══════════════════════════════════════════════════════════════
+  # 样式总览:
+  #   sidebar              → 侧边栏整体容器 (192×100%, 浅灰绿底)
+  #   nav_btn_container    → 单个导航按钮的外层包裹 (180×150, 透明)
+  #   nav_btn_inactivate   → 导航按钮本体 (112×64, 圆角48, 透明)
+  #   nav_icon_activate    → 导航图标-选中态 (深青色文字)
+  #   nav_icon_inactivate  → 导航图标-未选中态 (深灰绿文字)
+  #   nav_label_activate   → 导航文字-选中态 (深青色, Noto Sans SC 32px)
+  #   nav_label_inactivate → 导航文字-未选中态 (深灰绿, Noto Sans SC 32px)
+  #   content_container    → 右侧主内容区 (1080×100%, 左偏移96, 顶部内距80)
+  #   card_sm              → 小卡片容器 (400×112, 圆角24)
+  #   card_sm_icon_btn     → 小卡片左侧图标圆钮 (72×72, 圆角50, 灰底)
+  #   card_sm_main_label   → 小卡片主标签 (Montserrat 32px, 左上偏移92,5)
+  #   card_sm_sub_label    → 小卡片副标签 (Montserrat 32px, 左下偏移92)
+  #   card_md              → 中卡片容器 (400×240, 圆角24)
+  #   card_md_icon_btn     → 中卡片图标圆钮 (72×72, 圆角50, 灰底, 左上)
+  #   card_md_main_label   → 中卡片主标签 (Montserrat 32px, 左上偏移92,5)
+  #   card_md_sub_label    → 中卡片副标签 (Montserrat 32px, 偏移92,60)
+  #   card_lg              → 大卡片/模态面板 (800×600, 圆角24, 居中)
+  #   card_lg_icon_btn     → 大卡片图标圆钮 (72×72, 圆角50, 灰底, 左上)
+  #   card_lg_icon_btn_transp → 大卡片透明图标钮 (72×72, 圆角50, 透明, 左上)
+  #   card_lg_main_label   → 大卡片主标签 (Montserrat 32px, 左上)
+  #   card_lg_sub_label    → 大卡片副标签 (Montserrat 32px)
+  #   modal_container      → 全屏遮罩层 (1280×720, 深灰半透明70%)
+  # ═══════════════════════════════════════════════════════════════
+
   style_definitions:
-    # 侧边栏样式
+    # ── 侧边栏样式 ──────────────────────────────────────────────
+    # 宽192 × 高100%, 浅灰绿背景(#E9EFEE), 顶部内距30, 无圆角无边框
     - id: sidebar
       bg_color: 0xE9EFEE
       bg_opa: COVER
@@ -722,14 +750,16 @@ lvgl:
       width: 192
       height: 100%
 
-    # 导航按钮容器样式
+    # ── 导航按钮容器样式 ─────────────────────────────────────────
+    # 宽180 × 高150, 完全透明背景, 用于包裹每个按钮+标签的组合
     - id: nav_btn_container
       bg_opa: TRANSP
       border_opa: TRANSP
       width: 180
       height: 150
 
-    # 导航按钮未激活样式
+    # ── 导航按钮未激活样式 ───────────────────────────────────────
+    # 宽112 × 高64, 圆角48(胶囊形), 居中对齐, 透明背景/边框/阴影
     - id: nav_btn_inactivate
       bg_opa: TRANSP
       align: CENTER
@@ -739,31 +769,37 @@ lvgl:
       border_opa: TRANSP
       shadow_opa: TRANSP
 
-    # 导航图标激活样式
+    # ── 导航图标激活样式 ─────────────────────────────────────────
+    # 使用 extra_icon 字体(48px), 深青色文字(#4A6363), 居中
     - id: nav_icon_activate
       align: CENTER
       text_font: extra_icon
       text_color: 0x4A6363
 
-    # 导航图标未激活样式
+    # ── 导航图标未激活样式 ───────────────────────────────────────
+    # 使用 extra_icon 字体(48px), 深灰绿文字(#3F4948), 居中
     - id: nav_icon_inactivate
       align: CENTER
       text_font: extra_icon
       text_color: 0x3F4948
 
-    # 导航标签激活样式
+    # ── 导航标签激活样式 ─────────────────────────────────────────
+    # 底部居中对齐, 深青色文字(#4A6363), Noto Sans SC 32px
     - id: nav_label_activate
       align: BOTTOM_MID
       text_color: 0x4A6363
       text_font: noto_sans_sc_32
 
-    # 导航标签未激活样式
+    # ── 导航标签未激活样式 ───────────────────────────────────────
+    # 底部居中对齐, 深灰绿文字(#3F4948), Noto Sans SC 32px
     - id: nav_label_inactivate
       align: BOTTOM_MID
       text_color: 0x3F4948
       text_font: noto_sans_sc_32
 
-    # 内容容器样式
+    # ── 内容容器样式 ─────────────────────────────────────────────
+    # 宽1080 × 高100%, 居中对齐, 左偏移x=96(给侧边栏让位)
+    # 顶部内距80(给状态栏让位), 左侧内距30
     - id: content_container
       align: CENTER
       bg_opa: COVER
@@ -771,112 +807,13 @@ lvgl:
       height: 100%
       width: 1080
       x: 96
-      pad_top: 80
+      pad_top: 30
       pad_left: 30
-
-    # 小型控制卡片样式（与 Home Assistant 风格匹配）
-    - id: card_sm
-      width: 400
-      height: 112
-      radius: 24
-
-    # 小卡片图标按钮样式
-    - id: card_sm_icon_btn
-      width: 72
-      height: 72
-      radius: 50
-      bg_color: 0xECECEC
-      shadow_opa: TRANSP
-      align: LEFT_MID
-
-    # 小卡片主标签样式
-    - id: card_sm_main_label
-      text_font: montserrat_32
-      align: TOP_LEFT
-      x: 92
-      y: 5
-
-    # 小卡片副标签样式
-    - id: card_sm_sub_label
-      text_font: montserrat_32
-      align: BOTTOM_LEFT
-      x: 92
-
-    # 中型卡片样式
-    - id: card_md
-      width: 400
-      height: 240
-      radius: 24
-
-    # 中卡片图标按钮样式
-    - id: card_md_icon_btn
-      width: 72
-      height: 72
-      radius: 50
-      bg_color: 0xECECEC
-      shadow_opa: TRANSP
-      align: TOP_LEFT
-
-    # 中卡片主标签样式
-    - id: card_md_main_label
-      text_font: montserrat_32
-      align: TOP_LEFT
-      x: 92
-      y: 5
-
-    # 中卡片副标签样式
-    - id: card_md_sub_label
-      text_font: montserrat_32
-      x: 92
-      y: 60
-
-    # 大卡片容器样式（用于模态框）
-    - id: card_lg
-      width: 800
-      height: 600
-      radius: 24
-      align: CENTER
-      opa: 1
-
-    # 大卡片图标按钮样式
-    - id: card_lg_icon_btn
-      width: 72
-      height: 72
-      radius: 50
-      bg_color: 0xECECEC
-      shadow_opa: TRANSP
-      align: TOP_LEFT
-
-    # 大卡片透明图标按钮样式
-    - id: card_lg_icon_btn_transp
-      width: 72
-      height: 72
-      radius: 50
-      bg_opa: TRANSP
-      shadow_opa: TRANSP
-      align: TOP_LEFT
-
-    # 大卡片主标签样式
-    - id: card_lg_main_label
-      text_font: montserrat_32
-      align: TOP_LEFT
-
-    # 大卡片副标签样式
-    - id: card_lg_sub_label
-      text_font: montserrat_32
-
-    # 模态框容器样式（全屏半透明遮罩）
-    - id: modal_container
-      width: 1280
-      height: 720
-      bg_color: 0xA9A9A9
-      bg_opa: 0.7
-      align: CENTER
 
   # 顶层导航栏和模态框  
   top_layer:
     widgets:
-      # 侧边导航栏
+      # 侧边导航栏 ── 应用样式: sidebar (192×100%, 浅灰绿底, 顶部内距30)
       - obj:
           align: TOP_LEFT
           styles: sidebar
@@ -889,13 +826,13 @@ lvgl:
             flex_align_cross: center
             flex_align_track: center
           widgets:
-            # 仪表盘导航按钮
+            # 仪表盘导航按钮 ── 外层容器应用样式: nav_btn_container (180×150, 透明)
             - obj:
                 styles: nav_btn_container
                 widgets:
                   - button:
                       align: center
-                      styles: nav_btn_inactivate
+                      styles: nav_btn_inactivate  # 按钮本体: nav_btn_inactivate (112×64, 胶囊形圆角48)
                       id: dash_panel_btn
                       checkable: true
                       state:
@@ -906,7 +843,7 @@ lvgl:
                         - label:
                             id: dash_btn_icon
                             align: CENTER
-                            styles: nav_icon_inactivate
+                            styles: nav_icon_inactivate  # 图标: nav_icon_inactivate (extra_icon 48px, 深灰绿#3F4948)
                             text: "\U000F056E" # 仪表盘图标
                       on_value:
                         - lambda: id(page_num) = 0;
@@ -914,17 +851,17 @@ lvgl:
                       on_press:
                         - lvgl.page.show: dashboard_page
                   - label:
-                      styles: nav_label_inactivate
+                      styles: nav_label_inactivate  # 文字: nav_label_inactivate (Noto Sans SC 32px, 深灰绿#3F4948)
                       id: dash_btn_label
                       text: "仪表盘"
 
-            # 系统设置导航按钮
+            # 系统设置导航按钮 ── 外层容器应用样式: nav_btn_container (180×150, 透明)
             - obj:
                 styles: nav_btn_container
                 widgets:
                   - button:
                       align: center
-                      styles: nav_btn_inactivate
+                      styles: nav_btn_inactivate  # 按钮本体: nav_btn_inactivate (112×64, 胶囊形圆角48)
                       id: light_panel_btn
                       checkable: true
                       state:
@@ -935,7 +872,7 @@ lvgl:
                         - label:
                             id: light_btn_icon
                             align: CENTER
-                            styles: nav_icon_inactivate
+                            styles: nav_icon_inactivate  # 图标: nav_icon_inactivate (extra_icon 48px, 深灰绿#3F4948)
                             text: "\U000F08BB"  # 齿轮（轮廓）图标
                       on_value:
                         - lambda: id(page_num) = 1;
@@ -943,7 +880,7 @@ lvgl:
                       on_press:
                         - lvgl.page.show: system_page
                   - label:
-                      styles: nav_label_inactivate
+                      styles: nav_label_inactivate  # 文字: nav_label_inactivate (Noto Sans SC 32px, 深灰绿#3F4948)
                       id: light_btn_label
                       text: "系统"
 
@@ -984,7 +921,7 @@ lvgl:
     - id: dashboard_page
       widgets:
         - obj:
-            styles: content_container
+            styles: content_container  # ── 应用样式: content_container (1080×100%, 左偏移96, 顶部内距30)
             widgets:
               # 时间显示
               - label:
@@ -992,14 +929,14 @@ lvgl:
                   text_font: montserrat_96
                   text: "14:07"
                   align: CENTER
-                  y: -160
+                  y: -200
               # 日期显示
               - label:
                   id: date_label
                   text_font: montserrat_32
                   text: "2026-03-11 Thu"
                   align: CENTER
-                  y: -60
+                  y: -110
               # 环境数据网格（温度/湿度/CO2/气压）
               - obj:
                   width: 800
@@ -1007,7 +944,7 @@ lvgl:
                   bg_opa: TRANSP
                   border_opa: TRANSP
                   align: CENTER
-                  y: 50
+                  y: 30
                   layout:
                     type: GRID
                     grid_columns: [FR(20), FR(30), FR(20), FR(30)]
@@ -1090,7 +1027,7 @@ lvgl:
                   text_color: 0xE74C3C
                   text: "天气: 无预警"
                   align: CENTER
-                  y: 200
+                  y: 180
         # 页面标题
         - label:
             x: 220
@@ -1102,7 +1039,7 @@ lvgl:
     - id: system_page
       widgets:
         - obj:
-            styles: content_container
+            styles: content_container  # ── 应用样式: content_container (1080×100%, 左偏移96, 顶部内距30)
             widgets:
               # 系统信息区域
               - obj:
@@ -1115,7 +1052,7 @@ lvgl:
                   layout:
                     type: GRID
                     grid_columns: [140, FR(1)]
-                    grid_rows: [80, 80, 80]
+                    grid_rows: [60, 60, 60]
                     pad_row: 12
                     pad_column: 12
                   widgets:
@@ -1170,78 +1107,79 @@ lvgl:
                         grid_cell_row_pos: 2
                         grid_cell_x_align: START
                         grid_cell_y_align: CENTER
-              # 亮度控制区域（横向滑块，置于底部）
+              # 亮度控制区域（GRID 2列，百分比覆盖在滑条正面）
               - obj:
-                  width: 800
-                  height: 200
-                  align: BOTTOM_MID
-                  y: -50
+                  width: 700
+                  height: 100
+                  align: CENTER
+                  y: 80
                   bg_opa: TRANSP
                   border_opa: TRANSP
                   layout:
-                    type: flex
-                    flex_flow: COLUMN
-                    flex_align_main: CENTER
-                    flex_align_cross: CENTER
-                    pad_row: 20
+                    type: GRID
+                    grid_columns: [140, FR(1)]
+                    grid_rows: [FR(1)]
+                    pad_column: 12
                   widgets:
-                    # 亮度图标 + 百分比
+                    # 左列：标签
+                    - label:
+                        text_font: noto_sans_sc_32
+                        text: "亮度:"
+                        grid_cell_column_pos: 0
+                        grid_cell_row_pos: 0
+                        grid_cell_x_align: END
+                        grid_cell_y_align: CENTER
+                    # 右列：滑块 + 百分比（叠放，百分比在上层）
                     - obj:
-                        width: 400
-                        height: 80
+                        grid_cell_column_pos: 1
+                        grid_cell_row_pos: 0
+                        grid_cell_x_align: START
+                        grid_cell_y_align: CENTER
+                        width: 500
+                        height: 60
                         bg_opa: TRANSP
                         border_opa: TRANSP
-                        layout:
-                          type: flex
-                          flex_flow: ROW
-                          flex_align_main: CENTER
-                          flex_align_cross: CENTER
-                          pad_column: 20
                         widgets:
-                          - label:
-                              text_font: extra_icon
-                              text_color: 0xFFB90B
-                              text: "\U000F00DF"
+                          - slider:
+                              width: 500
+                              height: 40
+                              radius: 20
+                              align: CENTER
+                              min_value: 0
+                              max_value: 255
+                              id: backlight_slider
+                              bg_color: 0xECECEC
+                              bg_opa: COVER
+                              indicator:
+                                radius: 20
+                                bg_color: 0xFFB90B
+                              knob:
+                                bg_opa: TRANSP
+                              on_release:
+                                - light.turn_on:
+                                    id: backlight
+                                    brightness: !lambda return x / 255.0;
+                                - lambda: id(backlight_brightness_val) = int(x);
+                                - lvgl.label.update:
+                                    id: backlight_bright_label
+                                    text: !lambda |-
+                                      int percent = int(x) * 100 / 255;
+                                      return std::to_string(percent) + " %";
+                                - logger.log:
+                                    format: "亮度: %d%%"
+                                    args: [int((x*100)/255)]
+                                - homeassistant.action:
+                                    action: light.turn_on
+                                    data:
+                                      entity_id: light.tab5_display_backlight
+                                      brightness: !lambda return int(x);
                           - label:
                               id: backlight_bright_label
                               text_font: montserrat_32
+                              text_color: 0x333333
                               text: "50 %"
-                    # 横向亮度滑块
-                    - slider:
-                        width: 500
-                        height: 40
-                        radius: 20
-                        min_value: 0
-                        max_value: 255
-                        id: backlight_slider
-                        bg_color: 0xECECEC
-                        bg_opa: COVER
-                        indicator:
-                          radius: 20
-                          bg_color: 0xFFB90B
-                        knob:
-                          bg_opa: TRANSP
-                        on_boot:
-                          - lambda: |-
-                              lv_obj_move_foreground(id(backlight_slider));
-                        on_release:
-                          - light.turn_on:
-                              id: backlight
-                              brightness: !lambda return x / 255.0;
-                          - lambda: id(backlight_brightness_val) = int(x);
-                          - lvgl.label.update:
-                              id: backlight_bright_label
-                              text: !lambda |-
-                                int percent = int(x) * 100 / 255;
-                                return std::to_string(percent) + " %";
-                          - logger.log:
-                              format: "屏幕亮度: %d%%"
-                              args: [int((x*100)/255)]
-                          - homeassistant.action:
-                              action: light.turn_on
-                              data:
-                                entity_id: light.tab5_display_backlight
-                                brightness: !lambda return int(x);
+                              align: CENTER
+                              y: 2
         # 页面标题
         - label:
             x: 220
@@ -1303,6 +1241,7 @@ script:
                 lv_obj_clear_state(buttons[i], LV_STATE_CHECKED);
               }
               bool selected = (i == active);
+              // 动态应用导航标签样式: nav_label_activate(深青色) / nav_label_inactivate(深灰绿)
               lv_obj_add_style(labels[i], selected ? id(nav_label_activate) : id(nav_label_inactivate), LV_PART_MAIN);
               lv_label_set_text(icons[i], selected ? icon_checked[i] : icon_unchecked[i]);
           }
