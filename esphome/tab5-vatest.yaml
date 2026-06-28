@@ -14,11 +14,27 @@ esphome:
   name: tab5-ha-hmi-ew
   friendly_name: M5Stack Tab5
   min_version: 2025.12.0
-  # 启动时初始化语音助手 UI
+  # ★ 关键：project.name 必须设为 "esphome.voice-assistant"
+  #   这是 Home Assistant 识别 ESPHome 设备为「Assist satellite」的标识
+  #   没有这个配置，HA 设备页面不会出现「Assist satellite」配置面板
+  #   （即无法选择 pipeline、唤醒词等）
+  #   参考: https://github.com/esphome/wake-word-voice-assistants
+  project:
+    name: esphome.voice-assistant
+    version: dev
+  # 启动时初始化：先更新 UI，30 秒后如果还在初始化状态就强制重置
+  # （与参考项目 m5-tab5 对齐，防止 HA 长时间未连接导致 UI 卡在初始化状态）
   on_boot:
     priority: 600
     then:
       - script.execute: voice_ui_update
+      - delay: 30s
+      - if:
+          condition:
+            lambda: return id(init_in_progress);
+          then:
+            - lambda: id(init_in_progress) = false;
+            - script.execute: voice_ui_update
 
 # 日志配置
 logger:
