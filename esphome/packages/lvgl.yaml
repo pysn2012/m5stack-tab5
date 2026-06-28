@@ -511,8 +511,10 @@ lvgl:
                                 - lvgl.label.update:
                                     id: backlight_bright_label
                                     text: !lambda |-
+                                      static char buf[16];
                                       int percent = int(x) * 100 / 255;
-                                      return std::to_string(percent) + " %";
+                                      snprintf(buf, sizeof(buf), "%d %%", percent);
+                                      return buf;
                                 - homeassistant.action:
                                     action: light.turn_on
                                     data:
@@ -576,7 +578,9 @@ lvgl:
                                 - lvgl.label.update:
                                     id: volume_label
                                     text: !lambda |-
-                                      return std::to_string(int(x)) + " %";
+                                      static char buf[16];
+                                      snprintf(buf, sizeof(buf), "%d %%", int(x));
+                                      return buf;
                           - label:
                               id: volume_label
                               text_font: montserrat_32

@@ -10,7 +10,7 @@ script:
             id(light_panel_btn)
           };
           for (auto* btn : btns) {
-            lv_obj_set_ext_click_area(btn, 180, 180, 180, 180);
+            lv_obj_set_ext_click_area(btn, 180);
           }
 
   # 更新导航栏 UI 脚本
@@ -68,11 +68,11 @@ script:
       - lvgl.label.update:
           id: outdoor_label
           text: !lambda |-
-            char buf[128];
+            static char buf[128];
             snprintf(buf, sizeof(buf), "室外：%.1f°C  %.0f%%  %.0fhPa  %.0fppm",
               id(outdoor_temp_val), id(outdoor_humi_val),
               id(outdoor_pres_val), id(outdoor_pm25_val));
-            return std::string(buf);
+            return buf;
 
   # 更新室内信息标签
   - id: update_indoor_label
@@ -80,10 +80,10 @@ script:
       - lvgl.label.update:
           id: indoor_label
           text: !lambda |-
-            char buf[64];
+            static char buf[64];
             snprintf(buf, sizeof(buf), "室内：%.1f°C  %.0f%%",
               id(indoor_temp_val), id(indoor_humi_val));
-            return std::string(buf);
+            return buf;
 
   # 更新弱电功率标签
   - id: update_weak_power_label
@@ -91,10 +91,10 @@ script:
       - lvgl.label.update:
           id: weak_power_label
           text: !lambda |-
-            char buf[64];
+            static char buf[64];
             snprintf(buf, sizeof(buf), "弱电：%.1fW  %.0fWh",
               id(weak_power_val), id(weak_total_val));
-            return std::string(buf);
+            return buf;
 
   # 更新书桌功率标签
   - id: update_desk_power_label
@@ -102,7 +102,7 @@ script:
       - lvgl.label.update:
           id: desk_power_label
           text: !lambda |-
-            char buf[64];
+            static char buf[64];
             snprintf(buf, sizeof(buf), "书桌：%.1fW  %.0fWh",
               id(desk_power_val), id(desk_total_val));
-            return std::string(buf);
+            return buf;

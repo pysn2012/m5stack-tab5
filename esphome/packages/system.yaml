@@ -82,7 +82,9 @@ sensor:
       - lvgl.label.update:
           id: sys_rssi_label
           text: !lambda |-
-            return "信号：" + std::to_string(int(x)) + " dBm";
+            static char buf[32];
+            snprintf(buf, sizeof(buf), "信号：%d dBm", int(x));
+            return buf;
 
   # 设备运行时间
   - platform: uptime
@@ -97,10 +99,10 @@ sensor:
             int days = total / 86400;
             int hours = (total % 86400) / 3600;
             int mins = (total % 3600) / 60;
-            char buf[32];
+            static char buf[32];
             if (days > 0) snprintf(buf, sizeof(buf), "运行：%dd %02d:%02d", days, hours, mins);
             else snprintf(buf, sizeof(buf), "运行：%02d:%02d:%02d", hours, mins, total % 60);
-            return std::string(buf);
+            return buf;
 
   # 电池电量百分比计算（基于电压）
   - platform: template
@@ -208,11 +210,13 @@ text_sensor:
       - lvgl.label.update:
           id: backlight_bright_label
           text: !lambda |-
+            static char buf[16];
             if ( x.empty() || x == "None" || x == "null" ) return "off";
             else if ( x == "unknown" || x == "unavailable" ) return "unavailable";
             else {
               int percent = std::stoi(x) * 100 / 255;
-              return std::to_string(percent) + " %";
+              snprintf(buf, sizeof(buf), "%d %%", percent);
+              return buf;
             }
 
   # 设备端背光亮度值（用于同步到 HA）
@@ -233,4 +237,6 @@ text_sensor:
           - lvgl.label.update:
               id: sys_ip_label
               text: !lambda |-
-                return "IP地址：" + x;
+                static std::string buf;
+                buf = "IP地址：" + x;
+                return buf.c_str();
