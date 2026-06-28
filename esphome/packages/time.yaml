@@ -1,27 +1,25 @@
-# 时间同步
+# 时间同步配置（Home Assistant + RX8130 实时时钟）
 time:
   - platform: homeassistant
     id: ha_time
-    timezone: Asia/Shanghai
     on_time_sync:
-      - script.execute: time_update
+      then:
+        rx8130.write_time:
+  - platform: rx8130
+    id: rx8130_time
+    update_interval: never
     on_time:
-      - minutes: '*'
-        seconds: 0
+      # 就绪后每3秒更新一次
+      - seconds: /3
         then:
-          - script.execute: time_update
+          - lvgl.label.update:
+              id: time_label
+              text: !lambda |-
+                auto t = id(ha_time).now();
+                return t.strftime("%H:%M").c_str();
 
-# 更新时间
-script:
-  - id: time_update
-    then:
-      # 更新时间
-      - lvgl.label.update:
-          id: display_time
-          text: !lambda |-
-            static char dt_buf[20]; // "YYYY-MM-DD HH:MM" + \0 → 最多17字符，20足够
-            auto now = id(ha_time).now();
-            snprintf(dt_buf, sizeof(dt_buf), "%04d-%02d-%02d %02d:%02d",
-                     now.year, now.month, now.day_of_month,
-                     now.hour, now.minute);
-            return dt_buf;
+          - lvgl.label.update:
+              id: date_label
+              text: !lambda |-
+                auto t = id(ha_time).now();
+                return t.strftime("%Y-%m-%d %a").c_str();

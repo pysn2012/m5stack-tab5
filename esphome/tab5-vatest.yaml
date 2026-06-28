@@ -149,14 +149,6 @@ switch:
     pin:
       pi4ioe5v6408: pi4ioe1
       number: 0
-  # 扬声器使能
-  - platform: gpio
-    id: speaker_enable
-    name: "Speaker Enable"
-    pin:
-      pi4ioe5v6408: pi4ioe1
-      number: 1
-    restore_mode: ALWAYS_ON
   # 外部5V电源
   - platform: gpio
     id: external_5v_power
@@ -189,25 +181,6 @@ binary_sensor:
 
 # 选择器配置, DAC输出需要手动或通过自动化切换到 LINE1 以使用板载扬声器
 select:
-  # ES8388 音频编解码器配置，支持输出选择
-  - platform: es8388
-    dac_output:
-      id: es8388_dac_output
-      internal: true
-  - platform: template
-    name: "Tab5 DAC Output"
-    id: tab5_dac_output_template
-    options:
-      - "LINE1"
-      - "LINE2"
-      - "BOTH"
-    restore_value: true
-    optimistic: true
-    on_value:
-      then:
-        - select.set:
-            id: es8388_dac_output
-            option: !lambda "return x;"
   # WiFi 天线切换
   - platform: template
     id: wifi_antenna_select
@@ -468,57 +441,6 @@ light:
     initial_state:
       brightness: "50%"
 
-# I2S 音频总线配置
-i2s_audio:
-  - id: mic_bus
-    i2s_lrclk_pin: GPIO29
-    i2s_bclk_pin: GPIO27
-    i2s_mclk_pin: GPIO30
-
-# ES7210 音频 ADC 配置（麦克风输入）
-audio_adc:
-  - platform: es7210
-    id: es7210_adc
-    bits_per_sample: 16bit
-    sample_rate: 16000
-
-# 麦克风配置
-microphone:
-  - platform: i2s_audio
-    id: tab5_microphone
-    i2s_din_pin: GPIO28
-    sample_rate: 16000
-    bits_per_sample: 16bit
-    adc_type: external
-
-# ES8388 音频 DAC 配置（扬声器输出）
-audio_dac:
-  - platform: es8388
-    id: es8388_dac
-
-# 扬声器配置
-speaker:
-  - platform: i2s_audio
-    id: tab5_speaker
-    i2s_dout_pin: GPIO26
-    audio_dac: es8388_dac
-    dac_type: external
-    channel: mono
-    buffer_duration: 100ms
-    bits_per_sample: 16bit
-    sample_rate: 48000
-
-# 媒体播放器配置
-media_player:
-  - platform: speaker
-    name: tab5_media_player
-    id: speaker_player
-    announcement_pipeline:
-      speaker: tab5_speaker
-      format: FLAC
-      sample_rate: 48000
-      num_channels: 1
-
 # 时间同步配置（Home Assistant + RX8130 实时时钟）
 time:
   - platform: homeassistant
@@ -719,15 +641,10 @@ lvgl:
     - script.execute: expand_nav_btn_click_area    # 扩展导航按钮点击区域
     - script.execute: nav_rail_update              # 更新导航栏 UI
     - script.execute: sync_ha                      # 同步 Home Assistant 状态
-    # 同步唤醒词按钮 UI 状态
+    # 同步唤醒词按钮 UI 状态（常开）
     - lambda: |-
-        if (id(voice_wake_word_switch).state) {
-          lv_label_set_text(id(voice_wake_label), "\U000F036C Ok Nabu");
-          lv_obj_set_style_text_color(id(voice_wake_label), lv_color_hex(0x4CD964), LV_PART_MAIN);
-        } else {
-          lv_label_set_text(id(voice_wake_label), "\U000F036C Ok Nabu");
-          lv_obj_set_style_text_color(id(voice_wake_label), lv_color_hex(0xA3A8B5), LV_PART_MAIN);
-        }
+        lv_label_set_text(id(voice_wake_label), "\U000F036C Ok Nabu");
+        lv_obj_set_style_text_color(id(voice_wake_label), lv_color_hex(0x4CD964), LV_PART_MAIN);
 
   byte_order: little_endian
   color_depth: 16
@@ -1113,13 +1030,11 @@ lvgl:
                   bg_color: 0xECECEC
                   border_opa: TRANSP
                   shadow_opa: TRANSP
-                  on_short_click:
-                    - switch.toggle: voice_wake_word_switch
                   widgets:
                     - label:
                         id: voice_wake_label
                         text_font: noto_sans_sc_32
-                        text_color: 0xA3A8B5
+                        text_color: 0x4CD964
                         text: "\U000F036C Ok Nabu"
                         align: CENTER
         # 页面标题

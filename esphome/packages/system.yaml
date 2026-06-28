@@ -1,0 +1,236 @@
+# 选择器配置
+select:
+  # ES8388 音频编解码器配置，支持输出选择
+  - platform: es8388
+    dac_output:
+      id: es8388_dac_output
+      internal: true
+  - platform: template
+    name: "Tab5 DAC Output"
+    id: tab5_dac_output_template
+    options:
+      - "LINE1"    # 板载扬声器
+      - "LINE2"    # 耳机
+      - "BOTH"
+    restore_value: true
+    optimistic: true
+    on_value:
+      then:
+        - select.set:
+            id: es8388_dac_output
+            option: !lambda "return x;"
+  # WiFi 天线切换
+  - platform: template
+    id: wifi_antenna_select
+    name: "WiFi Antenna"
+    options:
+      - "Internal"    # 内置天线
+      - "External"    # 外置天线
+    optimistic: true
+    on_value:
+      - if:
+          condition:
+            lambda: return i == 0;    # 如果选择了第0项（Internal）
+          then:
+            - switch.turn_off: wifi_antenna_int_ext   # 关闭外置天线开关
+          else:
+            - switch.turn_on: wifi_antenna_int_ext    # 打开外置天线开关
+
+# 二进制传感器配置
+binary_sensor:
+  # 充电状态
+  - platform: gpio
+    id: charging
+    name: "Charging Status"
+    pin:
+      pi4ioe5v6408: pi4ioe2
+      number: 6
+      mode: INPUT_PULLDOWN
+    on_press:
+      - lambda: id(battery_percent).update();
+    on_release:
+      - lambda: id(battery_percent).update();
+  # 耳机检测
+  - platform: gpio
+    id: headphone_detect
+    name: "Headphone Detect"
+    pin:
+      pi4ioe5v6408: pi4ioe1
+      number: 7
+
+sensor:
+  # INA226 电池电压电流传感器
+  - platform: ina226
+    address: 0x41
+    adc_averaging: 16
+    max_current: 8.192A
+    shunt_resistance: 0.005ohm
+    bus_voltage:
+      id: battery_voltage
+      name: Battery Voltage
+    current:
+      id: battery_current
+      name: Battery Current
+      # 正值表示放电，负值表示充电
+
+  # WiFi 信号强度
+  - platform: wifi_signal
+    id: wifi_rssi
+    name: "WiFi Signal"
+    update_interval: 60s
+    on_value:
+      - lvgl.label.update:
+          id: sys_rssi_label
+          text: !lambda |-
+            return std::to_string(int(x)) + " dBm";
+
+  # 设备运行时间
+  - platform: uptime
+    id: device_uptime
+    name: "Uptime"
+    update_interval: 60s
+    on_value:
+      - lvgl.label.update:
+          id: sys_uptime_label
+          text: !lambda |-
+            int total = int(x);
+            int days = total / 86400;
+            int hours = (total % 86400) / 3600;
+            int mins = (total % 3600) / 60;
+            char buf[32];
+            if (days > 0) snprintf(buf, sizeof(buf), "%dd %02d:%02d", days, hours, mins);
+            else snprintf(buf, sizeof(buf), "%02d:%02d", hours, mins);
+            return std::string(buf);
+
+  # 电池电量百分比计算（基于电压）
+  - platform: template
+    id: battery_percent
+    name: "Battery Percentage"
+    unit_of_measurement: "%"
+    accuracy_decimals: 0
+    lambda: |-
+      float voltage = id(battery_voltage).state;
+      float min_voltage = 6.0;
+      float max_voltage = 8.4;
+
+      if (voltage < 5.0) return 0.0;
+      if (voltage <= min_voltage) return 0.0;
+      if (voltage >= max_voltage) return 100.0;
+
+      float percent = ((voltage - min_voltage) / (max_voltage - min_voltage)) * 100.0;
+      return percent;
+    update_interval: 30s
+    on_value:
+      - lvgl.label.update:
+          id: pwr_bat_icon_label
+          text: !lambda |-
+            float voltage = id(battery_voltage).state;
+            float current = id(battery_current).state;
+            bool charging_pin = id(charging).state;
+            int level = int(x);
+
+            // 未检测到电池
+            if (voltage < 5.0) {
+              return "\U000F06A5";  // 电源插头图标
+            }
+
+            // 根据充电状态选择图标集
+            bool is_charging = (current < -0.1 || charging_pin);
+
+            // 使用 level/10 分档：0-9=0, 10-19=1, 20-29=2, 等等
+            int bracket = level / 10;
+
+            if (is_charging) {
+              // 充电状态图标
+              switch (bracket) {
+                case 10:
+                case 9:
+                  return "\U000F0085";  // 充电-100%
+                case 8:
+                  return "\U000F008B";  // 充电-90%
+                case 7:
+                  return "\U000F008A";  // 充电-80%
+                case 6:
+                  return "\U000F089E";  // 充电-70%
+                case 5:
+                  return "\U000F0089";  // 充电-60%
+                case 4:
+                  return "\U000F089D";  // 充电-50%
+                case 3:
+                  return "\U000F0088";  // 充电-40%
+                case 2:
+                  return "\U000F0087";  // 充电-30%
+                case 1:
+                  return "\U000F0086";  // 充电-20%
+                default:
+                  return "\U000F089C";  // 充电-10%
+              }
+            } else {
+              // 普通电池图标
+              switch (bracket) {
+                case 10:
+                case 9:
+                  return "\U000F0079";  // 电池-100%
+                case 8:
+                  return "\U000F0082";  // 电池-90%
+                case 7:
+                  return "\U000F0081";  // 电池-80%
+                case 6:
+                  return "\U000F0080";  // 电池-70%
+                case 5:
+                  return "\U000F007F";  // 电池-60%
+                case 4:
+                  return "\U000F007E";  // 电池-50%
+                case 3:
+                  return "\U000F007D";  // 电池-40%
+                case 2:
+                  return "\U000F007C";  // 电池-30%
+                case 1:
+                  return "\U000F007B";  // 电池-20%
+                default:
+                  return "\U000F007A";  // 电池-10%
+              }
+            }
+
+text_sensor:
+  # 背光亮度值同步（从 HA 获取当前亮度）
+  - platform: homeassistant
+    id: backlight_brightness
+    entity_id: light.tab5_display_backlight
+    attribute: brightness
+    on_value:
+      - lvgl.slider.update:
+          id: backlight_slider
+          value: !lambda |-
+            if (x.empty() || x == "None" || x == "null" || x == "unknown" || x == "unavailable") 
+                return 0;
+            return std::stoi(x);
+      - lvgl.label.update:
+          id: backlight_bright_label
+          text: !lambda |-
+            if ( x.empty() || x == "None" || x == "null" ) return "off";
+            else if ( x == "unknown" || x == "unavailable" ) return "unavailable";
+            else {
+              int percent = std::stoi(x) * 100 / 255;
+              return std::to_string(percent) + " %";
+            }
+
+  # 设备端背光亮度值（用于同步到 HA）
+  - platform: template
+    id: device_backlight_brightness
+    name: "Device Backlight Brightness"
+    update_interval: never
+    lambda: |-
+      return std::to_string(id(backlight_brightness_val));
+
+  # WiFi IP 地址
+  - platform: wifi_info
+    ip_address:
+      id: wifi_ip
+      name: "WiFi IP Address"
+      on_value:
+        then:
+          - lvgl.label.update:
+              id: sys_ip_label
+              text: !lambda |-
+                return "IP: " + x;

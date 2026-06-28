@@ -1,4 +1,4 @@
-# ESP32主控配置
+# ESP32-P4 主控芯片配置
 esp32:
   variant: esp32p4
   flash_size: 16MB
@@ -118,66 +118,6 @@ switch:
       pi4ioe5v6408: pi4ioe1
       number: 2
 
-# 二进制传感器配置
-binary_sensor:
-  # 充电状态
-  - platform: gpio
-    id: charging
-    name: "Charging Status"
-    pin:
-      pi4ioe5v6408: pi4ioe2
-      number: 6
-      mode: INPUT_PULLDOWN
-    on_press:
-      - lambda: id(battery_percent).update();
-    on_release:
-      - lambda: id(battery_percent).update();
-  # 耳机检测
-  - platform: gpio
-    id: headphone_detect
-    name: "Headphone Detect"
-    pin:
-      pi4ioe5v6408: pi4ioe1
-      number: 7
-
-# 选择器配置
-select:
-  # ES8388 音频编解码器配置，支持输出选择
-  - platform: es8388
-    dac_output:
-      id: es8388_dac_output
-      internal: true
-  - platform: template
-    name: "Tab5 DAC Output"
-    id: tab5_dac_output_template
-    options:
-      - "LINE1"    # 板载扬声器
-      - "LINE2"    # 耳机
-      - "BOTH"
-    restore_value: true
-    optimistic: true
-    on_value:
-      then:
-        - select.set:
-            id: es8388_dac_output
-            option: !lambda "return x;"
-  # WiFi 天线切换
-  - platform: template
-    id: wifi_antenna_select
-    name: "WiFi Antenna"
-    options:
-      - "Internal"    # 内置天线
-      - "External"    # 外置天线
-    optimistic: true
-    on_value:
-      - if:
-          condition:
-            lambda: return i == 0;    # 如果选择了第0项（Internal）
-          then:
-            - switch.turn_off: wifi_antenna_int_ext   # 关闭外置天线开关
-          else:
-            - switch.turn_on: wifi_antenna_int_ext    # 打开外置天线开关
-
 # LDO 稳压器配置（为触摸屏等供电）
 esp_ldo:
   - voltage: 2.5V
@@ -197,7 +137,6 @@ display:
     show_test_card: false
     auto_clear_enabled: false
     update_interval: never
-    #rotation: 270                   LVGL不可使用
 
 # 触摸屏配置
 touchscreen:
@@ -245,3 +184,30 @@ light:
     initial_state:
       brightness: "50%"
 
+# I2S 音频总线配置
+i2s_audio:
+  - id: mic_bus
+    i2s_lrclk_pin: GPIO29
+    i2s_bclk_pin: GPIO27
+    i2s_mclk_pin: GPIO30
+
+# ES7210 音频 ADC 配置（麦克风输入）
+audio_adc:
+  - platform: es7210
+    id: es7210_adc
+    bits_per_sample: 16bit
+    sample_rate: 16000
+
+# 麦克风配置
+microphone:
+  - platform: i2s_audio
+    id: tab5_microphone
+    i2s_din_pin: GPIO28
+    sample_rate: 16000
+    bits_per_sample: 16bit
+    adc_type: external
+
+# ES8388 音频 DAC 配置（扬声器输出）
+audio_dac:
+  - platform: es8388
+    id: es8388_dac

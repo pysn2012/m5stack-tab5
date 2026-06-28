@@ -1,146 +1,268 @@
-# I2S 音频总线配置
-i2s_audio:
-  - id: mic_bus
-    i2s_lrclk_pin: GPIO29
-    i2s_bclk_pin: GPIO27
-    i2s_mclk_pin: GPIO30
-
-# ES7210 音频 ADC 配置（麦克风输入）
-audio_adc:
-  - platform: es7210
-    id: es7210_adc
-    bits_per_sample: 16bit
-    sample_rate: 16000
-
-# 麦克风配置
-microphone:
-  - platform: i2s_audio
-    id: tab5_microphone
-    i2s_din_pin: GPIO28
-    sample_rate: 16000
-    bits_per_sample: 16bit
-    adc_type: external
-
-# ES8388 音频 DAC 配置（扬声器输出）
-audio_dac:
-  - platform: es8388
-    id: es8388_dac
-
-# 扬声器配置
 speaker:
   - platform: i2s_audio
-    id: tab5_speaker
+    id: box_speaker
     i2s_dout_pin: GPIO26
     audio_dac: es8388_dac
     dac_type: external
     channel: mono
     buffer_duration: 100ms
+    timeout: 2000ms
     bits_per_sample: 16bit
     sample_rate: 48000
 
-# 媒体播放器配置
+# 媒体播放器，用于播放TTS和提示音
 media_player:
   - platform: speaker
-    name: tab5_media_player
-    id: speaker_player
+    name: None
+    id: speaker_media_player
+    volume_min: 0.5
+    volume_max: 0.8
     announcement_pipeline:
-      speaker: tab5_speaker
+      speaker: box_speaker
       format: FLAC
       sample_rate: 48000
       num_channels: 1
+    files:
+      - id: timer_finished_sound
+        file: https://github.com/pysn2012/wake-word-voice-assistants/raw/main/sounds/timer_finished.flac
+    on_announcement:
+      # 如果麦克风正在录音，则停止唤醒词（mWW或VA）
+      - if:
+          condition:
+            - microphone.is_capturing:
+          then:
+            - script.execute: stop_wake_word
+            # Ensure VA stops before moving on
+            - if:
+                condition:
+                  - lambda: return id(wake_word_engine_location).current_option() == "In Home Assistant";
+                then:
+                  - wait_until:
+                      - not:
+                          voice_assistant.is_running:
+      # 语音助手（VA）未运行，这是用户主动发起的媒体播放。显示静音界面。
+      - if:
+          condition:
+            not:
+              voice_assistant.is_running:
+          then:
+            - lambda: id(voice_assistant_phase) = ${voice_assist_muted_phase_id};
+            - script.execute: draw_display
+    on_idle:
+      # 语音助手（VA）未运行，这是用户主动发起的媒体播放结束。重新启动唤醒词。
+      - if:
+          condition:
+            not:
+              voice_assistant.is_running:
+          then:
+            - script.execute: start_wake_word
+            - script.execute: set_idle_or_mute_phase
+            - script.execute: draw_display
 
-# ── 唤醒词检测 ─────────────────────────────────────────────────
+# 设备端唤醒词引擎 (microWakeWord)，使用 "okay_nabu" 模型
 micro_wake_word:
   id: mww
   models:
     - okay_nabu
   on_wake_word_detected:
-    - if:
-        condition:
-          switch.is_on: voice_wake_word_switch
-        then:
-          - voice_assistant.start:
-              wake_word: !lambda return wake_word;
+    - voice_assistant.start:
+        wake_word: !lambda return wake_word;
 
-# ── 语音助手 ───────────────────────────────────────────────────
-# 状态回调通过 lambda 修改 LVGL 麦克风图标颜色:
-#   空闲(灰) → 聆听(绿) → 识别完成(橙) → 播报(蓝) → 空闲(灰)
-#   出错(红) → 2秒后 → 空闲(灰)
+# 语音助手核心配置
 voice_assistant:
   id: va
-  microphone: tab5_microphone
-  media_player: speaker_player
+  microphone: box_mic
+  media_player: speaker_media_player
   micro_wake_word: mww
-
+  noise_suppression_level: 2
+  auto_gain: 31dBFS
+  volume_multiplier: 2.0
+  # 定义了语音助手各个生命周期事件的回调，如开始监听、结束监听、开始播放TTS等。
+  # 在这些回调中，会更新屏幕显示状态、发布文本传感器值等。
   on_listening:
-    - lambda: |-
-        lv_obj_set_style_text_color(id(voice_mic_icon), lv_color_hex(0x4CD964), LV_PART_MAIN);
-
+    - lambda: id(voice_assistant_phase) = ${voice_assist_listening_phase_id};
+    - text_sensor.template.publish:
+        id: text_request
+        state: "..."
+    - text_sensor.template.publish:
+        id: text_response
+        state: "..."
+    - script.execute: draw_display
+  on_stt_vad_end:
+    - lambda: id(voice_assistant_phase) = ${voice_assist_thinking_phase_id};
+    - script.execute: draw_display
   on_stt_end:
-    - lambda: |-
-        lv_obj_set_style_text_color(id(voice_mic_icon), lv_color_hex(0xFFA500), LV_PART_MAIN);
-
+    - text_sensor.template.publish:
+        id: text_request
+        state: !lambda return x;
+    - script.execute: draw_display
   on_tts_start:
-    - lambda: |-
-        lv_obj_set_style_text_color(id(voice_mic_icon), lv_color_hex(0x4D94FF), LV_PART_MAIN);
-
+    - text_sensor.template.publish:
+        id: text_response
+        state: !lambda return x;
+    - lambda: id(voice_assistant_phase) = ${voice_assist_replying_phase_id};
+    - script.execute: draw_display
   on_end:
-    - lambda: |-
-        lv_obj_set_style_text_color(id(voice_mic_icon), lv_color_hex(0xA3A8B5), LV_PART_MAIN);
+    # 短暂等待，以确认是否有播报开始
     - wait_until:
         condition:
-          media_player.is_announcing:
-        timeout: 3s
+          - media_player.is_announcing:
+        timeout: 0.5s
+    # 播报已完成，I2S总线已空闲
     - wait_until:
-        condition:
-          and:
+        - and:
             - not:
                 media_player.is_announcing:
             - not:
-                speaker.is_playing: tab5_speaker
+                speaker.is_playing:
+    # 如果启用了手动唤醒词（mWW），则仅重启它；流式唤醒词会自动重启
     - if:
         condition:
-          switch.is_on: voice_wake_word_switch
+          - lambda: return id(wake_word_engine_location).current_option() == "On device";
         then:
+          - lambda: id(va).set_use_wake_word(false);
           - micro_wake_word.start:
-
+    - script.execute: set_idle_or_mute_phase
+    - script.execute: draw_display
+    # 清除文本传感器
+    - text_sensor.template.publish:
+        id: text_request
+        state: ""
+    - text_sensor.template.publish:
+        id: text_response
+        state: ""
   on_error:
-    - lambda: |-
-        lv_obj_set_style_text_color(id(voice_mic_icon), lv_color_hex(0xFF4D4D), LV_PART_MAIN);
-    - delay: 2s
-    - lambda: |-
-        lv_obj_set_style_text_color(id(voice_mic_icon), lv_color_hex(0xA3A8B5), LV_PART_MAIN);
     - if:
         condition:
-          switch.is_on: voice_wake_word_switch
+          lambda: return !id(init_in_progress);
         then:
-          - micro_wake_word.start:
-
-# ── 唤醒词开关 ─────────────────────────────────────────────────
+          - lambda: id(voice_assistant_phase) = ${voice_assist_error_phase_id};
+          - script.execute: draw_display
+          - delay: 1s
+          - if:
+              condition:
+                switch.is_off: mute
+              then:
+                - lambda: id(voice_assistant_phase) = ${voice_assist_idle_phase_id};
+              else:
+                - lambda: id(voice_assistant_phase) = ${voice_assist_muted_phase_id};
+          - script.execute: draw_display
+  on_client_connected:
+    - lambda: id(init_in_progress) = false;
+    - script.execute: start_wake_word
+    - script.execute: set_idle_or_mute_phase
+    - script.execute: draw_display
+  on_client_disconnected:
+    - script.execute: stop_wake_word
+    - lambda: id(voice_assistant_phase) = ${voice_assist_not_ready_phase_id};
+    - script.execute: draw_display
+  # 计时器相关回调
+  on_timer_started:
+    - script.execute: draw_display
+  on_timer_cancelled:
+    - script.execute: draw_display
+  on_timer_updated:
+    - script.execute: draw_display
+  on_timer_tick:
+    - script.execute: draw_display
+  on_timer_finished:
+    - switch.turn_on: timer_ringing
+    - wait_until:
+        media_player.is_announcing:
+    - lambda: id(voice_assistant_phase) = ${voice_assist_timer_finished_phase_id};
+    - script.execute: draw_display
+    
+# 开关 (Switches)
 switch:
+  # 软件静音开关
   - platform: template
-    name: "Voice Wake Word"
-    id: voice_wake_word_switch
-    icon: mdi:microphone
+    name: Mute
+    id: mute
+    icon: "mdi:microphone-off"
     optimistic: true
     restore_mode: RESTORE_DEFAULT_OFF
-    turn_on_action:
-      - micro_wake_word.start:
-    turn_off_action:
-      - micro_wake_word.stop:
-    on_state:
+    entity_category: config
+    on_turn_off:
+      - microphone.unmute:
+      - lambda: id(voice_assistant_phase) = ${voice_assist_idle_phase_id};
+      - script.execute: draw_display
+    on_turn_on:
+      - microphone.mute:
+      - lambda: id(voice_assistant_phase) = ${voice_assist_muted_phase_id};
+      - script.execute: draw_display
+  - platform: template
+    id: timer_ringing
+    optimistic: true
+    internal: true
+    restore_mode: ALWAYS_OFF
+    on_turn_off:
+      # 关闭重复模式并禁用播放列表项之间的暂停间隔
       - lambda: |-
-          if (x) {
-            lv_label_set_text(id(voice_wake_label), "\U000F036C Ok Nabu");
-            lv_obj_set_style_text_color(id(voice_wake_label), lv_color_hex(0x4CD964), LV_PART_MAIN);
-          } else {
-            lv_label_set_text(id(voice_wake_label), "\U000F036C Ok Nabu");
-            lv_obj_set_style_text_color(id(voice_wake_label), lv_color_hex(0xA3A8B5), LV_PART_MAIN);
-          }
+              id(speaker_media_player)
+                ->make_call()
+                .set_command(media_player::MediaPlayerCommand::MEDIA_PLAYER_COMMAND_REPEAT_OFF)
+                .set_announcement(true)
+                .perform();
+              id(speaker_media_player)->set_playlist_delay_ms(speaker::AudioPipelineType::ANNOUNCEMENT, 0);
+      # 停止闹钟播放
+      - media_player.stop:
+          announcement: true
+    on_turn_on:
+      # 开启重复模式，并在播放列表项/重复项之间暂停 1000 毫秒
+      - lambda: |-
+            id(speaker_media_player)
+              ->make_call()
+              .set_command(media_player::MediaPlayerCommand::MEDIA_PLAYER_COMMAND_REPEAT_ONE)
+              .set_announcement(true)
+              .perform();
+            id(speaker_media_player)->set_playlist_delay_ms(speaker::AudioPipelineType::ANNOUNCEMENT, 1000);
+      - media_player.speaker.play_on_device_media_file:
+          media_file: timer_finished_sound
+          announcement: true
+      - delay: 15min
+      - switch.turn_off: timer_ringing
 
-# ── 全局变量 ───────────────────────────────────────────────────
-globals:
-  - id: voice_assistant_active
-    type: bool
-    initial_value: 'false'
-    restore_value: false
+select:
+# 选择器 (Select): 允许用户在UI中选择唤醒词引擎运行位置（设备端或HA端）
+  - platform: template
+    entity_category: config
+    name: Wake word engine location
+    id: wake_word_engine_location
+    icon: "mdi:account-voice"
+    optimistic: true
+    restore_value: true
+    options:
+      - In Home Assistant
+      - On device
+    initial_option: On device
+    on_value:
+      - if:
+          condition:
+            lambda: return !id(init_in_progress);
+          then:
+            - wait_until:
+                lambda: return id(voice_assistant_phase) == ${voice_assist_muted_phase_id} || id(voice_assistant_phase) == ${voice_assist_idle_phase_id};
+            - if:
+                condition:
+                  lambda: return x == "In Home Assistant";
+                then:
+                  - micro_wake_word.stop
+                  - delay: 500ms
+                  - if:
+                      condition:
+                        switch.is_off: mute
+                      then:
+                        - lambda: id(va).set_use_wake_word(true);
+                        - voice_assistant.start_continuous:
+            - if:
+                condition:
+                  lambda: return x == "On device";
+                then:
+                  - lambda: id(va).set_use_wake_word(false);
+                  - voice_assistant.stop
+                  - delay: 500ms
+                  - if:
+                      condition:
+                        switch.is_off: mute
+                      then:
+                        - micro_wake_word.start

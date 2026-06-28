@@ -1,0 +1,64 @@
+# 脚本定义
+script:
+  # 扩展导航按钮点击区域脚本
+  # 为导航按钮扩展可点击区域，使图标附近的触摸也能被识别
+  # 提升侧边导航栏在小触摸目标上的可用性
+  - id: expand_nav_btn_click_area
+    then:
+      - lambda: |-
+          std::vector<lv_obj_t*> btns = {
+            id(dash_panel_btn),
+            id(light_panel_btn)
+          };
+          for (auto* btn : btns) {
+            lv_obj_set_ext_click_area(btn, 180);
+          }
+
+  # 更新导航栏 UI 脚本
+  # 根据当前页面选择更新导航栏状态：设置选中按钮的选中状态、
+  # 更新图标为激活/未激活样式、应用相应的标签样式（激活/未激活颜色）
+  - id: nav_rail_update
+    then:
+      - lambda: |-
+          const int active = id(page_num);
+          lv_obj_t* buttons[] = { 
+              id(dash_panel_btn), 
+              id(light_panel_btn), 
+          };
+          lv_obj_t* icons[] = { 
+              id(dash_btn_icon), 
+              id(light_btn_icon), 
+          };
+          lv_obj_t* labels[] = { 
+              id(dash_btn_label), 
+              id(light_btn_label), 
+          };
+          const char* icon_unchecked[] = {
+              "\U000F0A1D", // 仪表盘（轮廓）
+              "\U000F08BB", // 齿轮（轮廓）
+          };
+          const char* icon_checked[] = {
+              "\U000F056E", // 仪表盘
+              "\U000F0493", // 齿轮
+          };
+
+          const int count = sizeof(buttons) / sizeof(buttons[0]);
+
+          // 更新按钮 UI 状态
+          for (int i = 0; i < count; i++) {
+              if (i == id(page_num)) {
+                lv_obj_add_state(buttons[i], LV_STATE_CHECKED);
+              } else {
+                lv_obj_clear_state(buttons[i], LV_STATE_CHECKED);
+              }
+              bool selected = (i == active);
+              // 动态应用导航标签样式: nav_label_activate(深青色) / nav_label_inactivate(深灰绿)
+              lv_obj_add_style(labels[i], selected ? id(nav_label_activate) : id(nav_label_inactivate), LV_PART_MAIN);
+              lv_label_set_text(icons[i], selected ? icon_checked[i] : icon_unchecked[i]);
+          }
+
+  # 同步 Home Assistant 状态脚本
+  # 当 UI 绘制在屏幕上时，同步 Home Assistant 实体状态到 LVGL UI
+  - id: sync_ha
+    then:
+      - logger.log: "与 Home Assistant 同步"
