@@ -842,7 +842,7 @@ lvgl:
                         text_color: 0x1A1A1A
                         text: ""
                         width: 750
-                        text_align: START
+                        text_align: LEFT
 
               # 助手答复气泡（橙色）
               - obj:
@@ -863,4 +863,4 @@ lvgl:
                         text_color: 0x1A1A1A
                         text: ""
                         width: 750
-                        text_align: START
+                        text_align: LEFT
