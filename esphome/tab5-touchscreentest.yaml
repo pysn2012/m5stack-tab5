@@ -42,6 +42,5 @@ packages:
   time: !include packages/time.yaml
   fonts: !include packages/fonts.yaml
   sensor: !include packages/sensor.yaml
-  button: !include packages/button.yaml
   script: !include packages/script.yaml
   lvgl: !include packages/lvgl.yaml
