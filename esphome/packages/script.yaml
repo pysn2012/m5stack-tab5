@@ -117,9 +117,10 @@ script:
               id(desk_power_val), id(desk_total_val));
             return buf;
 
-  # ── 语音助手 UI 更新脚本 ─────────────────────────────────────
-  # 根据 voice_assistant_phase 切换 LVGL 页面 + 更新文字/图标 + 高亮侧边栏语音按钮
-  # 说明：以下脚本会调用 voice_assistant_phase 等全局变量与 voice_page 上的 widget ID。
+  # ── 语音助手 UI 更新脚本（核心）──────────────────────────────
+  # 根据 voice_assistant_phase 更新 widget 文字/图标 + 高亮侧边栏语音按钮
+  # 注意：页面切换不能在 lambda 中调用 LVGL C API（id(voice_page) 是 LvPageType* 不是 lv_obj_t*）
+  #       需要切换页面时设置全局变量 voice_page_pending，由后续 YAML action 处理
   - id: voice_ui_update
     then:
       - lambda: |-
@@ -171,8 +172,7 @@ script:
           if (id(va_response_label) != nullptr)
             lv_label_set_text(id(va_response_label), id(text_response).state.c_str());
 
-          // 2) 如果是活跃状态（listening/thinking/replying/error/timer_finished），
-          //    且当前不在 voice_page（page_num != 3），保存当前页并跳到 voice_page
+          // 2) 判断是否需要切换到语音页（仅在活跃阶段 + 当前不在语音页时）
           bool need_show_voice_page = (phase == ${voice_assist_listening_phase_id} ||
                                        phase == ${voice_assist_thinking_phase_id} ||
                                        phase == ${voice_assist_replying_phase_id} ||
@@ -181,14 +181,13 @@ script:
           if (need_show_voice_page && id(page_num) != 3) {
             id(prev_page_num) = id(page_num);
             id(page_num) = 3;
+            id(voice_page_pending) = true;  // 标记需要后续 YAML action 切页
             id(nav_rail_update).execute();
-            lv_scr_load_anim(id(voice_page), LV_SCR_LOAD_ANIM_FADE_ON, 200, 0, false);
+          } else {
+            id(voice_page_pending) = false;
           }
 
-          // 3) 侧边栏语音按钮的高亮逻辑：
-          //    - VA 活跃时（listening/thinking/replying/timer_finished）→ 橙色高亮
-          //    - 用户停留在 voice_page 时（page_num == 3）→ 普通高亮
-          //    - 否则 → 未激活
+          // 3) 侧边栏语音按钮高亮：VA 活跃→橙色 / 在语音页→普通高亮 / 否则未激活
           bool va_active = (phase == ${voice_assist_listening_phase_id} ||
                             phase == ${voice_assist_thinking_phase_id} ||
                             phase == ${voice_assist_replying_phase_id} ||
@@ -208,6 +207,12 @@ script:
           lv_obj_add_style(id(voice_btn_label),
                            (va_active || on_voice_page) ? id(nav_label_activate) : id(nav_label_inactivate),
                            LV_PART_MAIN);
+      # 在 lambda 之后，用 YAML action 切换页面（不能在 lambda 里调 lv_scr_load_anim）
+      - if:
+          condition:
+            lambda: return id(voice_page_pending);
+          then:
+            - lvgl.page.show: voice_page
 
   # ── 启动唤醒词引擎脚本 ──────────────────────────────────────
   - id: start_wake_word
@@ -268,8 +273,25 @@ script:
           id(prev_page_num) = 3;  // 防止重复返回
       - script.execute: nav_rail_update
       - lambda: |-
-          lv_obj_t* pages[] = { id(main_page), id(socket_page), id(system_page) };
+          // 设置 return_page_pending 标记，后续 YAML action 切换页面
+          id(return_page_pending) = true;
+      - lambda: |-
+          // 根据 prev 选择要显示的页面 ID
           int prev = id(page_num);
-          if (prev >= 0 && prev <= 2) {
-            lv_scr_load_anim(pages[prev], LV_SCR_LOAD_ANIM_FADE_ON, 200, 0, false);
-          }
+          // 用全局变量记录目标页面索引（0/1/2）
+          id(return_page_target) = prev;
+      - if:
+          condition:
+            lambda: return id(return_page_target) == 0;
+          then:
+            - lvgl.page.show: main_page
+      - if:
+          condition:
+            lambda: return id(return_page_target) == 1;
+          then:
+            - lvgl.page.show: socket_page
+      - if:
+          condition:
+            lambda: return id(return_page_target) == 2;
+          then:
+            - lvgl.page.show: system_page

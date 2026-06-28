@@ -21,6 +21,21 @@ globals:
     type: int
     restore_value: false
     initial_value: "0"
+  # 标记：voice_ui_update 脚本中是否需要切换到 voice_page（lambda 不能直接调 LVGL C API 切页，需用 YAML action）
+  - id: voice_page_pending
+    type: bool
+    restore_value: false
+    initial_value: "false"
+  # 标记：return_to_previous_page 脚本中是否需要切换页面
+  - id: return_page_pending
+    type: bool
+    restore_value: false
+    initial_value: "false"
+  # return_to_previous_page 的目标页面索引（0=主页, 1=插座, 2=系统）
+  - id: return_page_target
+    type: int
+    restore_value: false
+    initial_value: "0"
 
 # ── 扬声器配置（I2S + ES8388 DAC）──────────────────────────────────
 speaker:
