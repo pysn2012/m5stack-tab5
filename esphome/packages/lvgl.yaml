@@ -107,12 +107,6 @@ lvgl:
       shadow_opa: TRANSP
       pad_top: 10           # ← 新增
       pad_bottom: 6         # ← 新增
-      layout:               # ← 新增
-        type: flex
-        flex_flow: column
-        flex_align_main: center
-        flex_align_cross: center
-        pad_row: 2
 
     - id: nav_btn_activate
       bg_color: 0xCCE8E7   # ← 从 checked 里移过来的底纹色
@@ -124,12 +118,6 @@ lvgl:
       shadow_opa: TRANSP
       pad_top: 10
       pad_bottom: 6
-      layout:
-        type: flex
-        flex_flow: column
-        flex_align_main: center
-        flex_align_cross: center
-        pad_row: 2
 
     # ── 导航图标激活样式 ─────────────────────────────────────────
     - id: nav_icon_activate
@@ -190,6 +178,12 @@ lvgl:
                       align: center
                       styles: nav_btn_inactivate
                       id: dash_panel_btn
+                      layout:
+                        type: flex
+                        flex_flow: column
+                        flex_align_main: center
+                        flex_align_cross: center
+                        pad_row: 2
                       widgets:
                         - label:
                             id: dash_btn_icon
@@ -214,6 +208,12 @@ lvgl:
                       align: center
                       styles: nav_btn_inactivate
                       id: socket_panel_btn
+                      layout:
+                        type: flex
+                        flex_flow: column
+                        flex_align_main: center
+                        flex_align_cross: center
+                        pad_row: 2
                       widgets:
                         - label:
                             id: socket_btn_icon
@@ -238,6 +238,12 @@ lvgl:
                       align: center
                       styles: nav_btn_inactivate
                       id: light_panel_btn
+                      layout:
+                        type: flex
+                        flex_flow: column
+                        flex_align_main: center
+                        flex_align_cross: center
+                        pad_row: 2
                       widgets:
                         - label:
                             id: light_btn_icon
