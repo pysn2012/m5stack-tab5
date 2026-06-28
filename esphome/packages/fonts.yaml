@@ -1,7 +1,7 @@
 substitutions:
   # 允许显示的字符集。此列表非常庞大，包含了多语言字符。
   allowed_characters: |-
-    厦门室内弱电书桌未来不会仪表盘屏幕亮度系统设备信号运行地址天气预警无小时分钟下雨大中有渐停后转为开始过就了的又客厅插座音量功耗总室外·！@#￥%…&*（）—+-=、|【{}】；：'"，《。》/？℃℉￡ abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890~`!$^()_[]\;:<.>?
+    厦门室内弱电书桌未来不会仪表盘屏幕亮度系统设备信号运行地址天气预警无小时分钟下雨大中有渐停后转为开始过就了的又客厅插座音量功耗总外·！@#￥%…&*（）—+-=、|【{}】；：'"，《。》/？℃℉￡ abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890~`!$^()_[]\;:<.>?
 
 font:
   - file: "fonts/materialdesignicons-webfont.ttf"
