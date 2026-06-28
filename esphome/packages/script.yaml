@@ -47,13 +47,17 @@ script:
           const int count = sizeof(buttons) / sizeof(buttons[0]);
 
           for (int i = 0; i < count; i++) {
-              if (i == id(page_num)) {
-                lv_obj_add_state(buttons[i], LV_STATE_CHECKED);
-              } else {
-                lv_obj_clear_state(buttons[i], LV_STATE_CHECKED);
-              }
               bool selected = (i == active);
+              
+              // 切换按钮背景样式（激活/未激活）
+              lv_obj_remove_style_all(buttons[i]);  // 清除所有样式
+              lv_obj_add_style(buttons[i], selected ? id(nav_btn_activate) : id(nav_btn_inactivate), LV_PART_MAIN);
+              
+              // 切换标签颜色
+              lv_obj_remove_style_all(labels[i]);
               lv_obj_add_style(labels[i], selected ? id(nav_label_activate) : id(nav_label_inactivate), LV_PART_MAIN);
+              
+              // 切换图标
               lv_label_set_text(icons[i], selected ? icon_checked[i] : icon_unchecked[i]);
           }
 
@@ -69,7 +73,7 @@ script:
           id: outdoor_label
           text: !lambda |-
             static char buf[128];
-            snprintf(buf, sizeof(buf), "室外：温度%.1f℃  湿度%.0f%%  气压%.0fhPa  颗粒物%.0fppm",
+            snprintf(buf, sizeof(buf), "室外：温度%.1f℃  湿度%.1f%%  气压%.1fhPa  颗粒物%.0fppm",
               id(outdoor_temp_val), id(outdoor_humi_val),
               id(outdoor_pres_val), id(outdoor_pm25_val));
             return buf;
@@ -81,7 +85,7 @@ script:
           id: indoor_label
           text: !lambda |-
             static char buf[64];
-            snprintf(buf, sizeof(buf), "室内：温度%.1f°C  湿度%.0f%%",
+            snprintf(buf, sizeof(buf), "室内：温度%.1f℃  湿度%.1f%%",
               id(indoor_temp_val), id(indoor_humi_val));
             return buf;
 

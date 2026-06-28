@@ -36,6 +36,18 @@ binary_sensor:
           state:
             checked: !lambda return x;
 
+  # 传感器：小米插座4开关
+  - platform: homeassistant
+    id: chuangmi_socket4_status
+    entity_id: switch.chuangmi_cn_393289534_212a01_on_p_2_1
+    trigger_on_initial_state: true
+    on_state:
+      then:
+        lvgl.widget.update:
+          id: chuangmi_socket4_button
+          state:
+            checked: !lambda return x;
+
 # 文本传感器配置（同步 Home Assistant 设备状态）
 text_sensor:
   # 天气预警（从 Home Assistant 获取）
