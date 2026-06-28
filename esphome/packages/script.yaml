@@ -271,15 +271,8 @@ script:
           if (prev < 0 || prev > 2) prev = 0;  // 仅允许 0/1/2
           id(page_num) = prev;
           id(prev_page_num) = 3;  // 防止重复返回
-      - script.execute: nav_rail_update
-      - lambda: |-
-          // 设置 return_page_pending 标记，后续 YAML action 切换页面
-          id(return_page_pending) = true;
-      - lambda: |-
-          // 根据 prev 选择要显示的页面 ID
-          int prev = id(page_num);
-          // 用全局变量记录目标页面索引（0/1/2）
           id(return_page_target) = prev;
+      - script.execute: nav_rail_update
       - if:
           condition:
             lambda: return id(return_page_target) == 0;

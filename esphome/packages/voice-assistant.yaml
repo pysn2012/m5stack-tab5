@@ -1,6 +1,6 @@
 # ═════════════════════════════════════════════════════════════════
 # 语音助手核心配置（适配 LVGL UI 版本）
-# 参考: https://github.com/pysn2012/wake-word-voice-assistants
+# 严格对齐参考项目: https://github.com/pysn2012/wake-word-voice-assistants/blob/main/m5-tab5/m5-tab5.yaml
 # 唤醒词: "okay nabu"  →  唤醒后可进行语音对话或语音控制
 # ═════════════════════════════════════════════════════════════════
 
@@ -23,11 +23,6 @@ globals:
     initial_value: "0"
   # 标记：voice_ui_update 脚本中是否需要切换到 voice_page（lambda 不能直接调 LVGL C API 切页，需用 YAML action）
   - id: voice_page_pending
-    type: bool
-    restore_value: false
-    initial_value: "false"
-  # 标记：return_to_previous_page 脚本中是否需要切换页面
-  - id: return_page_pending
     type: bool
     restore_value: false
     initial_value: "false"
@@ -99,17 +94,19 @@ media_player:
             - script.execute: voice_ui_update
 
 # ── 设备端唤醒词引擎 microWakeWord ─────────────────────────────────
-# 使用 "okay_nabu" 唤醒词模型（中文发音 "ok nabu"）
+# 与参考项目 m5-tab5 完全对齐
+# 加载 2 个唤醒词模型，HA 端可分别启用/禁用每个模型
 micro_wake_word:
   id: mww
   models:
     - okay_nabu
+    - model: https://raw.githubusercontent.com/pysn2012/wake-word-voice-assistants/refs/heads/main/models/hey_sarah.json
   on_wake_word_detected:
-    # 唤醒词被检测到 → 启动语音助手（带唤醒词文本）
     - voice_assistant.start:
         wake_word: !lambda return wake_word;
 
 # ── 语音助手核心 ──────────────────────────────────────────────────
+# 严格按参考项目 m5-tab5 配置，不添加任何"优化"项，避免引入兼容性问题
 voice_assistant:
   id: va
   microphone: tab5_microphone
