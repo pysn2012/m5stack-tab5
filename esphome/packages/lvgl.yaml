@@ -349,7 +349,7 @@ lvgl:
               # 3个插座按钮（并排）
               - obj:
                   width: 900
-                  height: 200
+                  height: 240
                   align: CENTER
                   y: -180
                   bg_opa: TRANSP
@@ -374,12 +374,12 @@ lvgl:
                         widgets:
                           - label:
                               text_font: extra_icon
-                              align: CENTER
+                              align: top_mid
                               text: "\U000F0425"
                           - label:
                               text_font: noto_sans_sc_32
                               text: "插座1"
-                              align: CENTER
+                              align: bottom_mid
                         on_click:
                           - homeassistant.action:
                               action: switch.toggle
@@ -398,12 +398,12 @@ lvgl:
                         widgets:
                           - label:
                               text_font: extra_icon
-                              align: CENTER
+                              align: top_mid
                               text: "\U000F0425"
                           - label:
                               text_font: noto_sans_sc_32
                               text: "插座2"
-                              align: CENTER
+                              align: bottom_mid
                         on_click:
                           - homeassistant.action:
                               action: switch.toggle
@@ -422,12 +422,12 @@ lvgl:
                         widgets:
                           - label:
                               text_font: extra_icon
-                              align: CENTER
+                              align: top_mid
                               text: "\U000F0425"
                           - label:
                               text_font: noto_sans_sc_32
                               text: "插座3"
-                              align: CENTER
+                              align: bottom_mid
                         on_click:
                           - homeassistant.action:
                               action: switch.toggle
@@ -451,7 +451,7 @@ lvgl:
                     - label:
                         id: weak_power_label
                         text_font: noto_sans_sc_32
-                        text: "弱电：功耗-- W  总电量-- Wh"
+                        text: "弱电：功耗--W  总电量--Wh"
                         grid_cell_column_pos: 0
                         grid_cell_row_pos: 0
                         grid_cell_x_align: START
@@ -460,7 +460,7 @@ lvgl:
                     - label:
                         id: desk_power_label
                         text_font: noto_sans_sc_32
-                        text: "书桌：功耗-- W  总电量-- Wh"
+                        text: "书桌：功耗--W  总电量--Wh"
                         grid_cell_column_pos: 0
                         grid_cell_row_pos: 1
                         grid_cell_x_align: START
@@ -475,7 +475,7 @@ lvgl:
               # 亮度控制条（第1行）
               - obj:
                   width: 900
-                  height: 120
+                  height: 150
                   align: CENTER
                   y: -200
                   bg_opa: TRANSP
@@ -545,7 +545,7 @@ lvgl:
               # 音量控制条（第2行）
               - obj:
                   width: 900
-                  height: 120
+                  height: 150
                   align: CENTER
                   y: -100
                   bg_opa: TRANSP

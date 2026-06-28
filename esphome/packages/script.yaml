@@ -69,7 +69,7 @@ script:
           id: outdoor_label
           text: !lambda |-
             static char buf[128];
-            snprintf(buf, sizeof(buf), "室外：%.1f°C  %.0f%%  %.0fhPa  %.0fppm",
+            snprintf(buf, sizeof(buf), "室外：温度%.1f℃  湿度%.0f%%  气压%.0fhPa  颗粒物%.0fppm",
               id(outdoor_temp_val), id(outdoor_humi_val),
               id(outdoor_pres_val), id(outdoor_pm25_val));
             return buf;
@@ -81,7 +81,7 @@ script:
           id: indoor_label
           text: !lambda |-
             static char buf[64];
-            snprintf(buf, sizeof(buf), "室内：%.1f°C  %.0f%%",
+            snprintf(buf, sizeof(buf), "室内：温度%.1f°C  湿度%.0f%%",
               id(indoor_temp_val), id(indoor_humi_val));
             return buf;
 
@@ -92,7 +92,7 @@ script:
           id: weak_power_label
           text: !lambda |-
             static char buf[64];
-            snprintf(buf, sizeof(buf), "弱电：%.1fW  %.0fWh",
+            snprintf(buf, sizeof(buf), "弱电：功率%.1fW  总电量%.0fWh",
               id(weak_power_val), id(weak_total_val));
             return buf;
 
@@ -103,6 +103,6 @@ script:
           id: desk_power_label
           text: !lambda |-
             static char buf[64];
-            snprintf(buf, sizeof(buf), "书桌：%.1fW  %.0fWh",
+            snprintf(buf, sizeof(buf), "书桌：功率%.1fW  总电量%.0fWh",
               id(desk_power_val), id(desk_total_val));
             return buf;
