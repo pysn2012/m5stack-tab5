@@ -1,6 +1,6 @@
 # 全局变量定义
 globals:
-  # 当前页面编号（0=主页, 1=插座, 2=系统）
+  # 当前页面编号（0=主页, 1=插座, 2=系统, 3=语音）
   - id: page_num
     type: int
     restore_value: no
@@ -119,6 +119,18 @@ lvgl:
       pad_top: 10
       pad_bottom: 6
 
+    # ── 语音助手按钮激活样式（橙色高亮，区别于普通导航）─────────
+    - id: va_btn_activate
+      bg_color: 0xFF8C00   # 橙色：突出语音助手激活态
+      align: CENTER
+      width: 112
+      height: 100
+      radius: 48
+      border_opa: TRANSP
+      shadow_opa: TRANSP
+      pad_top: 10
+      pad_bottom: 6
+
     # ── 导航图标激活样式 ─────────────────────────────────────────
     - id: nav_icon_activate
       align: CENTER
@@ -153,6 +165,41 @@ lvgl:
       x: 96
       pad_top: 30
       pad_left: 30
+
+    # ── 语音助手页面：状态卡片样式 ──────────────────────────────
+    - id: va_status_card
+      bg_color: 0xFFFFFF
+      bg_opa: COVER
+      border_opa: TRANSP
+      radius: 24
+      width: 900
+      height: 280
+      pad_all: 30
+      shadow_opa: TRANSP
+
+    # ── 语音助手页面：对话气泡样式（用户问）─────────────────────
+    - id: va_request_bubble
+      bg_color: 0xCCE8E7
+      bg_opa: COVER
+      border_opa: TRANSP
+      radius: 24
+      width: 800
+      height: SIZE_CONTENT
+      min_height: 80
+      pad_all: 24
+      shadow_opa: TRANSP
+
+    # ── 语音助手页面：对话气泡样式（助手答复）───────────────────
+    - id: va_response_bubble
+      bg_color: 0xFFE0B2
+      bg_opa: COVER
+      border_opa: TRANSP
+      radius: 24
+      width: 800
+      height: SIZE_CONTENT
+      min_height: 80
+      pad_all: 24
+      shadow_opa: TRANSP
 
   # 顶层导航栏和模态框
   top_layer:
@@ -258,6 +305,47 @@ lvgl:
                         - lambda: id(page_num) = 2;
                         - script.execute: nav_rail_update
                         - lvgl.page.show: system_page
+
+
+            # ── 语音助手导航按钮（侧边栏第 4 项）─────────────────
+            # 点击：跳转到语音页面 + 主动启动一次语音对话（push-to-talk）
+            # 唤醒："okay nabu" 也可自动启动
+            - obj:
+                styles: nav_btn_container
+                widgets:
+                  - button:
+                      align: center
+                      styles: nav_btn_inactivate
+                      id: voice_panel_btn
+                      layout:
+                        type: flex
+                        flex_flow: column
+                        flex_align_main: center
+                        flex_align_cross: center
+                        pad_row: 2
+                      widgets:
+                        - label:
+                            id: voice_btn_icon
+                            align: CENTER
+                            styles: nav_icon_inactivate
+                            text: "\U000F05CB" # 声音助手图标 (account-voice)
+                        - label:
+                            styles: nav_label_inactivate
+                            id: voice_btn_label
+                            text: "语音"
+                      on_press:
+                        # 跳转到语音页面
+                        - lambda: id(page_num) = 3;
+                        - script.execute: nav_rail_update
+                        - lvgl.page.show: voice_page
+                        # 主动启动一次语音助手（push-to-talk）
+                        - if:
+                            condition:
+                              not:
+                                voice_assistant.is_running:
+                            then:
+                              - script.execute: stop_wake_word
+                              - voice_assistant.start:
 
 
       # 状态栏（显示电池/WiFi/API 状态图标）
@@ -693,3 +781,86 @@ lvgl:
                         grid_cell_row_pos: 2
                         grid_cell_x_align: START
                         grid_cell_y_align: CENTER
+
+    # ========== 语音助手页面 ==========
+    # 由 voice_ui_update 脚本驱动：
+    #   - va_status_icon   : 顶部大图标（聆听/思考/回复/错误…）
+    #   - va_status_label  : 顶部状态文字
+    #   - va_request_label : 用户说的话（STT 结果）
+    #   - va_response_label: 助手答复（TTS 文本）
+    - id: voice_page
+      widgets:
+        - obj:
+            styles: content_container
+            layout:
+              type: FLEX
+              flex_flow: COLUMN
+              flex_align_main: CENTER
+              flex_align_cross: CENTER
+              pad_row: 24
+            widgets:
+              # 顶部状态卡片（图标 + 状态文字）
+              - obj:
+                  styles: va_status_card
+                  layout:
+                    type: FLEX
+                    flex_flow: COLUMN
+                    flex_align_main: CENTER
+                    flex_align_cross: CENTER
+                    pad_row: 16
+                  widgets:
+                    - label:
+                        id: va_status_icon
+                        text_font: extra_icon
+                        text_color: 0xFF8C00
+                        text: "\U000F05CB"
+                        align: CENTER
+                    - label:
+                        id: va_status_label
+                        text_font: noto_sans_sc_48
+                        text_color: 0x333333
+                        text: "请说 \"okay nabu\" 或点击图标对话"
+                        align: CENTER
+                        text_align: CENTER
+
+              # 用户问气泡（蓝色）
+              - obj:
+                  styles: va_request_bubble
+                  layout:
+                    type: FLEX
+                    flex_flow: COLUMN
+                    flex_align_main: START
+                    flex_align_cross: START
+                  widgets:
+                    - label:
+                        text_font: noto_sans_sc_32
+                        text_color: 0x4A6363
+                        text: "你："
+                    - label:
+                        id: va_request_label
+                        text_font: noto_sans_sc_32
+                        text_color: 0x1A1A1A
+                        text: ""
+                        width: 750
+                        text_align: START
+
+              # 助手答复气泡（橙色）
+              - obj:
+                  styles: va_response_bubble
+                  layout:
+                    type: FLEX
+                    flex_flow: COLUMN
+                    flex_align_main: START
+                    flex_align_cross: START
+                  widgets:
+                    - label:
+                        text_font: noto_sans_sc_32
+                        text_color: 0x8B5A00
+                        text: "助手："
+                    - label:
+                        id: va_response_label
+                        text_font: noto_sans_sc_32
+                        text_color: 0x1A1A1A
+                        text: ""
+                        width: 750
+                        text_align: START

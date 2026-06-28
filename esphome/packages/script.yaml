@@ -7,13 +7,14 @@ script:
           std::vector<lv_obj_t*> btns = {
             id(dash_panel_btn),
             id(socket_panel_btn),
-            id(light_panel_btn)
+            id(light_panel_btn),
+            id(voice_panel_btn)
           };
           for (auto* btn : btns) {
             lv_obj_set_ext_click_area(btn, 180);
           }
 
-  # 更新导航栏 UI 脚本
+  # 更新导航栏 UI 脚本（4 个按钮：主页/插座/系统/语音）
   - id: nav_rail_update
     then:
       - lambda: |-
@@ -22,41 +23,46 @@ script:
               id(dash_panel_btn),
               id(socket_panel_btn),
               id(light_panel_btn),
+              id(voice_panel_btn),
           };
           lv_obj_t* icons[] = {
               id(dash_btn_icon),
               id(socket_btn_icon),
               id(light_btn_icon),
+              id(voice_btn_icon),
           };
           lv_obj_t* labels[] = {
               id(dash_btn_label),
               id(socket_btn_label),
               id(light_btn_label),
+              id(voice_btn_label),
           };
           const char* icon_unchecked[] = {
-              "\U000F02DC", // 客厅
+              "\U000F02DC", // 客厅（沙发）
               "\U000F0905", // 插座
               "\U000F08BB", // 齿轮（轮廓）
+              "\U000F05CB", // 声音助手
           };
           const char* icon_checked[] = {
               "\U000F02DC", // 客厅
               "\U000F0905", // 插座
-              "\U000F0493", // 齿轮
+              "\U000F0493", // 齿轮（实心）
+              "\U000F05CB", // 声音助手（保持一致）
           };
 
           const int count = sizeof(buttons) / sizeof(buttons[0]);
 
           for (int i = 0; i < count; i++) {
               bool selected = (i == active);
-              
+
               // 切换按钮背景样式（激活/未激活）
-              lv_obj_remove_style_all(buttons[i]);  // 清除所有样式
+              lv_obj_remove_style_all(buttons[i]);
               lv_obj_add_style(buttons[i], selected ? id(nav_btn_activate) : id(nav_btn_inactivate), LV_PART_MAIN);
-              
+
               // 切换标签颜色
               lv_obj_remove_style_all(labels[i]);
               lv_obj_add_style(labels[i], selected ? id(nav_label_activate) : id(nav_label_inactivate), LV_PART_MAIN);
-              
+
               // 切换图标
               lv_label_set_text(icons[i], selected ? icon_checked[i] : icon_unchecked[i]);
           }
@@ -110,3 +116,160 @@ script:
             snprintf(buf, sizeof(buf), "书桌：功率%.1fW  总电量%.0fWh",
               id(desk_power_val), id(desk_total_val));
             return buf;
+
+  # ── 语音助手 UI 更新脚本 ─────────────────────────────────────
+  # 根据 voice_assistant_phase 切换 LVGL 页面 + 更新文字/图标 + 高亮侧边栏语音按钮
+  # 说明：以下脚本会调用 voice_assistant_phase 等全局变量与 voice_page 上的 widget ID。
+  - id: voice_ui_update
+    then:
+      - lambda: |-
+          int phase = id(voice_assistant_phase);
+          const char* status_text = "";
+          const char* status_icon = "\U000F05CB";  // 默认声音助手图标
+
+          switch (phase) {
+            case ${voice_assist_listening_phase_id}:
+              status_text = "正在聆听...";
+              status_icon = "\U000F0362";  // 麦克风
+              break;
+            case ${voice_assist_thinking_phase_id}:
+              status_text = "思考中...";
+              status_icon = "\U000F0064";  // 助手
+              break;
+            case ${voice_assist_replying_phase_id}:
+              status_text = "回复中...";
+              status_icon = "\U000F0E19";  // 音量高
+              break;
+            case ${voice_assist_error_phase_id}:
+              status_text = "出错了，请重试";
+              status_icon = "\U000F0156";  // 关闭
+              break;
+            case ${voice_assist_muted_phase_id}:
+              status_text = "麦克风已静音";
+              status_icon = "\U000F0374";  // 减号
+              break;
+            case ${voice_assist_not_ready_phase_id}:
+              status_text = "正在连接 Home Assistant...";
+              status_icon = "\U000F05A9";  // WiFi 图标
+              break;
+            case ${voice_assist_timer_finished_phase_id}:
+              status_text = "计时器到点了！";
+              status_icon = "\U000F09C8";  // 提示
+              break;
+            default:
+              status_text = "请说 \"okay nabu\" 或点击图标对话";
+              status_icon = "\U000F05CB";  // 声音助手
+          }
+
+          // 1) 更新语音页面上的状态文字 / 图标 / 用户问 / 答复
+          if (id(va_status_label) != nullptr)
+            lv_label_set_text(id(va_status_label), status_text);
+          if (id(va_status_icon) != nullptr)
+            lv_label_set_text(id(va_status_icon), status_icon);
+          if (id(va_request_label) != nullptr)
+            lv_label_set_text(id(va_request_label), id(text_request).state.c_str());
+          if (id(va_response_label) != nullptr)
+            lv_label_set_text(id(va_response_label), id(text_response).state.c_str());
+
+          // 2) 如果是活跃状态（listening/thinking/replying/error/timer_finished），
+          //    且当前不在 voice_page（page_num != 3），保存当前页并跳到 voice_page
+          bool need_show_voice_page = (phase == ${voice_assist_listening_phase_id} ||
+                                       phase == ${voice_assist_thinking_phase_id} ||
+                                       phase == ${voice_assist_replying_phase_id} ||
+                                       phase == ${voice_assist_error_phase_id} ||
+                                       phase == ${voice_assist_timer_finished_phase_id});
+          if (need_show_voice_page && id(page_num) != 3) {
+            id(prev_page_num) = id(page_num);
+            id(page_num) = 3;
+            id(nav_rail_update).execute();
+            lv_scr_load_anim(id(voice_page), LV_SCR_LOAD_ANIM_FADE_ON, 200, 0, false);
+          }
+
+          // 3) 侧边栏语音按钮的高亮逻辑：
+          //    - VA 活跃时（listening/thinking/replying/timer_finished）→ 橙色高亮
+          //    - 用户停留在 voice_page 时（page_num == 3）→ 普通高亮
+          //    - 否则 → 未激活
+          bool va_active = (phase == ${voice_assist_listening_phase_id} ||
+                            phase == ${voice_assist_thinking_phase_id} ||
+                            phase == ${voice_assist_replying_phase_id} ||
+                            phase == ${voice_assist_timer_finished_phase_id});
+          bool on_voice_page = (id(page_num) == 3);
+
+          lv_obj_remove_style_all(id(voice_panel_btn));
+          if (va_active) {
+            lv_obj_add_style(id(voice_panel_btn), id(va_btn_activate), LV_PART_MAIN);
+          } else if (on_voice_page) {
+            lv_obj_add_style(id(voice_panel_btn), id(nav_btn_activate), LV_PART_MAIN);
+          } else {
+            lv_obj_add_style(id(voice_panel_btn), id(nav_btn_inactivate), LV_PART_MAIN);
+          }
+
+          lv_obj_remove_style_all(id(voice_btn_label));
+          lv_obj_add_style(id(voice_btn_label),
+                           (va_active || on_voice_page) ? id(nav_label_activate) : id(nav_label_inactivate),
+                           LV_PART_MAIN);
+
+  # ── 启动唤醒词引擎脚本 ──────────────────────────────────────
+  - id: start_wake_word
+    then:
+      - if:
+          condition:
+            and:
+              - not:
+                  - voice_assistant.is_running:
+              - lambda: return id(wake_word_engine_location).current_option() == "On device";
+          then:
+            - lambda: id(va).set_use_wake_word(false);
+            - micro_wake_word.start:
+      - if:
+          condition:
+            and:
+              - not:
+                  - voice_assistant.is_running:
+              - lambda: return id(wake_word_engine_location).current_option() == "In Home Assistant";
+          then:
+            - lambda: id(va).set_use_wake_word(true);
+            - voice_assistant.start_continuous:
+
+  # ── 停止唤醒词引擎脚本 ──────────────────────────────────────
+  - id: stop_wake_word
+    then:
+      - if:
+          condition:
+            lambda: return id(wake_word_engine_location).current_option() == "In Home Assistant";
+          then:
+            - lambda: id(va).set_use_wake_word(false);
+            - voice_assistant.stop:
+      - if:
+          condition:
+            lambda: return id(wake_word_engine_location).current_option() == "On device";
+          then:
+            - micro_wake_word.stop:
+
+  # ── 根据静音开关设置 idle 或 muted 阶段 ────────────────────
+  - id: set_idle_or_mute_phase
+    then:
+      - if:
+          condition:
+            switch.is_off: mute
+          then:
+            - lambda: id(voice_assistant_phase) = ${voice_assist_idle_phase_id};
+          else:
+            - lambda: id(voice_assistant_phase) = ${voice_assist_muted_phase_id};
+
+  # ── 返回语音助手启动前的页面 ───────────────────────────────
+  # 用户在 voice_page 上读完答复后，可调用此脚本回到原页面
+  - id: return_to_previous_page
+    then:
+      - lambda: |-
+          int prev = id(prev_page_num);
+          if (prev < 0 || prev > 2) prev = 0;  // 仅允许 0/1/2
+          id(page_num) = prev;
+          id(prev_page_num) = 3;  // 防止重复返回
+      - script.execute: nav_rail_update
+      - lambda: |-
+          lv_obj_t* pages[] = { id(main_page), id(socket_page), id(system_page) };
+          int prev = id(page_num);
+          if (prev >= 0 && prev <= 2) {
+            lv_scr_load_anim(pages[prev], LV_SCR_LOAD_ANIM_FADE_ON, 200, 0, false);
+          }

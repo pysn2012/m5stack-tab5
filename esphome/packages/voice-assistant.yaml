@@ -1,3 +1,28 @@
+# ═════════════════════════════════════════════════════════════════
+# 语音助手核心配置（适配 LVGL UI 版本）
+# 参考: https://github.com/pysn2012/wake-word-voice-assistants
+# 唤醒词: "okay nabu"  →  唤醒后可进行语音对话或语音控制
+# ═════════════════════════════════════════════════════════════════
+
+# ── 全局变量 ──────────────────────────────────────────────────────
+globals:
+  # 标记设备是否仍在初始化（HA API 连接成功前为 true）
+  - id: init_in_progress
+    type: bool
+    restore_value: false
+    initial_value: "true"
+  # 当前语音助手所处的阶段 ID（参考 substitutions 中的 voice_assist_*_phase_id）
+  - id: voice_assistant_phase
+    type: int
+    restore_value: false
+    initial_value: ${voice_assist_not_ready_phase_id}
+  # 启动语音助手前所在的页面编号（用于结束时自动返回）
+  - id: prev_page_num
+    type: int
+    restore_value: false
+    initial_value: "0"
+
+# ── 扬声器配置（I2S + ES8388 DAC）──────────────────────────────────
 speaker:
   - platform: i2s_audio
     id: box_speaker
@@ -10,7 +35,7 @@ speaker:
     bits_per_sample: 16bit
     sample_rate: 48000
 
-# 媒体播放器，用于播放TTS和提示音
+# ── 媒体播放器（用于播放 TTS 和提示音）─────────────────────────────
 media_player:
   - platform: speaker
     name: None
@@ -26,13 +51,12 @@ media_player:
       - id: timer_finished_sound
         file: https://github.com/pysn2012/wake-word-voice-assistants/raw/main/sounds/timer_finished.flac
     on_announcement:
-      # 如果麦克风正在录音，则停止唤醒词（mWW或VA）
+      # 如果麦克风正在录音，则停止唤醒词（mWW 或 VA 流式唤醒）
       - if:
           condition:
             - microphone.is_capturing:
           then:
             - script.execute: stop_wake_word
-            # Ensure VA stops before moving on
             - if:
                 condition:
                   - lambda: return id(wake_word_engine_location).current_option() == "In Home Assistant";
@@ -40,16 +64,16 @@ media_player:
                   - wait_until:
                       - not:
                           voice_assistant.is_running:
-      # 语音助手（VA）未运行，这是用户主动发起的媒体播放。显示静音界面。
+      # 如果 VA 未运行，说明这是用户主动播放的媒体，显示静音界面
       - if:
           condition:
             not:
               voice_assistant.is_running:
           then:
             - lambda: id(voice_assistant_phase) = ${voice_assist_muted_phase_id};
-            - script.execute: draw_display
+            - script.execute: voice_ui_update
     on_idle:
-      # 语音助手（VA）未运行，这是用户主动发起的媒体播放结束。重新启动唤醒词。
+      # VA 未运行，用户主动播放结束，重新启动唤醒词
       - if:
           condition:
             not:
@@ -57,28 +81,30 @@ media_player:
           then:
             - script.execute: start_wake_word
             - script.execute: set_idle_or_mute_phase
-            - script.execute: draw_display
+            - script.execute: voice_ui_update
 
-# 设备端唤醒词引擎 (microWakeWord)，使用 "okay_nabu" 模型
+# ── 设备端唤醒词引擎 microWakeWord ─────────────────────────────────
+# 使用 "okay_nabu" 唤醒词模型（中文发音 "ok nabu"）
 micro_wake_word:
   id: mww
   models:
     - okay_nabu
   on_wake_word_detected:
+    # 唤醒词被检测到 → 启动语音助手（带唤醒词文本）
     - voice_assistant.start:
         wake_word: !lambda return wake_word;
 
-# 语音助手核心配置
+# ── 语音助手核心 ──────────────────────────────────────────────────
 voice_assistant:
   id: va
-  microphone: box_mic
+  microphone: tab5_microphone
   media_player: speaker_media_player
   micro_wake_word: mww
   noise_suppression_level: 2
   auto_gain: 31dBFS
   volume_multiplier: 2.0
-  # 定义了语音助手各个生命周期事件的回调，如开始监听、结束监听、开始播放TTS等。
-  # 在这些回调中，会更新屏幕显示状态、发布文本传感器值等。
+
+  # 开始监听用户语音
   on_listening:
     - lambda: id(voice_assistant_phase) = ${voice_assist_listening_phase_id};
     - text_sensor.template.publish:
@@ -87,35 +113,43 @@ voice_assistant:
     - text_sensor.template.publish:
         id: text_response
         state: "..."
-    - script.execute: draw_display
+    - script.execute: voice_ui_update
+
+  # VAD 检测到用户说完了
   on_stt_vad_end:
     - lambda: id(voice_assistant_phase) = ${voice_assist_thinking_phase_id};
-    - script.execute: draw_display
+    - script.execute: voice_ui_update
+
+  # 语音转文字完成（用户说的话）
   on_stt_end:
     - text_sensor.template.publish:
         id: text_request
         state: !lambda return x;
-    - script.execute: draw_display
+    - script.execute: voice_ui_update
+
+  # 开始 TTS 播报（回复内容）
   on_tts_start:
     - text_sensor.template.publish:
         id: text_response
         state: !lambda return x;
     - lambda: id(voice_assistant_phase) = ${voice_assist_replying_phase_id};
-    - script.execute: draw_display
+    - script.execute: voice_ui_update
+
+  # 语音助手会话结束
   on_end:
     # 短暂等待，以确认是否有播报开始
     - wait_until:
         condition:
           - media_player.is_announcing:
         timeout: 0.5s
-    # 播报已完成，I2S总线已空闲
+    # 等待播报真正完成
     - wait_until:
         - and:
             - not:
                 media_player.is_announcing:
             - not:
                 speaker.is_playing:
-    # 如果启用了手动唤醒词（mWW），则仅重启它；流式唤醒词会自动重启
+    # 重启设备端唤醒词（如果配置为 On device）
     - if:
         condition:
           - lambda: return id(wake_word_engine_location).current_option() == "On device";
@@ -123,7 +157,7 @@ voice_assistant:
           - lambda: id(va).set_use_wake_word(false);
           - micro_wake_word.start:
     - script.execute: set_idle_or_mute_phase
-    - script.execute: draw_display
+    - script.execute: voice_ui_update
     # 清除文本传感器
     - text_sensor.template.publish:
         id: text_request
@@ -131,13 +165,15 @@ voice_assistant:
     - text_sensor.template.publish:
         id: text_response
         state: ""
+
+  # 出错处理
   on_error:
     - if:
         condition:
           lambda: return !id(init_in_progress);
         then:
           - lambda: id(voice_assistant_phase) = ${voice_assist_error_phase_id};
-          - script.execute: draw_display
+          - script.execute: voice_ui_update
           - delay: 1s
           - if:
               condition:
@@ -146,35 +182,47 @@ voice_assistant:
                 - lambda: id(voice_assistant_phase) = ${voice_assist_idle_phase_id};
               else:
                 - lambda: id(voice_assistant_phase) = ${voice_assist_muted_phase_id};
-          - script.execute: draw_display
+          - script.execute: voice_ui_update
+
+  # HA 连接 / 断开
   on_client_connected:
     - lambda: id(init_in_progress) = false;
     - script.execute: start_wake_word
     - script.execute: set_idle_or_mute_phase
-    - script.execute: draw_display
+    - script.execute: voice_ui_update
   on_client_disconnected:
     - script.execute: stop_wake_word
     - lambda: id(voice_assistant_phase) = ${voice_assist_not_ready_phase_id};
-    - script.execute: draw_display
+    - script.execute: voice_ui_update
+
   # 计时器相关回调
   on_timer_started:
-    - script.execute: draw_display
+    - script.execute: voice_ui_update
   on_timer_cancelled:
-    - script.execute: draw_display
+    - script.execute: voice_ui_update
   on_timer_updated:
-    - script.execute: draw_display
+    - script.execute: voice_ui_update
   on_timer_tick:
-    - script.execute: draw_display
+    - script.execute: voice_ui_update
   on_timer_finished:
     - switch.turn_on: timer_ringing
     - wait_until:
         media_player.is_announcing:
     - lambda: id(voice_assistant_phase) = ${voice_assist_timer_finished_phase_id};
-    - script.execute: draw_display
-    
-# 开关 (Switches)
+    - script.execute: voice_ui_update
+
+# ── 脚本（Scripts）说明 ───────────────────────────────────────────
+# 以下脚本定义在 packages/script.yaml 中，以避免与该文件中已有的 script: 块冲突：
+#   - start_wake_word        : 根据 wake_word_engine_location 启动 mWW 或流式唤醒
+#   - stop_wake_word         : 停止对应唤醒词引擎
+#   - set_idle_or_mute_phase : 根据 mute 开关设置 idle/muted 阶段
+#   - voice_ui_update        : 根据 voice_assistant_phase 切换 LVGL 页面、更新图标/文字、
+#                              高亮侧边栏语音按钮
+#   - return_to_previous_page: 从语音页面返回启动前的页面
+
+# ── 开关（Switches） ──────────────────────────────────────────────
 switch:
-  # 软件静音开关
+  # 软件静音开关（控制麦克风）
   - platform: template
     name: Mute
     id: mute
@@ -185,45 +233,44 @@ switch:
     on_turn_off:
       - microphone.unmute:
       - lambda: id(voice_assistant_phase) = ${voice_assist_idle_phase_id};
-      - script.execute: draw_display
+      - script.execute: voice_ui_update
     on_turn_on:
       - microphone.mute:
       - lambda: id(voice_assistant_phase) = ${voice_assist_muted_phase_id};
-      - script.execute: draw_display
+      - script.execute: voice_ui_update
+
+  # 计时器响铃开关（内部使用）
   - platform: template
     id: timer_ringing
     optimistic: true
     internal: true
     restore_mode: ALWAYS_OFF
     on_turn_off:
-      # 关闭重复模式并禁用播放列表项之间的暂停间隔
       - lambda: |-
-              id(speaker_media_player)
-                ->make_call()
-                .set_command(media_player::MediaPlayerCommand::MEDIA_PLAYER_COMMAND_REPEAT_OFF)
-                .set_announcement(true)
-                .perform();
-              id(speaker_media_player)->set_playlist_delay_ms(speaker::AudioPipelineType::ANNOUNCEMENT, 0);
-      # 停止闹钟播放
+          id(speaker_media_player)
+            ->make_call()
+            .set_command(media_player::MediaPlayerCommand::MEDIA_PLAYER_COMMAND_REPEAT_OFF)
+            .set_announcement(true)
+            .perform();
+          id(speaker_media_player)->set_playlist_delay_ms(speaker::AudioPipelineType::ANNOUNCEMENT, 0);
       - media_player.stop:
           announcement: true
     on_turn_on:
-      # 开启重复模式，并在播放列表项/重复项之间暂停 1000 毫秒
       - lambda: |-
-            id(speaker_media_player)
-              ->make_call()
-              .set_command(media_player::MediaPlayerCommand::MEDIA_PLAYER_COMMAND_REPEAT_ONE)
-              .set_announcement(true)
-              .perform();
-            id(speaker_media_player)->set_playlist_delay_ms(speaker::AudioPipelineType::ANNOUNCEMENT, 1000);
+          id(speaker_media_player)
+            ->make_call()
+            .set_command(media_player::MediaPlayerCommand::MEDIA_PLAYER_COMMAND_REPEAT_ONE)
+            .set_announcement(true)
+            .perform();
+          id(speaker_media_player)->set_playlist_delay_ms(speaker::AudioPipelineType::ANNOUNCEMENT, 1000);
       - media_player.speaker.play_on_device_media_file:
           media_file: timer_finished_sound
           announcement: true
       - delay: 15min
       - switch.turn_off: timer_ringing
 
+# ── 选择器：唤醒词引擎运行位置 ─────────────────────────────────────
 select:
-# 选择器 (Select): 允许用户在UI中选择唤醒词引擎运行位置（设备端或HA端）
   - platform: template
     entity_category: config
     name: Wake word engine location
@@ -266,3 +313,27 @@ select:
                         switch.is_off: mute
                       then:
                         - micro_wake_word.start
+
+# ── 文本传感器：用户问 / 答复 ─────────────────────────────────────
+text_sensor:
+  # 用户问（STT 结果），自动截断过长文本
+  - id: text_request
+    platform: template
+    on_value:
+      lambda: |-
+        if(id(text_request).state.length() > 80) {
+          std::string name = id(text_request).state.c_str();
+          std::string truncated = esphome::str_truncate(name.c_str(), 78);
+          id(text_request).state = (truncated + "...").c_str();
+        }
+
+  # 助手答复（TTS 文本），自动截断过长文本
+  - id: text_response
+    platform: template
+    on_value:
+      lambda: |-
+        if(id(text_response).state.length() > 80) {
+          std::string name = id(text_response).state.c_str();
+          std::string truncated = esphome::str_truncate(name.c_str(), 78);
+          id(text_response).state = (truncated + "...").c_str();
+        }

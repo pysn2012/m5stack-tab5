@@ -1,7 +1,7 @@
 substitutions:
   # 允许显示的字符集。此列表非常庞大，包含了多语言字符。
   allowed_characters: |-
-    主页温湿压颗粒物厦门室内弱电书桌未来不会仪表盘屏幕亮度系统设备信号运行地址天气预警无小时分钟但减增强下雨大中有渐停后转为开始过就了的又客厅插座音量功耗率总外·！@#￥%…&*（）—+-=、|【{}】；：'"，《。》/？℃℉￡ abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890~`!$^()_[]\;:<.>?
+    主页温湿压颗粒物厦门室内弱电书桌未来不会仪表盘屏幕亮度系统设备信号运行地址天气预警无小时分钟但减增强下雨大中有渐停后转为开始过就了的又客厅插座音量功耗率总外语音聆听思考回复错误静音唤醒对话助手你正在中到点连接请说或点击图标出错了请重试麦克风已计算时器·！@#￥%…&*（）—+-=、|【{}】；：'"，《。》/？℃℉￡ abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890~`!$^()_[]\;:<.>?
 
 font:
   - file: "fonts/materialdesignicons-webfont.ttf"
@@ -62,6 +62,17 @@ font:
       "\U000F0905", # 电源插座
       "\U000F0E19", # 音量高
       "\U000F09C8", # 功率插头
+      # ── 语音助手相关图标（新增） ──
+      "\U000F0362", # 麦克风（listening 状态）
+      "\U000F0363", # 麦克风（轮廓）
+      "\U000F05CB", # 声音助手（侧边栏语音按钮）
+      "\U000F036C", # 麦克风设置
+      "\U000F05C5", # 音频波形
+      "\U000F059B", # 音量中
+      "\U000F075E", # 月亮（休眠/思考）
+      "\U000F1B3F", # 机器人（助手形象）
+      "\U000F1B40", # 机器人轮廓
+      "\U000F018C", # 信息提示
     ]
 
   - file: "fonts/materialdesignicons-webfont.ttf"
@@ -71,6 +82,7 @@ font:
     glyphs: [
       "\U000F0D80", # 楼层1
       "\U000F0425", # 电源
+      "\U000F05CB", # 声音助手
     ]
 
 
@@ -94,10 +106,10 @@ font:
     glyphs: ${allowed_characters}
     ignore_missing_glyphs: true
 
-  # Noto Sans SC 中文字体（48px）
+  # Noto Sans SC 中文字体（48px，用于语音页面状态文字）
   - file: gfonts://Noto+Sans+SC
     id: noto_sans_sc_48
     size: 48
     bpp: 4
-    glyphs: "客厅仪表盘系统设置亮度插座弱电书桌音量功耗总室外内预警地址信号运行"
+    glyphs: "客厅仪表盘系统设置亮度插座弱电书桌音量功耗总室外内预警地址信号运行语音聆听思考回复错误静音唤醒对话助手你正在中到点连接请说或点击图标出错了请重试麦克风已计算时器"
     ignore_missing_glyphs: true
