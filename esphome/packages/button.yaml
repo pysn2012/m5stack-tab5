@@ -1,6 +1,6 @@
 substitutions:
-  icon_font: icon_font
-  text_font: cn_font
+  icon_font: extra_icon
+  text_font: noto_sans_sc_32
   button_on_color: "0xFF8C00"            # 按钮激活状态的背景色（橙色）
   button_text_color: "0xFFFFFF"          # 按钮文字颜色（白色）
   button_control_color: "0x313131"       # 控制类按钮的默认背景色（深灰色）
