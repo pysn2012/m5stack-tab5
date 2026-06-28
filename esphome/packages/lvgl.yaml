@@ -53,6 +53,11 @@ globals:
     type: float
     restore_value: no
     initial_value: '0'
+  # 音量缓存值
+  - id: volume_val
+    type: int
+    restore_value: no
+    initial_value: '50'
 
 # LVGL 图形库配置
 lvgl:
@@ -570,11 +575,7 @@ lvgl:
                               knob:
                                 bg_opa: TRANSP
                               on_release:
-                                - lambda: |-
-                                    float vol = x / 100.0;
-                                    auto call = id(speaker_media_player).make_call();
-                                    call.set_volume(vol);
-                                    call.perform();
+                                - lambda: id(volume_val) = int(x);
                                 - lvgl.label.update:
                                     id: volume_label
                                     text: !lambda |-
