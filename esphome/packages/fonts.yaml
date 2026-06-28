@@ -1,7 +1,7 @@
 substitutions:
   # 允许显示的字符集。此列表非常庞大，包含了多语言字符。
   allowed_characters: |-
-    厦门室内外弱电书桌未来不会仪表盘屏幕亮度系统设备信号运行地址天气预警无小时分钟下雨大中有渐停后转为开始过就了的又·！@#￥%…&*（）—+-=、|【{}】；：‘“”，《。》/？℃℉￡ abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890~`!$^()_[]\;:'",<.>?
+    厦门室内外弱电书桌未来不会仪表盘屏幕亮度系统设备信号运行地址天气预警无小时分钟下雨大中有渐停后转为开始过就了的又客厅插座音量功耗总电量室外室内·！@#￥%…&*（）—+-=、|【{}】；：'""，《。》/？℃℉￡ abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890~`!$^()_[]\;:'",<.>?
 
 font:
   - file: "fonts/materialdesignicons-webfont.ttf"
@@ -58,8 +58,12 @@ font:
       "\U000F0374", # 减号
       "\U000F00DF", # 亮度调节
       "\U000F03D8", # 调色板
+      "\U000F02DC", # 沙发（客厅）
+      "\U000F0905", # 电源插座
+      "\U000F0E19", # 音量高
+      "\U000F09C8", # 功率插头
     ]
-      
+
   - file: "fonts/materialdesignicons-webfont.ttf"
     id: extra_icon_64
     size: 64
@@ -94,5 +98,5 @@ font:
     id: noto_sans_sc_48
     size: 48
     bpp: 4
-    glyphs: "仪表盘系统设置亮度插座"
+    glyphs: "客厅仪表盘系统设置亮度插座弱电书桌音量功耗总电量室外室内预警地址信号运行"
     ignore_missing_glyphs: true

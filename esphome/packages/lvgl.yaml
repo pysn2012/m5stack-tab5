@@ -1,6 +1,6 @@
 # 全局变量定义
 globals:
-  # 当前页面编号（0=仪表盘, 1=系统）
+  # 当前页面编号（0=客厅, 1=插座, 2=系统）
   - id: page_num
     type: int
     restore_value: no
@@ -10,6 +10,49 @@ globals:
     type: int
     restore_value: yes
     initial_value: '128'  # 默认 50%
+  # 室外传感器缓存值
+  - id: outdoor_temp_val
+    type: float
+    restore_value: no
+    initial_value: '0'
+  - id: outdoor_humi_val
+    type: float
+    restore_value: no
+    initial_value: '0'
+  - id: outdoor_pres_val
+    type: float
+    restore_value: no
+    initial_value: '0'
+  - id: outdoor_pm25_val
+    type: float
+    restore_value: no
+    initial_value: '0'
+  # 室内传感器缓存值
+  - id: indoor_temp_val
+    type: float
+    restore_value: no
+    initial_value: '0'
+  - id: indoor_humi_val
+    type: float
+    restore_value: no
+    initial_value: '0'
+  # 插座功率缓存值
+  - id: weak_power_val
+    type: float
+    restore_value: no
+    initial_value: '0'
+  - id: weak_total_val
+    type: float
+    restore_value: no
+    initial_value: '0'
+  - id: desk_power_val
+    type: float
+    restore_value: no
+    initial_value: '0'
+  - id: desk_total_val
+    type: float
+    restore_value: no
+    initial_value: '0'
 
 # LVGL 图形库配置
 lvgl:
@@ -17,9 +60,9 @@ lvgl:
   on_boot:
     - light.turn_on: backlight
     - rx8130.read_time:
-    - script.execute: expand_nav_btn_click_area    # 扩展导航按钮点击区域
-    - script.execute: nav_rail_update              # 更新导航栏 UI
-    - script.execute: sync_ha                      # 同步 Home Assistant 状态
+    - script.execute: expand_nav_btn_click_area
+    - script.execute: nav_rail_update
+    - script.execute: sync_ha
 
   byte_order: little_endian
   color_depth: 16
@@ -27,20 +70,9 @@ lvgl:
   # ═══════════════════════════════════════════════════════════════
   # LVGL 样式定义
   # ═══════════════════════════════════════════════════════════════
-  # 样式总览:
-  #   sidebar              → 侧边栏整体容器 (192×100%, 浅灰绿底)
-  #   nav_btn_container    → 单个导航按钮的外层包裹 (180×150, 透明)
-  #   nav_btn_inactivate   → 导航按钮本体 (112×64, 圆角48, 透明)
-  #   nav_icon_activate    → 导航图标-选中态 (深青色文字)
-  #   nav_icon_inactivate  → 导航图标-未选中态 (深灰绿文字)
-  #   nav_label_activate   → 导航文字-选中态 (深青色, Noto Sans SC 32px)
-  #   nav_label_inactivate → 导航文字-未选中态 (深灰绿, Noto Sans SC 32px)
-  #   content_container    → 右侧主内容区 (1080×100%, 左偏移96, 顶部内距30)
-  # ═══════════════════════════════════════════════════════════════
 
   style_definitions:
     # ── 侧边栏样式 ──────────────────────────────────────────────
-    # 宽192 × 高100%, 浅灰绿背景(#E9EFEE), 顶部内距30, 无圆角无边框
     - id: sidebar
       bg_color: 0xE9EFEE
       bg_opa: COVER
@@ -53,7 +85,6 @@ lvgl:
       height: 100%
 
     # ── 导航按钮容器样式 ─────────────────────────────────────────
-    # 宽180 × 高150, 完全透明背景, 用于包裹每个按钮+标签的组合
     - id: nav_btn_container
       bg_opa: TRANSP
       border_opa: TRANSP
@@ -61,7 +92,6 @@ lvgl:
       height: 150
 
     # ── 导航按钮未激活样式 ───────────────────────────────────────
-    # 宽112 × 高64, 圆角48(胶囊形), 居中对齐, 透明背景/边框/阴影
     - id: nav_btn_inactivate
       bg_opa: TRANSP
       align: CENTER
@@ -72,36 +102,30 @@ lvgl:
       shadow_opa: TRANSP
 
     # ── 导航图标激活样式 ─────────────────────────────────────────
-    # 使用 extra_icon 字体(48px), 深青色文字(#4A6363), 居中
     - id: nav_icon_activate
       align: CENTER
       text_font: extra_icon
       text_color: 0x4A6363
 
     # ── 导航图标未激活样式 ───────────────────────────────────────
-    # 使用 extra_icon 字体(48px), 深灰绿文字(#3F4948), 居中
     - id: nav_icon_inactivate
       align: CENTER
       text_font: extra_icon
       text_color: 0x3F4948
 
     # ── 导航标签激活样式 ─────────────────────────────────────────
-    # 底部居中对齐, 深青色文字(#4A6363), Noto Sans SC 32px
     - id: nav_label_activate
       align: BOTTOM_MID
       text_color: 0x4A6363
       text_font: noto_sans_sc_32
 
     # ── 导航标签未激活样式 ───────────────────────────────────────
-    # 底部居中对齐, 深灰绿文字(#3F4948), Noto Sans SC 32px
     - id: nav_label_inactivate
       align: BOTTOM_MID
       text_color: 0x3F4948
       text_font: noto_sans_sc_32
 
     # ── 内容容器样式 ─────────────────────────────────────────────
-    # 宽1080 × 高100%, 居中对齐, 左偏移x=96(给侧边栏让位)
-    # 顶部内距30, 左侧内距30
     - id: content_container
       align: CENTER
       bg_opa: COVER
@@ -112,10 +136,10 @@ lvgl:
       pad_top: 30
       pad_left: 30
 
-  # 顶层导航栏和模态框  
+  # 顶层导航栏和模态框
   top_layer:
     widgets:
-      # 侧边导航栏 ── 应用样式: sidebar (192×100%, 浅灰绿底, 顶部内距30)
+      # 侧边导航栏
       - obj:
           align: TOP_LEFT
           styles: sidebar
@@ -128,13 +152,13 @@ lvgl:
             flex_align_cross: center
             flex_align_track: center
           widgets:
-            # 仪表盘导航按钮 ── 外层容器应用样式: nav_btn_container (180×150, 透明)
+            # 客厅导航按钮
             - obj:
                 styles: nav_btn_container
                 widgets:
                   - button:
                       align: center
-                      styles: nav_btn_inactivate  # 按钮本体: nav_btn_inactivate (112×64, 胶囊形圆角48)
+                      styles: nav_btn_inactivate
                       id: dash_panel_btn
                       checkable: true
                       state:
@@ -145,25 +169,54 @@ lvgl:
                         - label:
                             id: dash_btn_icon
                             align: CENTER
-                            styles: nav_icon_inactivate  # 图标: nav_icon_inactivate (extra_icon 48px, 深灰绿#3F4948)
-                            text: "\U000F056E" # 仪表盘图标
+                            styles: nav_icon_inactivate
+                            text: "\U000F02DC" # 客厅图标
                       on_value:
                         - lambda: id(page_num) = 0;
                         - script.execute: nav_rail_update
                       on_press:
                         - lvgl.page.show: dashboard_page
                   - label:
-                      styles: nav_label_inactivate  # 文字: nav_label_inactivate (Noto Sans SC 32px, 深灰绿#3F4948)
+                      styles: nav_label_inactivate
                       id: dash_btn_label
-                      text: "仪表盘"
+                      text: "客厅"
 
-            # 系统设置导航按钮 ── 外层容器应用样式: nav_btn_container (180×150, 透明)
+            # 插座导航按钮
             - obj:
                 styles: nav_btn_container
                 widgets:
                   - button:
                       align: center
-                      styles: nav_btn_inactivate  # 按钮本体: nav_btn_inactivate (112×64, 胶囊形圆角48)
+                      styles: nav_btn_inactivate
+                      id: socket_panel_btn
+                      checkable: true
+                      state:
+                        checked: false
+                      checked:
+                        bg_color: 0xCCE8E7
+                      widgets:
+                        - label:
+                            id: socket_btn_icon
+                            align: CENTER
+                            styles: nav_icon_inactivate
+                            text: "\U000F0905" # 插座图标
+                      on_value:
+                        - lambda: id(page_num) = 1;
+                        - script.execute: nav_rail_update
+                      on_press:
+                        - lvgl.page.show: socket_page
+                  - label:
+                      styles: nav_label_inactivate
+                      id: socket_btn_label
+                      text: "插座"
+
+            # 系统导航按钮
+            - obj:
+                styles: nav_btn_container
+                widgets:
+                  - button:
+                      align: center
+                      styles: nav_btn_inactivate
                       id: light_panel_btn
                       checkable: true
                       state:
@@ -174,15 +227,15 @@ lvgl:
                         - label:
                             id: light_btn_icon
                             align: CENTER
-                            styles: nav_icon_inactivate  # 图标: nav_icon_inactivate (extra_icon 48px, 深灰绿#3F4948)
+                            styles: nav_icon_inactivate
                             text: "\U000F08BB"  # 齿轮（轮廓）图标
                       on_value:
-                        - lambda: id(page_num) = 1;
+                        - lambda: id(page_num) = 2;
                         - script.execute: nav_rail_update
                       on_press:
                         - lvgl.page.show: system_page
                   - label:
-                      styles: nav_label_inactivate  # 文字: nav_label_inactivate (Noto Sans SC 32px, 深灰绿#3F4948)
+                      styles: nav_label_inactivate
                       id: light_btn_label
                       text: "系统"
 
@@ -217,125 +270,184 @@ lvgl:
                 text_font: extra_icon
                 text: "\U000F109B"
 
-  # LVGL 页面定义 
+  # LVGL 页面定义
   pages:
-    # 仪表盘页面（显示时间、日期、环境传感器数据和天气预警）
+    # ========== 客厅页面 ==========
     - id: dashboard_page
       widgets:
         - obj:
-            styles: content_container  # 应用样式: content_container (1080×100%, 左偏移96, 顶部内距30)
+            styles: content_container
             widgets:
-              # 时间显示
+              # 时间显示（大字居中）
               - label:
                   id: time_label
                   text_font: montserrat_96
                   text: "14:07"
                   align: CENTER
                   y: -200
-              # 日期显示
+              # 日期星期（中字居中）
               - label:
                   id: date_label
                   text_font: montserrat_32
                   text: "2026-03-11 Thu"
                   align: CENTER
                   y: -110
-              # 环境数据网格（温度/湿度/PM2.5/气压）
+              # 信息区域（3行左对齐）
               - obj:
-                  width: 800
-                  height: 200
+                  width: 900
+                  height: 300
+                  align: CENTER
+                  y: 50
                   bg_opa: TRANSP
                   border_opa: TRANSP
-                  align: CENTER
-                  y: 30
                   layout:
                     type: GRID
-                    grid_columns: [FR(20), FR(30), FR(20), FR(30)]
-                    grid_rows: [FR(1), FR(1)]
-                    pad_row: 24
-                    pad_column: 24
+                    grid_columns: [FR(1)]
+                    grid_rows: [FR(1), FR(1), FR(1)]
+                    pad_row: 12
                   widgets:
-                    # 温度图标
+                    # 室外行
                     - label:
-                        text_font: extra_icon
-                        text: "\U000F050F"
-                        grid_cell_column_pos: 0 
-                        grid_cell_row_pos: 0 
-                        grid_cell_x_align: CENTER
-                        grid_cell_y_align: CENTER
-                    # 温度值
-                    - label:
-                        id: temp_label
-                        text_font: montserrat_32
-                        text: "- °C"
-                        grid_cell_column_pos: 1 
-                        grid_cell_row_pos: 0 
+                        id: outdoor_label
+                        text_font: noto_sans_sc_32
+                        text: "室外：-- °C  -- %  -- hPa  -- ppm"
+                        grid_cell_column_pos: 0
+                        grid_cell_row_pos: 0
                         grid_cell_x_align: START
                         grid_cell_y_align: CENTER
-                    # 湿度图标
+                    # 室内行
                     - label:
-                        text_font: extra_icon
-                        text: "\U000F058E"
-                        grid_cell_column_pos: 2 
-                        grid_cell_row_pos: 0 
-                        grid_cell_x_align: CENTER
-                        grid_cell_y_align: CENTER
-                    # 湿度值
-                    - label:
-                        text_font: montserrat_32
-                        id: humi_label
-                        text: "- %"
-                        grid_cell_column_pos: 3 
-                        grid_cell_row_pos: 0 
+                        id: indoor_label
+                        text_font: noto_sans_sc_32
+                        text: "室内：-- °C  -- %"
+                        grid_cell_column_pos: 0
+                        grid_cell_row_pos: 1
                         grid_cell_x_align: START
                         grid_cell_y_align: CENTER
-                    # PM2.5 图标
+                    # 预警行
                     - label:
-                        text_font: extra_icon
-                        text: "\U000F0F30"
-                        grid_cell_column_pos: 0 
-                        grid_cell_row_pos: 1 
-                        grid_cell_x_align: CENTER
-                        grid_cell_y_align: CENTER
-                    # PM2.5 值
-                    - label:
-                        text_font: montserrat_32
-                        id: pm25_label
-                        text: "- ppm"
-                        grid_cell_column_pos: 1 
-                        grid_cell_row_pos: 1 
+                        id: weather_alert_label
+                        text_font: noto_sans_sc_32
+                        text_color: 0xE74C3C
+                        text: "预警：无预警"
+                        grid_cell_column_pos: 0
+                        grid_cell_row_pos: 2
                         grid_cell_x_align: START
                         grid_cell_y_align: CENTER
-                    # 气压图标
-                    - label:
-                        text_font: extra_icon
-                        text: "\U000F029A"
-                        grid_cell_column_pos: 2 
-                        grid_cell_row_pos: 1 
-                        grid_cell_x_align: CENTER
-                        grid_cell_y_align: CENTER
-                    # 气压值
-                    - label:
-                        text_font: montserrat_32
-                        id: pres_label
-                        text: "- hPa"
-                        grid_cell_column_pos: 3 
-                        grid_cell_row_pos: 1 
-                        grid_cell_x_align: START
-                        grid_cell_y_align: CENTER
-              # 天气预警
-              - label:
-                  id: weather_alert_label
-                  text_font: noto_sans_sc_32
-                  text_color: 0xE74C3C
-                  text: "天气: 无预警"
+
+    # ========== 插座页面 ==========
+    - id: socket_page
+      widgets:
+        - obj:
+            styles: content_container
+            widgets:
+              # 3个插座按钮（并排）
+              - obj:
+                  width: 900
+                  height: 120
                   align: CENTER
-                  y: 180
-        # 页面标题
-        - label:
-            x: 220
-            y: 40
-            text_font: noto_sans_sc_48
-            text: "仪表盘"   
+                  y: -180
+                  bg_opa: TRANSP
+                  border_opa: TRANSP
+                  layout:
+                    type: FLEX
+                    flex_flow: ROW
+                    pad_column: 24
+                    flex_align_main: CENTER
+                    flex_align_cross: CENTER
+                  widgets:
+                    # 插座1按钮
+                    - button:
+                        id: chuangmi_socket1_button
+                        width: 200
+                        height: 80
+                        checkable: true
+                        state:
+                          checked: false
+                        checked:
+                          bg_color: 0xFF8C00
+                        widgets:
+                          - label:
+                              text_font: noto_sans_sc_32
+                              text: "插座1"
+                              align: CENTER
+                        on_value:
+                          - homeassistant.action:
+                              action: switch.toggle
+                              data:
+                                entity_id: switch.chuangmi_cn_125697630_m3_on_p_2_1
+                    # 插座2按钮
+                    - button:
+                        id: chuangmi_socket2_button
+                        width: 200
+                        height: 80
+                        checkable: true
+                        state:
+                          checked: false
+                        checked:
+                          bg_color: 0xFF8C00
+                        widgets:
+                          - label:
+                              text_font: noto_sans_sc_32
+                              text: "插座2"
+                              align: CENTER
+                        on_value:
+                          - homeassistant.action:
+                              action: switch.toggle
+                              data:
+                                entity_id: switch.chuangmi_cn_125796823_m3_on_p_2_1
+                    # 插座3按钮
+                    - button:
+                        id: chuangmi_socket3_button
+                        width: 200
+                        height: 80
+                        checkable: true
+                        state:
+                          checked: false
+                        checked:
+                          bg_color: 0xFF8C00
+                        widgets:
+                          - label:
+                              text_font: noto_sans_sc_32
+                              text: "插座3"
+                              align: CENTER
+                        on_value:
+                          - homeassistant.action:
+                              action: switch.toggle
+                              data:
+                                entity_id: switch.chuangmi_cn_125520813_m3_on_p_2_1
+              # 信息区域（2行左对齐）
+              - obj:
+                  width: 900
+                  height: 200
+                  align: CENTER
+                  y: 30
+                  bg_opa: TRANSP
+                  border_opa: TRANSP
+                  layout:
+                    type: GRID
+                    grid_columns: [FR(1)]
+                    grid_rows: [FR(1), FR(1)]
+                    pad_row: 12
+                  widgets:
+                    # 弱电行
+                    - label:
+                        id: weak_power_label
+                        text_font: noto_sans_sc_32
+                        text: "弱电：-- W  -- Wh"
+                        grid_cell_column_pos: 0
+                        grid_cell_row_pos: 0
+                        grid_cell_x_align: START
+                        grid_cell_y_align: CENTER
+                    # 书桌行
+                    - label:
+                        id: desk_power_label
+                        text_font: noto_sans_sc_32
+                        text: "书桌：-- W  -- Wh"
+                        grid_cell_column_pos: 0
+                        grid_cell_row_pos: 1
+                        grid_cell_x_align: START
+                        grid_cell_y_align: CENTER
 
     # ========== 系统页面 ==========
     - id: system_page
@@ -343,78 +455,12 @@ lvgl:
         - obj:
             styles: content_container
             widgets:
-              # 系统信息区域
+              # 亮度控制条（第1行）
               - obj:
-                  width: 800
-                  height: 300
+                  width: 900
+                  height: 80
                   align: CENTER
-                  y: -140
-                  bg_opa: TRANSP
-                  border_opa: TRANSP
-                  layout:
-                    type: GRID
-                    grid_columns: [140, FR(1)]
-                    grid_rows: [60, 60, 60]
-                    pad_row: 12
-                    pad_column: 12
-                  widgets:
-                    # IP 标签
-                    - label:
-                        text_font: noto_sans_sc_32
-                        text: "地址:"
-                        grid_cell_column_pos: 0
-                        grid_cell_row_pos: 0
-                        grid_cell_x_align: END
-                        grid_cell_y_align: CENTER
-                    # IP 值
-                    - label:
-                        id: sys_ip_label
-                        text_font: montserrat_32
-                        text: "0.0.0.0"
-                        grid_cell_column_pos: 1
-                        grid_cell_row_pos: 0
-                        grid_cell_x_align: START
-                        grid_cell_y_align: CENTER
-                    # 信号标签
-                    - label:
-                        text_font: noto_sans_sc_32
-                        text: "信号:"
-                        grid_cell_column_pos: 0
-                        grid_cell_row_pos: 1
-                        grid_cell_x_align: END
-                        grid_cell_y_align: CENTER
-                    # 信号值
-                    - label:
-                        id: sys_rssi_label
-                        text_font: montserrat_32
-                        text: "- dBm"
-                        grid_cell_column_pos: 1
-                        grid_cell_row_pos: 1
-                        grid_cell_x_align: START
-                        grid_cell_y_align: CENTER
-                    # 运行时间标签
-                    - label:
-                        text_font: noto_sans_sc_32
-                        text: "运行:"
-                        grid_cell_column_pos: 0
-                        grid_cell_row_pos: 2
-                        grid_cell_x_align: END
-                        grid_cell_y_align: CENTER
-                    # 运行时间值
-                    - label:
-                        id: sys_uptime_label
-                        text_font: montserrat_32
-                        text: "-"
-                        grid_cell_column_pos: 1
-                        grid_cell_row_pos: 2
-                        grid_cell_x_align: START
-                        grid_cell_y_align: CENTER
-              # 亮度控制区域（GRID 2列，百分比覆盖在滑条正面）
-              - obj:
-                  width: 800
-                  height: 150
-                  align: CENTER
-                  y: 120
+                  y: -200
                   bg_opa: TRANSP
                   border_opa: TRANSP
                   layout:
@@ -423,27 +469,25 @@ lvgl:
                     grid_rows: [FR(1)]
                     pad_column: 12
                   widgets:
-                    # 左列：标签
                     - label:
                         text_font: noto_sans_sc_32
-                        text: "亮度:"
+                        text: "亮度："
                         grid_cell_column_pos: 0
                         grid_cell_row_pos: 0
                         grid_cell_x_align: END
                         grid_cell_y_align: CENTER
-                    # 右列：滑块 + 百分比（叠放，百分比在上层）
                     - obj:
                         grid_cell_column_pos: 1
                         grid_cell_row_pos: 0
                         grid_cell_x_align: START
                         grid_cell_y_align: CENTER
-                        width: 520
-                        height: 90
+                        width: 620
+                        height: 70
                         bg_opa: TRANSP
                         border_opa: TRANSP
                         widgets:
                           - slider:
-                              width: 460
+                              width: 560
                               height: 40
                               radius: 20
                               align: CENTER
@@ -467,9 +511,6 @@ lvgl:
                                     text: !lambda |-
                                       int percent = int(x) * 100 / 255;
                                       return std::to_string(percent) + " %";
-                                - logger.log:
-                                    format: "亮度: %d%%"
-                                    args: [int((x*100)/255)]
                                 - homeassistant.action:
                                     action: light.turn_on
                                     data:
@@ -482,9 +523,107 @@ lvgl:
                               text: "50 %"
                               align: CENTER
                               y: 2
-        # 页面标题
-        - label:
-            x: 220
-            y: 40
-            text_font: noto_sans_sc_48
-            text: "系统"
+              # 音量控制条（第2行）
+              - obj:
+                  width: 900
+                  height: 80
+                  align: CENTER
+                  y: -100
+                  bg_opa: TRANSP
+                  border_opa: TRANSP
+                  layout:
+                    type: GRID
+                    grid_columns: [140, FR(1)]
+                    grid_rows: [FR(1)]
+                    pad_column: 12
+                  widgets:
+                    - label:
+                        text_font: noto_sans_sc_32
+                        text: "音量："
+                        grid_cell_column_pos: 0
+                        grid_cell_row_pos: 0
+                        grid_cell_x_align: END
+                        grid_cell_y_align: CENTER
+                    - obj:
+                        grid_cell_column_pos: 1
+                        grid_cell_row_pos: 0
+                        grid_cell_x_align: START
+                        grid_cell_y_align: CENTER
+                        width: 620
+                        height: 70
+                        bg_opa: TRANSP
+                        border_opa: TRANSP
+                        widgets:
+                          - slider:
+                              width: 560
+                              height: 40
+                              radius: 20
+                              align: CENTER
+                              min_value: 0
+                              max_value: 100
+                              id: volume_slider
+                              bg_color: 0xECECEC
+                              bg_opa: COVER
+                              indicator:
+                                radius: 20
+                                bg_color: 0x4A6363
+                              knob:
+                                bg_opa: TRANSP
+                              on_release:
+                                - lambda: |-
+                                    float vol = x / 100.0;
+                                    auto call = id(speaker_media_player).make_call();
+                                    call.set_volume(vol);
+                                    call.perform();
+                                - lvgl.label.update:
+                                    id: volume_label
+                                    text: !lambda |-
+                                      return std::to_string(int(x)) + " %";
+                          - label:
+                              id: volume_label
+                              text_font: montserrat_32
+                              text_color: 0x333333
+                              text: "50 %"
+                              align: CENTER
+                              y: 2
+              # 系统信息区域（3行左对齐）
+              - obj:
+                  width: 900
+                  height: 240
+                  align: CENTER
+                  y: 50
+                  bg_opa: TRANSP
+                  border_opa: TRANSP
+                  layout:
+                    type: GRID
+                    grid_columns: [FR(1)]
+                    grid_rows: [FR(1), FR(1), FR(1)]
+                    pad_row: 12
+                  widgets:
+                    # IP地址行
+                    - label:
+                        id: sys_ip_label
+                        text_font: noto_sans_sc_32
+                        text: "IP地址：0.0.0.0"
+                        grid_cell_column_pos: 0
+                        grid_cell_row_pos: 0
+                        grid_cell_x_align: START
+                        grid_cell_y_align: CENTER
+                    # 信号行
+                    - label:
+                        id: sys_rssi_label
+                        text_font: noto_sans_sc_32
+                        text: "信号：-- dBm"
+                        grid_cell_column_pos: 0
+                        grid_cell_row_pos: 1
+                        grid_cell_x_align: START
+                        grid_cell_y_align: CENTER
+                    # 运行行
+                    - label:
+                        id: sys_uptime_label
+                        text_font: noto_sans_sc_32
+                        text: "运行：--:--:--"
+                        grid_cell_column_pos: 0
+                        grid_cell_row_pos: 2
+                        grid_cell_x_align: START
+                        grid_cell_y_align: CENTER

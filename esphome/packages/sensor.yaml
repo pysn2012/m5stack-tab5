@@ -46,70 +46,101 @@ text_sensor:
       - lvgl.label.update:
           id: weather_alert_label
           text: !lambda |-
-            if (x.empty() || x == "None" || x == "null" || x == "unknown" || x == "unavailable") 
-                return "天气: 无预警";
-            return "天气预警: " + x;
+            if (x.empty() || x == "None" || x == "null" || x == "unknown" || x == "unavailable")
+                return "预警：无预警";
+            return "预警：" + x;
 
 # 数值传感器
 sensor:
-  # Home Assistant 环境传感器
+  # Home Assistant 环境传感器 - 室外
   - platform: homeassistant
     id: cur_temp
     entity_id: sensor.xiamen_temperature
     on_value:
-      - lvgl.label.update:
-          id: temp_label
-          text:
-            format: "%.1f °C"
-            args: [ 'x' ]
+      - lambda: |-
+          id(outdoor_temp_val) = x;
+      - script.execute: update_outdoor_label
 
   - platform: homeassistant
     id: cur_humi
     entity_id: sensor.xiamen_humidity
     on_value:
-      - lvgl.label.update:
-          id: humi_label
-          text:
-            format: "%.1f %%"
-            args: [ 'x' ]
+      - lambda: |-
+          id(outdoor_humi_val) = x;
+      - script.execute: update_outdoor_label
 
   - platform: homeassistant
     id: cur_pres
     entity_id: sensor.xiamen_atmospheric_pressure
     on_value:
-      - lvgl.label.update:
-          id: pres_label
-          text:
-            format: "%.1f hPa"
-            args: [ 'x' ]
+      - lambda: |-
+          id(outdoor_pres_val) = x;
+      - script.execute: update_outdoor_label
 
   - platform: homeassistant
     id: cur_pm25
     entity_id: sensor.xiamen_pm25
     on_value:
-      - lvgl.label.update:
-          id: pm25_label
-          text:
-            format: "%.0f ppm"
-            args: [ 'x' ]
+      - lambda: |-
+          id(outdoor_pm25_val) = x;
+      - script.execute: update_outdoor_label
 
   # 室内温度
   - platform: homeassistant
     entity_id: sensor.cleargras_cn_blt_3_u5c2qgggk400_dk1_temperature_p_2_1
     id: xiaomi_temp
     on_value:
-      - lvgl.label.update:
-          id: indoor_temp
-          text:
-            format: "%.1f °C"
-            args: [ 'x' ]
+      - lambda: |-
+          id(indoor_temp_val) = x;
+      - script.execute: update_indoor_label
+
   # 室内湿度
   - platform: homeassistant
     id: xiaomi_humi
     entity_id: sensor.cleargras_cn_blt_3_u5c2qgggk400_dk1_relative_humidity_p_2_2
     on_value:
-      - lvgl.label.update:
-          id: indoor_humi
-          text:
-            format: "%.1f %%"
-            args: [ 'x' ]
+      - lambda: |-
+          id(indoor_humi_val) = x;
+      - script.execute: update_indoor_label
+
+  # 弱电排插功率
+  - platform: homeassistant
+    name: cmpower1 power
+    entity_id: sensor.cmpower_w1_270cee_24_gong_lu
+    id: cmpower1_power
+    unit_of_measurement: "W"
+    on_value:
+      - lambda: |-
+          id(weak_power_val) = x;
+      - script.execute: update_weak_power_label
+
+  - platform: homeassistant
+    name: cm1 total power
+    entity_id: sensor.cmpower_w1_270cee_29_zong_dian_liang
+    id: cm1_total_power
+    unit_of_measurement: "Wh"
+    on_value:
+      - lambda: |-
+          id(weak_total_val) = x;
+      - script.execute: update_weak_power_label
+
+  # 书桌排插功率
+  - platform: homeassistant
+    name: cmpower2 power
+    entity_id: sensor.cmpower_w1_26982d_24_gong_lu
+    id: cmpower2_power
+    unit_of_measurement: "W"
+    on_value:
+      - lambda: |-
+          id(desk_power_val) = x;
+      - script.execute: update_desk_power_label
+
+  - platform: homeassistant
+    name: cm2 total power
+    entity_id: sensor.cmpower_w1_26982d_29_zong_dian_liang
+    id: cm2_total_power
+    unit_of_measurement: "Wh"
+    on_value:
+      - lambda: |-
+          id(desk_total_val) = x;
+      - script.execute: update_desk_power_label

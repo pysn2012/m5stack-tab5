@@ -82,7 +82,7 @@ sensor:
       - lvgl.label.update:
           id: sys_rssi_label
           text: !lambda |-
-            return std::to_string(int(x)) + " dBm";
+            return "信号：" + std::to_string(int(x)) + " dBm";
 
   # 设备运行时间
   - platform: uptime
@@ -98,8 +98,8 @@ sensor:
             int hours = (total % 86400) / 3600;
             int mins = (total % 3600) / 60;
             char buf[32];
-            if (days > 0) snprintf(buf, sizeof(buf), "%dd %02d:%02d", days, hours, mins);
-            else snprintf(buf, sizeof(buf), "%02d:%02d", hours, mins);
+            if (days > 0) snprintf(buf, sizeof(buf), "运行：%dd %02d:%02d", days, hours, mins);
+            else snprintf(buf, sizeof(buf), "运行：%02d:%02d:%02d", hours, mins, total % 60);
             return std::string(buf);
 
   # 电池电量百分比计算（基于电压）
@@ -233,4 +233,4 @@ text_sensor:
           - lvgl.label.update:
               id: sys_ip_label
               text: !lambda |-
-                return "IP: " + x;
+                return "IP地址：" + x;
