@@ -367,8 +367,8 @@ lvgl:
                         width: 160
                         height: 160
                         bg_color: 0xFF8C00
-                        radius: 8px              # 圆角
-                        pad_all: 8px             # 内边距
+                        radius: 8                # 圆角
+                        pad_all: 8               # 内边距
                         text_color: 0xFFFFFF     # 文字颜色
                         checkable: true
                         widgets:
@@ -391,8 +391,8 @@ lvgl:
                         width: 160
                         height: 160
                         bg_color: 0xFF8C00
-                        radius: 8px              # 圆角
-                        pad_all: 8px             # 内边距
+                        radius: 8                # 圆角
+                        pad_all: 8               # 内边距
                         text_color: 0xFFFFFF     # 文字颜色
                         checkable: true
                         widgets:
@@ -415,8 +415,8 @@ lvgl:
                         width: 160
                         height: 160
                         bg_color: 0xFF8C00
-                        radius: 8px              # 圆角
-                        pad_all: 8px             # 内边距
+                        radius: 8                # 圆角
+                        pad_all: 8               # 内边距
                         text_color: 0xFFFFFF     # 文字颜色
                         checkable: true
                         widgets:
