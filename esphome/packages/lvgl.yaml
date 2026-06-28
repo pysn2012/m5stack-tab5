@@ -1,6 +1,6 @@
 # 全局变量定义
 globals:
-  # 当前页面编号（0=客厅, 1=插座, 2=系统）
+  # 当前页面编号（0=主页, 1=插座, 2=系统）
   - id: page_num
     type: int
     restore_value: no
@@ -157,7 +157,7 @@ lvgl:
             flex_align_cross: center
             flex_align_track: center
           widgets:
-            # 客厅导航按钮
+            # 主页导航按钮
             - obj:
                 styles: nav_btn_container
                 widgets:
@@ -175,15 +175,16 @@ lvgl:
                             id: dash_btn_icon
                             align: CENTER
                             styles: nav_icon_inactivate
-                            text: "\U000F02DC" # 客厅图标
-                      on_press:
+                            text: "\U000F02DC" # 主页图标
+                      on_value:
                         - lambda: id(page_num) = 0;
                         - script.execute: nav_rail_update
-                        - lvgl.page.show: dashboard_page
+                      on_press:
+                        - lvgl.page.show: main_page
                   - label:
                       styles: nav_label_inactivate
                       id: dash_btn_label
-                      text: "客厅"
+                      text: "主页"
 
             # 插座导航按钮
             - obj:
@@ -204,9 +205,10 @@ lvgl:
                             align: CENTER
                             styles: nav_icon_inactivate
                             text: "\U000F0905" # 插座图标
-                      on_press:
+                      on_value:
                         - lambda: id(page_num) = 1;
                         - script.execute: nav_rail_update
+                      on_press:
                         - lvgl.page.show: socket_page
                   - label:
                       styles: nav_label_inactivate
@@ -232,9 +234,10 @@ lvgl:
                             align: CENTER
                             styles: nav_icon_inactivate
                             text: "\U000F08BB"  # 齿轮（轮廓）图标
-                      on_press:
+                      on_value:
                         - lambda: id(page_num) = 2;
                         - script.execute: nav_rail_update
+                      on_press:
                         - lvgl.page.show: system_page
                   - label:
                       styles: nav_label_inactivate
@@ -274,8 +277,8 @@ lvgl:
 
   # LVGL 页面定义
   pages:
-    # ========== 客厅页面 ==========
-    - id: dashboard_page
+    # ========== 主页页面 ==========
+    - id: main_page
       widgets:
         - obj:
             styles: content_container
@@ -312,7 +315,7 @@ lvgl:
                     - label:
                         id: outdoor_label
                         text_font: noto_sans_sc_32
-                        text: "室外：-- °C  -- %  -- hPa  -- ppm"
+                        text: "室外：温度--℃  湿度--%  气压--hPa  颗粒物--ppm"
                         grid_cell_column_pos: 0
                         grid_cell_row_pos: 0
                         grid_cell_x_align: START
@@ -321,7 +324,7 @@ lvgl:
                     - label:
                         id: indoor_label
                         text_font: noto_sans_sc_32
-                        text: "室内：-- °C  -- %"
+                        text: "室内：温度--℃  湿度--%"
                         grid_cell_column_pos: 0
                         grid_cell_row_pos: 1
                         grid_cell_x_align: START
@@ -346,7 +349,7 @@ lvgl:
               # 3个插座按钮（并排）
               - obj:
                   width: 900
-                  height: 120
+                  height: 200
                   align: CENTER
                   y: -180
                   bg_opa: TRANSP
@@ -361,19 +364,23 @@ lvgl:
                     # 插座1按钮
                     - button:
                         id: chuangmi_socket1_button
-                        width: 200
-                        height: 80
+                        width: 160
+                        height: 160
+                        bg_color: 0xFF8C00
+                        radius: 10x              # 圆角
+                        pad_all: 8px             # 内边距
+                        text_color: 0xFFFFFF     # 文字颜色
                         checkable: true
-                        state:
-                          checked: false
-                        checked:
-                          bg_color: 0xFF8C00
                         widgets:
+                          - label:
+                              text_font: extra_icon
+                              align: CENTER
+                              text: "\U000F0425"
                           - label:
                               text_font: noto_sans_sc_32
                               text: "插座1"
                               align: CENTER
-                        on_value:
+                        on_click:
                           - homeassistant.action:
                               action: switch.toggle
                               data:
@@ -381,19 +388,23 @@ lvgl:
                     # 插座2按钮
                     - button:
                         id: chuangmi_socket2_button
-                        width: 200
-                        height: 80
+                        width: 160
+                        height: 160
+                        bg_color: 0xFF8C00
+                        radius: 10x              # 圆角
+                        pad_all: 8px             # 内边距
+                        text_color: 0xFFFFFF     # 文字颜色
                         checkable: true
-                        state:
-                          checked: false
-                        checked:
-                          bg_color: 0xFF8C00
                         widgets:
+                          - label:
+                              text_font: extra_icon
+                              align: CENTER
+                              text: "\U000F0425"
                           - label:
                               text_font: noto_sans_sc_32
                               text: "插座2"
                               align: CENTER
-                        on_value:
+                        on_click:
                           - homeassistant.action:
                               action: switch.toggle
                               data:
@@ -401,19 +412,23 @@ lvgl:
                     # 插座3按钮
                     - button:
                         id: chuangmi_socket3_button
-                        width: 200
-                        height: 80
+                        width: 160
+                        height: 160
+                        bg_color: 0xFF8C00
+                        radius: 10x              # 圆角
+                        pad_all: 8px             # 内边距
+                        text_color: 0xFFFFFF     # 文字颜色
                         checkable: true
-                        state:
-                          checked: false
-                        checked:
-                          bg_color: 0xFF8C00
                         widgets:
+                          - label:
+                              text_font: extra_icon
+                              align: CENTER
+                              text: "\U000F0425"
                           - label:
                               text_font: noto_sans_sc_32
                               text: "插座3"
                               align: CENTER
-                        on_value:
+                        on_click:
                           - homeassistant.action:
                               action: switch.toggle
                               data:
@@ -436,7 +451,7 @@ lvgl:
                     - label:
                         id: weak_power_label
                         text_font: noto_sans_sc_32
-                        text: "弱电：-- W  -- Wh"
+                        text: "弱电：功耗-- W  总电量-- Wh"
                         grid_cell_column_pos: 0
                         grid_cell_row_pos: 0
                         grid_cell_x_align: START
@@ -445,7 +460,7 @@ lvgl:
                     - label:
                         id: desk_power_label
                         text_font: noto_sans_sc_32
-                        text: "书桌：-- W  -- Wh"
+                        text: "书桌：功耗-- W  总电量-- Wh"
                         grid_cell_column_pos: 0
                         grid_cell_row_pos: 1
                         grid_cell_x_align: START
@@ -460,7 +475,7 @@ lvgl:
               # 亮度控制条（第1行）
               - obj:
                   width: 900
-                  height: 80
+                  height: 120
                   align: CENTER
                   y: -200
                   bg_opa: TRANSP
@@ -484,7 +499,7 @@ lvgl:
                         grid_cell_x_align: START
                         grid_cell_y_align: CENTER
                         width: 620
-                        height: 70
+                        height: 90
                         bg_opa: TRANSP
                         border_opa: TRANSP
                         widgets:
@@ -530,7 +545,7 @@ lvgl:
               # 音量控制条（第2行）
               - obj:
                   width: 900
-                  height: 80
+                  height: 120
                   align: CENTER
                   y: -100
                   bg_opa: TRANSP
@@ -554,7 +569,7 @@ lvgl:
                         grid_cell_x_align: START
                         grid_cell_y_align: CENTER
                         width: 620
-                        height: 70
+                        height: 90
                         bg_opa: TRANSP
                         border_opa: TRANSP
                         widgets:
