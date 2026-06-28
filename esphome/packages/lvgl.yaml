@@ -176,10 +176,9 @@ lvgl:
                             align: CENTER
                             styles: nav_icon_inactivate
                             text: "\U000F02DC" # 客厅图标
-                      on_value:
+                      on_press:
                         - lambda: id(page_num) = 0;
                         - script.execute: nav_rail_update
-                      on_press:
                         - lvgl.page.show: dashboard_page
                   - label:
                       styles: nav_label_inactivate
@@ -205,10 +204,9 @@ lvgl:
                             align: CENTER
                             styles: nav_icon_inactivate
                             text: "\U000F0905" # 插座图标
-                      on_value:
+                      on_press:
                         - lambda: id(page_num) = 1;
                         - script.execute: nav_rail_update
-                      on_press:
                         - lvgl.page.show: socket_page
                   - label:
                       styles: nav_label_inactivate
@@ -234,10 +232,9 @@ lvgl:
                             align: CENTER
                             styles: nav_icon_inactivate
                             text: "\U000F08BB"  # 齿轮（轮廓）图标
-                      on_value:
+                      on_press:
                         - lambda: id(page_num) = 2;
                         - script.execute: nav_rail_update
-                      on_press:
                         - lvgl.page.show: system_page
                   - label:
                       styles: nav_label_inactivate

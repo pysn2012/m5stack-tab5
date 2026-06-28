@@ -10,7 +10,7 @@ script:
             id(light_panel_btn)
           };
           for (auto* btn : btns) {
-            lv_obj_set_ext_click_area(btn, 180);
+            lv_obj_set_ext_click_area(btn, 180, 180, 180, 180);
           }
 
   # 更新导航栏 UI 脚本
