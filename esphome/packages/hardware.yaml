@@ -202,6 +202,7 @@ audio_adc:
 microphone:
   - platform: i2s_audio
     id: tab5_microphone
+    i2s_audio_id: mic_bus          # ★ 显式引用 i2s_audio 总线（packages 拆分配置时必须指定）
     i2s_din_pin: GPIO28
     sample_rate: 16000
     bits_per_sample: 16bit

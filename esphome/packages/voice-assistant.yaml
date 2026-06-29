@@ -36,6 +36,7 @@ globals:
 speaker:
   - platform: i2s_audio
     id: box_speaker
+    i2s_audio_id: mic_bus           # ★ 显式引用 i2s_audio 总线（与 hardware.yaml 中的 mic_bus 对应）
     i2s_dout_pin: GPIO26
     audio_dac: es8388_dac
     dac_type: external
@@ -102,6 +103,7 @@ micro_wake_word:
     - okay_nabu
     - model: https://raw.githubusercontent.com/pysn2012/wake-word-voice-assistants/refs/heads/main/models/hey_sarah.json
   on_wake_word_detected:
+    - logger.log: "★ micro_wake_word: 检测到唤醒词！"
     - voice_assistant.start:
         wake_word: !lambda return wake_word;
 
@@ -199,10 +201,12 @@ voice_assistant:
   # HA 连接 / 断开
   on_client_connected:
     - lambda: id(init_in_progress) = false;
+    - logger.log: "★ voice_assistant: HA connected, starting wake word engine"
     - script.execute: start_wake_word
     - script.execute: set_idle_or_mute_phase
     - script.execute: voice_ui_update
   on_client_disconnected:
+    - logger.log: "★ voice_assistant: HA disconnected"
     - script.execute: stop_wake_word
     - lambda: id(voice_assistant_phase) = ${voice_assist_not_ready_phase_id};
     - script.execute: voice_ui_update

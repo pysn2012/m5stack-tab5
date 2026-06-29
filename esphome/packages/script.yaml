@@ -217,6 +217,7 @@ script:
   # ── 启动唤醒词引擎脚本 ──────────────────────────────────────
   - id: start_wake_word
     then:
+      - logger.log: "★ start_wake_word: 脚本被调用"
       - if:
           condition:
             and:
@@ -224,6 +225,7 @@ script:
                   - voice_assistant.is_running:
               - lambda: return id(wake_word_engine_location).current_option() == "On device";
           then:
+            - logger.log: "★ start_wake_word: 启动设备端 micro_wake_word"
             - lambda: id(va).set_use_wake_word(false);
             - micro_wake_word.start:
       - if:
@@ -233,12 +235,14 @@ script:
                   - voice_assistant.is_running:
               - lambda: return id(wake_word_engine_location).current_option() == "In Home Assistant";
           then:
+            - logger.log: "★ start_wake_word: 启动 HA 端流式唤醒"
             - lambda: id(va).set_use_wake_word(true);
             - voice_assistant.start_continuous:
 
   # ── 停止唤醒词引擎脚本 ──────────────────────────────────────
   - id: stop_wake_word
     then:
+      - logger.log: "★ stop_wake_word: 脚本被调用"
       - if:
           condition:
             lambda: return id(wake_word_engine_location).current_option() == "In Home Assistant";
