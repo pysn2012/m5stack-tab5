@@ -89,9 +89,7 @@ lvgl:
           snprintf(buf, sizeof(buf), "%d %%", id(volume_val));
           return buf;
     # 设置媒体播放器初始音量
-    - media_player.set_volume:
-        id: speaker_media_player
-        volume: !lambda return id(volume_val) / 100.0;
+    - media_player.volume_set: !lambda return id(volume_val) / 100.0;
 
   byte_order: little_endian
   color_depth: 16

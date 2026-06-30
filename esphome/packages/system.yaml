@@ -15,10 +15,8 @@ number:
     optimistic: true
     restore_value: true
     on_value:
-      # 1) 设置媒体播放器实际音量（0.0 - 1.0）
-      - media_player.set_volume:
-          id: speaker_media_player
-          volume: !lambda return x / 100.0;
+      # 1) 设置媒体播放器实际音量（lambda 返回 0.0 - 1.0 的小数）
+      - media_player.volume_set: !lambda return x / 100.0;
       # 2) 同步全局缓存变量
       - lambda: id(volume_val) = int(x);
       # 3) 更新 LVGL 滑块位置
