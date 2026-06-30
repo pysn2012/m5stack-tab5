@@ -130,35 +130,35 @@ script:
 
           switch (phase) {
             case ${voice_assist_listening_phase_id}:
-              status_text = "正在聆听...";
+              status_text = "聆听状态";
               status_icon = "\U000F0362";  // 麦克风
               break;
             case ${voice_assist_thinking_phase_id}:
-              status_text = "思考中...";
+              status_text = "思考状态";
               status_icon = "\U000F0064";  // 助手
               break;
             case ${voice_assist_replying_phase_id}:
-              status_text = "回复中...";
+              status_text = "回复状态";
               status_icon = "\U000F0E19";  // 音量高
               break;
             case ${voice_assist_error_phase_id}:
-              status_text = "出错了，请重试";
+              status_text = "错误状态";
               status_icon = "\U000F0156";  // 关闭
               break;
             case ${voice_assist_muted_phase_id}:
-              status_text = "麦克风已静音";
+              status_text = "静音状态";
               status_icon = "\U000F0374";  // 减号
               break;
             case ${voice_assist_not_ready_phase_id}:
-              status_text = "正在连接 Home Assistant...";
+              status_text = "连接中";
               status_icon = "\U000F05A9";  // WiFi 图标
               break;
             case ${voice_assist_timer_finished_phase_id}:
-              status_text = "计时器到点了！";
+              status_text = "计时到点";
               status_icon = "\U000F09C8";  // 提示
               break;
             default:
-              status_text = "请说 \"okay nabu\" 或点击图标对话";
+              status_text = "待机状态";
               status_icon = "\U000F05CB";  // 声音助手
           }
 
