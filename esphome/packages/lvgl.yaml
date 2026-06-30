@@ -9,7 +9,7 @@ globals:
   - id: backlight_brightness_val
     type: int
     restore_value: yes
-    initial_value: '128'  # 默认 50%
+    initial_value: '153'  # 默认 60% (153/255 ≈ 60%)
   # 室外传感器缓存值
   - id: outdoor_temp_val
     type: float
@@ -56,8 +56,8 @@ globals:
   # 音量缓存值
   - id: volume_val
     type: int
-    restore_value: no
-    initial_value: '50'
+    restore_value: yes
+    initial_value: '60'
 
 # LVGL 图形库配置
 lvgl:
@@ -68,6 +68,30 @@ lvgl:
     - script.execute: expand_nav_btn_click_area
     - script.execute: nav_rail_update
     - script.execute: sync_ha
+    # 初始化滑块位置和标签（使用全局初始值 60%）
+    - lvgl.slider.update:
+        id: backlight_slider
+        value: !lambda return id(backlight_brightness_val);
+    - lvgl.slider.update:
+        id: volume_slider
+        value: !lambda return id(volume_val);
+    - lvgl.label.update:
+        id: backlight_bright_label
+        text: !lambda |-
+          static char buf[16];
+          int percent = id(backlight_brightness_val) * 100 / 255;
+          snprintf(buf, sizeof(buf), "%d %%", percent);
+          return buf;
+    - lvgl.label.update:
+        id: volume_label
+        text: !lambda |-
+          static char buf[16];
+          snprintf(buf, sizeof(buf), "%d %%", id(volume_val));
+          return buf;
+    # 设置媒体播放器初始音量
+    - media_player.set_volume:
+        id: speaker_media_player
+        volume: !lambda return id(volume_val) / 100.0;
 
   byte_order: little_endian
   color_depth: 16
@@ -640,6 +664,7 @@ lvgl:
                               align: CENTER
                               min_value: 0
                               max_value: 255
+                              value: 153
                               id: backlight_slider
                               bg_color: 0xECECEC
                               bg_opa: COVER
@@ -669,7 +694,7 @@ lvgl:
                               id: backlight_bright_label
                               text_font: montserrat_32
                               text_color: 0x333333
-                              text: "50 %"
+                              text: "60 %"
                               align: CENTER
                               y: 2
               # 音量控制条（第2行）
@@ -710,6 +735,7 @@ lvgl:
                               align: CENTER
                               min_value: 0
                               max_value: 100
+                              value: 60
                               id: volume_slider
                               bg_color: 0xECECEC
                               bg_opa: COVER
@@ -719,18 +745,15 @@ lvgl:
                               knob:
                                 bg_opa: TRANSP
                               on_release:
-                                - lambda: id(volume_val) = int(x);
-                                - lvgl.label.update:
-                                    id: volume_label
-                                    text: !lambda |-
-                                      static char buf[16];
-                                      snprintf(buf, sizeof(buf), "%d %%", int(x));
-                                      return buf;
+                                # 通过 number 组件统一设置音量（触发 HA 同步 + 媒体播放器音量 + UI 更新）
+                                - number.set:
+                                    id: volume_number
+                                    value: !lambda return int(x);
                           - label:
                               id: volume_label
                               text_font: montserrat_32
                               text_color: 0x333333
-                              text: "50 %"
+                              text: "60 %"
                               align: CENTER
                               y: 2
               # 系统信息区域（3行左对齐）

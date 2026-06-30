@@ -1,3 +1,38 @@
+# ── 音量数值组件（TAB5 ↔ HA 双向同步的核心）─────────────────────
+# 该 number 组件暴露到 HA，HA 端可通过 number 实体调节音量；
+# TAB5 端的音量滑块也通过 number.set 调节此组件，
+# on_value 统一处理：设置媒体播放器音量 + 更新滑块 + 更新标签 + 同步全局变量
+number:
+  - platform: template
+    name: "Volume"
+    id: volume_number
+    entity_category: config
+    icon: "mdi:volume-high"
+    min_value: 0
+    max_value: 100
+    step: 1
+    initial_value: 60
+    optimistic: true
+    restore_value: true
+    on_value:
+      # 1) 设置媒体播放器实际音量（0.0 - 1.0）
+      - media_player.set_volume:
+          id: speaker_media_player
+          volume: !lambda return x / 100.0;
+      # 2) 同步全局缓存变量
+      - lambda: id(volume_val) = int(x);
+      # 3) 更新 LVGL 滑块位置
+      - lvgl.slider.update:
+          id: volume_slider
+          value: !lambda return int(x);
+      # 4) 更新音量百分比标签
+      - lvgl.label.update:
+          id: volume_label
+          text: !lambda |-
+            static char buf[16];
+            snprintf(buf, sizeof(buf), "%d %%", int(x));
+            return buf;
+
 # 选择器配置
 select:
   # ES8388 音频编解码器配置，支持输出选择

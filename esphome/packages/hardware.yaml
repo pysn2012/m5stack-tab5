@@ -182,7 +182,7 @@ light:
     restore_mode: RESTORE_DEFAULT_ON
     default_transition_length: 250ms
     initial_state:
-      brightness: "50%"
+      brightness: "60%"
 
 # I2S 音频总线配置
 i2s_audio:
