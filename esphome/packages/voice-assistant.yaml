@@ -93,6 +93,36 @@ media_player:
             - script.execute: start_wake_word
             - script.execute: set_idle_or_mute_phase
             - script.execute: voice_ui_update
+    # ── HA → TAB5 音量同步 ──────────────────────────────────────
+    # 当 HA 端直接调节媒体播放器音量时，on_state 触发器会捕获到变化，
+    # 将音量值同步回 TAB5 的滑块、标签和全局变量。
+    # on_state 在任何状态变化时都会触发，因此需要用 static 变量记录上次音量，
+    # 仅在音量实际变化时才更新 UI，避免不必要的刷新和循环。
+    on_state:
+      - if:
+          condition:
+            lambda: |-
+              static float last_synced_vol = -1.0;
+              float vol = id(speaker_media_player)->volume;
+              if (vol < 0) return false;  // 音量未知，跳过
+              int vol_int = int(vol * 100 + 0.5);
+              int last_int = int(last_synced_vol * 100 + 0.5);
+              bool changed = (vol_int != last_int);
+              if (changed) {
+                last_synced_vol = vol;
+                id(volume_val) = vol_int;
+              }
+              return changed;
+          then:
+            - lvgl.slider.update:
+                id: volume_slider
+                value: !lambda return int(id(speaker_media_player)->volume * 100 + 0.5);
+            - lvgl.label.update:
+                id: volume_label
+                text: !lambda |-
+                  static char buf[16];
+                  snprintf(buf, sizeof(buf), "%d %%", int(id(speaker_media_player)->volume * 100 + 0.5));
+                  return buf;
 
 # ── 设备端唤醒词引擎 microWakeWord ─────────────────────────────────
 # 与参考项目 m5-tab5 完全对齐

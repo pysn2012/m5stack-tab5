@@ -116,41 +116,41 @@ lvgl:
       bg_opa: TRANSP
       border_opa: TRANSP
       width: 180
-      height: 150
+      height: 72
 
-    # ── 导航按钮未激活样式 ───────────────────────────────────────
+    # ── 导航按钮未激活样式（水平布局：icon + 文字在同一行）────────
     - id: nav_btn_inactivate
       bg_opa: TRANSP
-      width: 112
-      height: 130            # ← 增大高度，避免图标与文字重叠
-      radius: 48
+      width: 168
+      height: 56
+      radius: 28              # 半高圆角，胶囊形底纹不超出按钮
       border_opa: TRANSP
       shadow_opa: TRANSP
-      pad_top: 14
-      pad_bottom: 14
+      pad_left: 12
+      pad_right: 12
 
     - id: nav_btn_activate
       bg_color: 0xCCE8E7    # 选中底纹色
-      bg_opa: COVER          # ← 关键：必须显式设置 COVER，否则背景透明看不到选中效果
-      width: 112
-      height: 130
-      radius: 48
+      bg_opa: COVER
+      width: 168
+      height: 56
+      radius: 28
       border_opa: TRANSP
       shadow_opa: TRANSP
-      pad_top: 14
-      pad_bottom: 14
+      pad_left: 12
+      pad_right: 12
 
     # ── 语音助手按钮激活样式（橙色高亮，区别于普通导航）─────────
     - id: va_btn_activate
       bg_color: 0xFF8C00    # 橙色：突出语音助手激活态
-      bg_opa: COVER          # ← 关键：必须显式设置 COVER
-      width: 112
-      height: 130
-      radius: 48
+      bg_opa: COVER
+      width: 168
+      height: 56
+      radius: 28
       border_opa: TRANSP
       shadow_opa: TRANSP
-      pad_top: 14
-      pad_bottom: 14
+      pad_left: 12
+      pad_right: 12
 
     # ── 导航图标激活样式 ─────────────────────────────────────────
     # 不设置 align，由按钮的 flex 布局统一控制位置
@@ -246,10 +246,10 @@ lvgl:
                       id: dash_panel_btn
                       layout:
                         type: flex
-                        flex_flow: column
+                        flex_flow: row
                         flex_align_main: center
                         flex_align_cross: center
-                        pad_row: 8
+                        pad_column: 10
                       widgets:
                         - label:
                             id: dash_btn_icon
@@ -275,10 +275,10 @@ lvgl:
                       id: socket_panel_btn
                       layout:
                         type: flex
-                        flex_flow: column
+                        flex_flow: row
                         flex_align_main: center
                         flex_align_cross: center
-                        pad_row: 8
+                        pad_column: 10
                       widgets:
                         - label:
                             id: socket_btn_icon
@@ -304,10 +304,10 @@ lvgl:
                       id: light_panel_btn
                       layout:
                         type: flex
-                        flex_flow: column
+                        flex_flow: row
                         flex_align_main: center
                         flex_align_cross: center
-                        pad_row: 8
+                        pad_column: 10
                       widgets:
                         - label:
                             id: light_btn_icon
@@ -335,10 +335,10 @@ lvgl:
                       id: voice_panel_btn
                       layout:
                         type: flex
-                        flex_flow: column
+                        flex_flow: row
                         flex_align_main: center
                         flex_align_cross: center
-                        pad_row: 8
+                        pad_column: 10
                       widgets:
                         - label:
                             id: voice_btn_icon
