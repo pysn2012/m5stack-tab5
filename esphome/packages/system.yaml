@@ -28,7 +28,7 @@ number:
           id: volume_label
           text: !lambda |-
             static char buf[16];
-            snprintf(buf, sizeof(buf), "%d %%", int(x));
+            snprintf(buf, sizeof(buf), "%d%%", int(x));
             return buf;
 
 # 选择器配置
@@ -245,10 +245,10 @@ text_sensor:
           text: !lambda |-
             static char buf[16];
             if ( x.empty() || x == "None" || x == "null" ) return "off";
-            else if ( x == "unknown" || x == "unavailable" ) return "unavailable";
+            else if ( x == "unknown" || x == "unavailable" ) return "N/A";
             else {
               int percent = std::stoi(x) * 100 / 255;
-              snprintf(buf, sizeof(buf), "%d %%", percent);
+              snprintf(buf, sizeof(buf), "%d%%", percent);
               return buf;
             }
 
