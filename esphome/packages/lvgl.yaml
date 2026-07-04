@@ -115,42 +115,42 @@ lvgl:
     - id: nav_btn_container
       bg_opa: TRANSP
       border_opa: TRANSP
-      width: 180
-      height: 170
+      width: 160
+      height: 160
 
     # ── 导航按钮未激活样式（水平布局：icon + 文字在同一行）────────
     - id: nav_btn_inactivate
       bg_opa: TRANSP
-      width: 168
+      width: 150
       height: 150
       radius: 28              # 半高圆角，胶囊形底纹不超出按钮
       border_opa: TRANSP
       shadow_opa: TRANSP
-      pad_left: 12
-      pad_right: 12
+      pad_left: 5
+      pad_right: 5
 
     - id: nav_btn_activate
       bg_color: 0xCCE8E7    # 选中底纹色
       bg_opa: COVER
-      width: 168
+      width: 150
       height: 150
       radius: 28
       border_opa: TRANSP
       shadow_opa: TRANSP
-      pad_left: 12
-      pad_right: 12
+      pad_left: 5
+      pad_right: 5
 
     # ── 语音助手按钮激活样式（橙色高亮，区别于普通导航）─────────
     - id: va_btn_activate
       bg_color: 0xFF8C00    # 橙色：突出语音助手激活态
       bg_opa: COVER
-      width: 168
+      width: 150
       height: 150
       radius: 28
       border_opa: TRANSP
       shadow_opa: TRANSP
-      pad_left: 12
-      pad_right: 12
+      pad_left: 5
+      pad_right: 5
 
     # ── 导航图标激活样式 ─────────────────────────────────────────
     # 不设置 align，由按钮的 flex 布局统一控制位置
@@ -220,7 +220,7 @@ lvgl:
           layout:
             type: flex
             flex_flow: COLUMN
-            pad_row: 8
+            pad_row: 5
             flex_align_main: start
             flex_align_cross: center
             flex_align_track: center
@@ -646,7 +646,7 @@ lvgl:
                               y: 2
               # 音量控制条（第2行）
               - obj:
-                  width: 900
+                  width: 950
                   height: 150
                   align: CENTER
                   y: -100
