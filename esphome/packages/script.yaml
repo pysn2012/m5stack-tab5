@@ -31,6 +31,12 @@ script:
               id(light_btn_icon),
               id(voice_btn_icon),
           };
+          lv_obj_t* labels[] = {
+              id(dash_btn_label),
+              id(socket_btn_label),
+              id(light_btn_label),
+              id(voice_btn_label),
+          };
           const char* icon_unchecked[] = {
               "\U000F02DC", // 客厅（沙发）
               "\U000F0905", // 插座
@@ -52,6 +58,10 @@ script:
               // 切换按钮背景样式（激活/未激活）
               lv_obj_remove_style_all(buttons[i]);
               lv_obj_add_style(buttons[i], selected ? id(nav_btn_activate) : id(nav_btn_inactivate), LV_PART_MAIN);
+
+              // 切换标签颜色
+              lv_obj_remove_style_all(labels[i]);
+              lv_obj_add_style(labels[i], selected ? id(nav_label_activate) : id(nav_label_inactivate), LV_PART_MAIN);
 
               // 切换图标
               lv_label_set_text(icons[i], selected ? icon_checked[i] : icon_unchecked[i]);
@@ -191,12 +201,18 @@ script:
           // 更新状态文字和图标
           if (id(va_status_label) != nullptr)
             lv_label_set_text(id(va_status_label), status_text);
+          if (id(va_status_hint) != nullptr)
+            lv_label_set_text(id(va_status_hint), status_hint);
           if (id(va_status_icon) != nullptr)
             lv_label_set_text(id(va_status_icon), status_icon);
           if (id(va_request_label) != nullptr)
             lv_label_set_text(id(va_request_label), id(text_request).state.c_str());
           if (id(va_response_label) != nullptr)
             lv_label_set_text(id(va_response_label), id(text_response).state.c_str());
+
+          // 更新状态圆圈颜色
+          if (id(va_icon_circle) != nullptr)
+            lv_obj_set_style_bg_color(id(va_icon_circle), lv_color_hex(circle_color), LV_PART_MAIN);
 
           // 判断是否需要切换到语音页
           bool need_show_voice_page = (phase == ${voice_assist_listening_phase_id} ||
@@ -229,6 +245,10 @@ script:
             lv_obj_add_style(id(voice_panel_btn), id(nav_btn_inactivate), LV_PART_MAIN);
           }
 
+          lv_obj_remove_style_all(id(voice_btn_label));
+          lv_obj_add_style(id(voice_btn_label),
+                           (va_active || on_voice_page) ? id(nav_label_activate) : id(nav_label_inactivate),
+                           LV_PART_MAIN);
       - if:
           condition:
             lambda: return id(voice_page_pending);
