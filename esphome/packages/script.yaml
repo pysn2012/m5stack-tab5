@@ -72,48 +72,27 @@ script:
     then:
       - logger.log: "与 Home Assistant 同步"
 
-  # 更新室外信息卡片
+  # 更新室外信息标签
   - id: update_outdoor_label
     then:
       - lvgl.label.update:
-          id: outdoor_temp_value
+          id: outdoor_label
           text: !lambda |-
-            static char buf[16];
-            snprintf(buf, sizeof(buf), "%.1f°C", id(outdoor_temp_val));
-            return buf;
-      - lvgl.label.update:
-          id: outdoor_humi_value
-          text: !lambda |-
-            static char buf[16];
-            snprintf(buf, sizeof(buf), "%.1f%%", id(outdoor_humi_val));
-            return buf;
-      - lvgl.label.update:
-          id: outdoor_pres_value
-          text: !lambda |-
-            static char buf[16];
-            snprintf(buf, sizeof(buf), "%.0fhPa", id(outdoor_pres_val));
-            return buf;
-      - lvgl.label.update:
-          id: outdoor_pm25_value
-          text: !lambda |-
-            static char buf[16];
-            snprintf(buf, sizeof(buf), "%.0fppm", id(outdoor_pm25_val));
+            static char buf[128];
+            snprintf(buf, sizeof(buf), "室外：温度%.1f℃  湿度%.1f%%  气压%.1fhPa  颗粒物%.0fppm",
+              id(outdoor_temp_val), id(outdoor_humi_val),
+              id(outdoor_pres_val), id(outdoor_pm25_val));
             return buf;
 
-  # 更新室内信息卡片
+  # 更新室内信息标签
   - id: update_indoor_label
     then:
       - lvgl.label.update:
-          id: indoor_temp_value
+          id: indoor_label
           text: !lambda |-
-            static char buf[16];
-            snprintf(buf, sizeof(buf), "%.1f°C", id(indoor_temp_val));
-            return buf;
-      - lvgl.label.update:
-          id: indoor_humi_value
-          text: !lambda |-
-            static char buf[16];
-            snprintf(buf, sizeof(buf), "%.1f%%", id(indoor_humi_val));
+            static char buf[64];
+            snprintf(buf, sizeof(buf), "室内：温度%.1f℃  湿度%.1f%%",
+              id(indoor_temp_val), id(indoor_humi_val));
             return buf;
 
   # 更新弱电功率标签
@@ -122,8 +101,8 @@ script:
       - lvgl.label.update:
           id: weak_power_label
           text: !lambda |-
-            static char buf[32];
-            snprintf(buf, sizeof(buf), "弱电：%.1fW / %.0fWh",
+            static char buf[64];
+            snprintf(buf, sizeof(buf), "弱电：功率%.1fW  总电量%.0fWh",
               id(weak_power_val), id(weak_total_val));
             return buf;
 
@@ -133,76 +112,59 @@ script:
       - lvgl.label.update:
           id: desk_power_label
           text: !lambda |-
-            static char buf[32];
-            snprintf(buf, sizeof(buf), "书桌：%.1fW / %.0fWh",
+            static char buf[64];
+            snprintf(buf, sizeof(buf), "书桌：功率%.1fW  总电量%.0fWh",
               id(desk_power_val), id(desk_total_val));
             return buf;
 
   # ── 语音助手 UI 更新脚本（核心）──────────────────────────────
+  # 根据 voice_assistant_phase 更新 widget 文字/图标 + 高亮侧边栏语音按钮
+  # 注意：页面切换不能在 lambda 中调用 LVGL C API（id(voice_page) 是 LvPageType* 不是 lv_obj_t*）
+  #       需要切换页面时设置全局变量 voice_page_pending，由后续 YAML action 处理
   - id: voice_ui_update
     then:
       - lambda: |-
           int phase = id(voice_assistant_phase);
           const char* status_text = "";
-          const char* status_hint = "";
-          const char* status_icon = "\U000F05CB";
-          uint32_t circle_color = 0x9CA3AF;  // 默认灰色
+          const char* status_icon = "\U000F05CB";  // 默认声音助手图标
 
           switch (phase) {
             case ${voice_assist_listening_phase_id}:
-              status_text = "聆听中";
-              status_hint = "请说话...";
-              status_icon = "\U000F0362";
-              circle_color = 0x3B82F6;  // 蓝色
+              status_text = "聆听状态";
+              status_icon = "\U000F0362";  // 麦克风
               break;
             case ${voice_assist_thinking_phase_id}:
-              status_text = "思考中";
-              status_hint = "正在处理...";
-              status_icon = "\U000F0064";
-              circle_color = 0xF59E0B;  // 橙色
+              status_text = "思考状态";
+              status_icon = "\U000F0064";  // 助手
               break;
             case ${voice_assist_replying_phase_id}:
-              status_text = "回复中";
-              status_hint = "正在播报...";
-              status_icon = "\U000F0E19";
-              circle_color = 0x10B981;  // 绿色
+              status_text = "回复状态";
+              status_icon = "\U000F0E19";  // 音量高
               break;
             case ${voice_assist_error_phase_id}:
-              status_text = "出错了";
-              status_hint = "请重试";
-              status_icon = "\U000F0156";
-              circle_color = 0xEF4444;  // 红色
+              status_text = "错误状态";
+              status_icon = "\U000F0156";  // 关闭
               break;
             case ${voice_assist_muted_phase_id}:
-              status_text = "已静音";
-              status_hint = "麦克风已关闭";
-              status_icon = "\U000F0374";
-              circle_color = 0x6B7280;  // 深灰
+              status_text = "静音状态";
+              status_icon = "\U000F0374";  // 减号
               break;
             case ${voice_assist_not_ready_phase_id}:
               status_text = "连接中";
-              status_hint = "正在连接 Home Assistant...";
-              status_icon = "\U000F05A9";
-              circle_color = 0xF59E0B;  // 橙色
+              status_icon = "\U000F05A9";  // WiFi 图标
               break;
             case ${voice_assist_timer_finished_phase_id}:
-              status_text = "计时结束";
-              status_hint = "";
-              status_icon = "\U000F09C8";
-              circle_color = 0xEF4444;  // 红色
+              status_text = "计时到点";
+              status_icon = "\U000F09C8";  // 提示
               break;
             default:
               status_text = "待机状态";
-              status_hint = "说 \"Okay Nabu\" 唤醒";
-              status_icon = "\U000F05CB";
-              circle_color = 0x9CA3AF;  // 灰色
+              status_icon = "\U000F05CB";  // 声音助手
           }
 
-          // 更新状态文字和图标
+          // 1) 更新语音页面上的状态文字 / 图标 / 用户问 / 答复
           if (id(va_status_label) != nullptr)
             lv_label_set_text(id(va_status_label), status_text);
-          if (id(va_status_hint) != nullptr)
-            lv_label_set_text(id(va_status_hint), status_hint);
           if (id(va_status_icon) != nullptr)
             lv_label_set_text(id(va_status_icon), status_icon);
           if (id(va_request_label) != nullptr)
@@ -210,11 +172,7 @@ script:
           if (id(va_response_label) != nullptr)
             lv_label_set_text(id(va_response_label), id(text_response).state.c_str());
 
-          // 更新状态圆圈颜色
-          if (id(va_icon_circle) != nullptr)
-            lv_obj_set_style_bg_color(id(va_icon_circle), lv_color_hex(circle_color), LV_PART_MAIN);
-
-          // 判断是否需要切换到语音页
+          // 2) 判断是否需要切换到语音页（仅在活跃阶段 + 当前不在语音页时）
           bool need_show_voice_page = (phase == ${voice_assist_listening_phase_id} ||
                                        phase == ${voice_assist_thinking_phase_id} ||
                                        phase == ${voice_assist_replying_phase_id} ||
@@ -223,13 +181,13 @@ script:
           if (need_show_voice_page && id(page_num) != 3) {
             id(prev_page_num) = id(page_num);
             id(page_num) = 3;
-            id(voice_page_pending) = true;
+            id(voice_page_pending) = true;  // 标记需要后续 YAML action 切页
             id(nav_rail_update).execute();
           } else {
             id(voice_page_pending) = false;
           }
 
-          // 侧边栏语音按钮高亮
+          // 3) 侧边栏语音按钮高亮：VA 活跃→橙色 / 在语音页→普通高亮 / 否则未激活
           bool va_active = (phase == ${voice_assist_listening_phase_id} ||
                             phase == ${voice_assist_thinking_phase_id} ||
                             phase == ${voice_assist_replying_phase_id} ||
@@ -249,6 +207,7 @@ script:
           lv_obj_add_style(id(voice_btn_label),
                            (va_active || on_voice_page) ? id(nav_label_activate) : id(nav_label_inactivate),
                            LV_PART_MAIN);
+      # 在 lambda 之后，用 YAML action 切换页面（不能在 lambda 里调 lv_scr_load_anim）
       - if:
           condition:
             lambda: return id(voice_page_pending);

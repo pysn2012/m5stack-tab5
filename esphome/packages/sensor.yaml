@@ -60,9 +60,9 @@ text_sensor:
           text: !lambda |-
             static std::string buf;
             if (x.empty() || x == "None" || x == "null" || x == "unknown" || x == "unavailable")
-                buf = "无预警";
+                buf = "预警：无预警";
             else
-                buf = x;
+                buf = "预警：" + x;
             return buf.c_str();
 
 # 数值传感器

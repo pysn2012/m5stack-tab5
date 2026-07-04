@@ -121,7 +121,7 @@ media_player:
                 id: volume_label
                 text: !lambda |-
                   static char buf[16];
-                  snprintf(buf, sizeof(buf), "%d%%", int(id(speaker_media_player)->volume * 100 + 0.5));
+                  snprintf(buf, sizeof(buf), "%d %%", int(id(speaker_media_player)->volume * 100 + 0.5));
                   return buf;
 
 # ── 设备端唤醒词引擎 microWakeWord ─────────────────────────────────
