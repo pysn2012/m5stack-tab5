@@ -117,6 +117,7 @@ lvgl:
       border_opa: TRANSP
       width: 160
       height: 160
+      pad_all: 0
 
     # ── 导航按钮未激活样式（水平布局：icon + 文字在同一行）────────
     - id: nav_btn_inactivate
@@ -126,8 +127,7 @@ lvgl:
       radius: 28              # 半高圆角，胶囊形底纹不超出按钮
       border_opa: TRANSP
       shadow_opa: TRANSP
-      pad_left: 5
-      pad_right: 5
+      pad_all: 0
 
     - id: nav_btn_activate
       bg_color: 0xCCE8E7    # 选中底纹色
@@ -137,8 +137,7 @@ lvgl:
       radius: 28
       border_opa: TRANSP
       shadow_opa: TRANSP
-      pad_left: 5
-      pad_right: 5
+      pad_all: 0
 
     # ── 语音助手按钮激活样式（橙色高亮，区别于普通导航）─────────
     - id: va_btn_activate
@@ -149,8 +148,7 @@ lvgl:
       radius: 28
       border_opa: TRANSP
       shadow_opa: TRANSP
-      pad_left: 5
-      pad_right: 5
+      pad_all: 0
 
     # ── 导航图标激活样式 ─────────────────────────────────────────
     # 不设置 align，由按钮的 flex 布局统一控制位置
@@ -238,6 +236,7 @@ lvgl:
                             id: dash_btn_icon
                             styles: nav_icon_inactivate
                             text: "\U000F02DC" # 主页图标
+                            align: center
                       on_press:
                         - lambda: id(page_num) = 0;
                         - script.execute: nav_rail_update
@@ -257,6 +256,7 @@ lvgl:
                             id: socket_btn_icon
                             styles: nav_icon_inactivate
                             text: "\U000F0905" # 插座图标
+                            align: center
                       on_press:
                         - lambda: id(page_num) = 1;
                         - script.execute: nav_rail_update
@@ -276,6 +276,7 @@ lvgl:
                             id: light_btn_icon
                             styles: nav_icon_inactivate
                             text: "\U000F08BB"  # 齿轮（轮廓）图标
+                            align: center
                       on_press:
                         - lambda: id(page_num) = 2;
                         - script.execute: nav_rail_update
@@ -297,6 +298,7 @@ lvgl:
                             id: voice_btn_icon
                             styles: nav_icon_inactivate
                             text: "\U000F05CB" # 声音助手图标 (account-voice)
+                            align: center
                       on_press:
                         # 跳转到语音页面
                         - lambda: id(page_num) = 3;
