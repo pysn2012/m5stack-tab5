@@ -31,12 +31,6 @@ script:
               id(light_btn_icon),
               id(voice_btn_icon),
           };
-          lv_obj_t* labels[] = {
-              id(dash_btn_label),
-              id(socket_btn_label),
-              id(light_btn_label),
-              id(voice_btn_label),
-          };
           const char* icon_unchecked[] = {
               "\U000F02DC", // 客厅（沙发）
               "\U000F0905", // 插座
@@ -58,10 +52,6 @@ script:
               // 切换按钮背景样式（激活/未激活）
               lv_obj_remove_style_all(buttons[i]);
               lv_obj_add_style(buttons[i], selected ? id(nav_btn_activate) : id(nav_btn_inactivate), LV_PART_MAIN);
-
-              // 切换标签颜色
-              lv_obj_remove_style_all(labels[i]);
-              lv_obj_add_style(labels[i], selected ? id(nav_label_activate) : id(nav_label_inactivate), LV_PART_MAIN);
 
               // 切换图标
               lv_label_set_text(icons[i], selected ? icon_checked[i] : icon_unchecked[i]);

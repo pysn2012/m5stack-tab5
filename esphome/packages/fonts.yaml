@@ -59,7 +59,7 @@ font:
       "\U000F0374", # 减号
       "\U000F00DF", # 亮度调节
       "\U000F03D8", # 调色板
-      "\U000F02DC", # 沙发（客厅）
+      "\U000F02DC", # HOME
       "\U000F0905", # 电源插座
       "\U000F0E19", # 音量高
       "\U000F09C8", # 功率插头
@@ -77,13 +77,17 @@ font:
     ]
 
   - file: "fonts/materialdesignicons-webfont.ttf"
-    id: extra_icon_64
-    size: 64
+    id: extra_icon_80
+    size: 80
     bpp: 4
     glyphs: [
-      "\U000F0D80", # 楼层1
+      "\U000F02DC", # HOME
+      "\U000F0905", # 电源插座
+      "\U000F0493", # 齿轮
+      "\U000F08BB", # 齿轮（轮廓）
+      "\U000F05CB", # 声音助手（侧边栏语音按钮）
       "\U000F0425", # 电源
-      "\U000F05CB", # 声音助手
+
     ]
 
 

@@ -116,13 +116,13 @@ lvgl:
       bg_opa: TRANSP
       border_opa: TRANSP
       width: 180
-      height: 72
+      height: 170
 
     # ── 导航按钮未激活样式（水平布局：icon + 文字在同一行）────────
     - id: nav_btn_inactivate
       bg_opa: TRANSP
       width: 168
-      height: 56
+      height: 150
       radius: 28              # 半高圆角，胶囊形底纹不超出按钮
       border_opa: TRANSP
       shadow_opa: TRANSP
@@ -133,7 +133,7 @@ lvgl:
       bg_color: 0xCCE8E7    # 选中底纹色
       bg_opa: COVER
       width: 168
-      height: 56
+      height: 150
       radius: 28
       border_opa: TRANSP
       shadow_opa: TRANSP
@@ -145,7 +145,7 @@ lvgl:
       bg_color: 0xFF8C00    # 橙色：突出语音助手激活态
       bg_opa: COVER
       width: 168
-      height: 56
+      height: 150
       radius: 28
       border_opa: TRANSP
       shadow_opa: TRANSP
@@ -155,24 +155,13 @@ lvgl:
     # ── 导航图标激活样式 ─────────────────────────────────────────
     # 不设置 align，由按钮的 flex 布局统一控制位置
     - id: nav_icon_activate
-      text_font: extra_icon
+      text_font: extra_icon_80
       text_color: 0x1A4A4A
 
     # ── 导航图标未激活样式 ───────────────────────────────────────
     - id: nav_icon_inactivate
-      text_font: extra_icon
+      text_font: extra_icon_80
       text_color: 0x3F4948
-
-    # ── 导航标签激活样式 ─────────────────────────────────────────
-    # 不设置 align，由按钮的 flex 布局统一控制位置
-    - id: nav_label_activate
-      text_color: 0x1A4A4A
-      text_font: noto_sans_sc_32
-
-    # ── 导航标签未激活样式 ───────────────────────────────────────
-    - id: nav_label_inactivate
-      text_color: 0x3F4948
-      text_font: noto_sans_sc_32
 
     # ── 内容容器样式 ─────────────────────────────────────────────
     - id: content_container
@@ -183,7 +172,7 @@ lvgl:
       width: 1080
       x: 96
       pad_top: 30
-      pad_left: 30
+      pad_left: 20
 
     # ── 语音助手页面：状态卡片样式 ──────────────────────────────
     - id: va_status_card
@@ -231,7 +220,7 @@ lvgl:
           layout:
             type: flex
             flex_flow: COLUMN
-            pad_row: 12
+            pad_row: 8
             flex_align_main: start
             flex_align_cross: center
             flex_align_track: center
@@ -244,21 +233,11 @@ lvgl:
                       align: center
                       styles: nav_btn_inactivate
                       id: dash_panel_btn
-                      layout:
-                        type: flex
-                        flex_flow: row
-                        flex_align_main: center
-                        flex_align_cross: center
-                        pad_column: 10
                       widgets:
                         - label:
                             id: dash_btn_icon
                             styles: nav_icon_inactivate
                             text: "\U000F02DC" # 主页图标
-                        - label:
-                            styles: nav_label_inactivate
-                            id: dash_btn_label
-                            text: "主页"
                       on_press:
                         - lambda: id(page_num) = 0;
                         - script.execute: nav_rail_update
@@ -273,21 +252,11 @@ lvgl:
                       align: center
                       styles: nav_btn_inactivate
                       id: socket_panel_btn
-                      layout:
-                        type: flex
-                        flex_flow: row
-                        flex_align_main: center
-                        flex_align_cross: center
-                        pad_column: 10
                       widgets:
                         - label:
                             id: socket_btn_icon
                             styles: nav_icon_inactivate
                             text: "\U000F0905" # 插座图标
-                        - label:
-                            styles: nav_label_inactivate
-                            id: socket_btn_label
-                            text: "插座"
                       on_press:
                         - lambda: id(page_num) = 1;
                         - script.execute: nav_rail_update
@@ -302,21 +271,11 @@ lvgl:
                       align: center
                       styles: nav_btn_inactivate
                       id: light_panel_btn
-                      layout:
-                        type: flex
-                        flex_flow: row
-                        flex_align_main: center
-                        flex_align_cross: center
-                        pad_column: 10
                       widgets:
                         - label:
                             id: light_btn_icon
                             styles: nav_icon_inactivate
                             text: "\U000F08BB"  # 齿轮（轮廓）图标
-                        - label:
-                            styles: nav_label_inactivate
-                            id: light_btn_label
-                            text: "系统"
                       on_press:
                         - lambda: id(page_num) = 2;
                         - script.execute: nav_rail_update
@@ -333,21 +292,11 @@ lvgl:
                       align: center
                       styles: nav_btn_inactivate
                       id: voice_panel_btn
-                      layout:
-                        type: flex
-                        flex_flow: row
-                        flex_align_main: center
-                        flex_align_cross: center
-                        pad_column: 10
                       widgets:
                         - label:
                             id: voice_btn_icon
                             styles: nav_icon_inactivate
                             text: "\U000F05CB" # 声音助手图标 (account-voice)
-                        - label:
-                            styles: nav_label_inactivate
-                            id: voice_btn_label
-                            text: "语音"
                       on_press:
                         # 跳转到语音页面
                         - lambda: id(page_num) = 3;
@@ -418,7 +367,7 @@ lvgl:
                   y: -110
               # 信息区域（3行左对齐）
               - obj:
-                  width: 900
+                  width: 950
                   height: 300
                   align: CENTER
                   y: 50
@@ -467,7 +416,7 @@ lvgl:
             widgets:
               # 4个插座按钮（并排）
               - obj:
-                  width: 900
+                  width: 950
                   height: 240
                   align: CENTER
                   y: -180
@@ -494,7 +443,7 @@ lvgl:
                           bg_color: 0xFF8C00     # 开启状态颜色橙色
                         widgets:
                           - label:
-                              text_font: extra_icon_64
+                              text_font: extra_icon_80
                               align: top_mid
                               text: "\U000F0425"
                           - label:
@@ -520,7 +469,7 @@ lvgl:
                           bg_color: 0xFF8C00     # 开启状态颜色橙色
                         widgets:
                           - label:
-                              text_font: extra_icon_64
+                              text_font: extra_icon_80
                               align: top_mid
                               text: "\U000F0425"
                           - label:
@@ -546,7 +495,7 @@ lvgl:
                           bg_color: 0xFF8C00     # 开启状态颜色橙色
                         widgets:
                           - label:
-                              text_font: extra_icon_64
+                              text_font: extra_icon_80
                               align: top_mid
                               text: "\U000F0425"
                           - label:
@@ -572,7 +521,7 @@ lvgl:
                           bg_color: 0xFF8C00     # 开启状态颜色橙色
                         widgets:
                           - label:
-                              text_font: extra_icon_64
+                              text_font: extra_icon_80
                               align: top_mid
                               text: "\U000F0425"
                           - label:
@@ -587,7 +536,7 @@ lvgl:
 
               # 信息区域（2行左对齐）
               - obj:
-                  width: 900
+                  width: 950
                   height: 200
                   align: CENTER
                   y: 30
@@ -626,7 +575,7 @@ lvgl:
             widgets:
               # 亮度控制条（第1行）
               - obj:
-                  width: 900
+                  width: 950
                   height: 150
                   align: CENTER
                   y: -200
@@ -756,7 +705,7 @@ lvgl:
                               y: 2
               # 系统信息区域（3行左对齐）
               - obj:
-                  width: 900
+                  width: 950
                   height: 240
                   align: CENTER
                   y: 50
