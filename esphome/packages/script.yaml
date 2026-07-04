@@ -193,10 +193,6 @@ script:
             lv_obj_add_style(id(voice_panel_btn), id(nav_btn_inactivate), LV_PART_MAIN);
           }
 
-          lv_obj_remove_style_all(id(voice_btn_label));
-          lv_obj_add_style(id(voice_btn_label),
-                           (va_active || on_voice_page) ? id(nav_label_activate) : id(nav_label_inactivate),
-                           LV_PART_MAIN);
       # 在 lambda 之后，用 YAML action 切换页面（不能在 lambda 里调 lv_scr_load_anim）
       - if:
           condition:
