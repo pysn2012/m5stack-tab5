@@ -418,7 +418,7 @@ lvgl:
             widgets:
               # 4个插座按钮（并排）
               - obj:
-                  width: 850
+                  width: 950
                   height: 240
                   align: CENTER
                   y: -160
@@ -428,7 +428,7 @@ lvgl:
                     type: FLEX
                     flex_flow: ROW
                     pad_column: 24
-                    flex_align_main: CENTER
+                    flex_align_main: START
                     flex_align_cross: CENTER
                   widgets:
                     # 插座1按钮
