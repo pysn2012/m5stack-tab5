@@ -418,10 +418,10 @@ lvgl:
             widgets:
               # 4个插座按钮（并排）
               - obj:
-                  width: 950
+                  width: 850
                   height: 240
                   align: CENTER
-                  y: -180
+                  y: -160
                   bg_opa: TRANSP
                   border_opa: TRANSP
                   layout:
@@ -436,7 +436,7 @@ lvgl:
                         id: chuangmi_socket1_button
                         width: 160
                         height: 160
-                        radius: 12               # 圆角
+                        radius: 20               # 圆角
                         pad_all: 12              # 内边距
                         text_color: 0xFFFFFF     # 文字颜色
                         checkable: true
@@ -462,7 +462,7 @@ lvgl:
                         id: chuangmi_socket2_button
                         width: 160
                         height: 160
-                        radius: 12               # 圆角
+                        radius: 20               # 圆角
                         pad_all: 12              # 内边距
                         text_color: 0xFFFFFF     # 文字颜色
                         checkable: true
@@ -488,7 +488,7 @@ lvgl:
                         id: chuangmi_socket3_button
                         width: 160
                         height: 160
-                        radius: 12               # 圆角
+                        radius: 20               # 圆角
                         pad_all: 12              # 内边距
                         text_color: 0xFFFFFF     # 文字颜色
                         checkable: true
@@ -514,7 +514,7 @@ lvgl:
                         id: chuangmi_socket4_button
                         width: 160
                         height: 160
-                        radius: 12               # 圆角
+                        radius: 20               # 圆角
                         pad_all: 12              # 内边距
                         text_color: 0xFFFFFF     # 文字颜色
                         checkable: true

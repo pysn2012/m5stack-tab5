@@ -6,6 +6,7 @@ number:
   - platform: template
     name: "Volume"
     id: volume_number
+    internal: true
     entity_category: config
     icon: "mdi:volume-high"
     min_value: 0
