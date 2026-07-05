@@ -122,12 +122,9 @@ lvgl:
             # 如果语音助手未活跃，执行息屏脚本
             - script.execute: screen_off
 
-  # ═══════════════════════════════════════════════════════════════
   # LVGL 样式定义
-  # ═══════════════════════════════════════════════════════════════
-
   style_definitions:
-    # ── 侧边栏样式 ──────────────────────────────────────────────
+    # 侧边栏样式
     - id: sidebar
       bg_color: 0xE9EFEE
       bg_opa: COVER
@@ -139,7 +136,7 @@ lvgl:
       width: 192
       height: 100%
 
-    # ── 导航按钮容器样式 ─────────────────────────────────────────
+    # 导航按钮容器样式
     - id: nav_btn_container
       bg_opa: TRANSP
       border_opa: TRANSP
@@ -147,7 +144,7 @@ lvgl:
       height: 160
       pad_all: 0
 
-    # ── 导航按钮未激活样式（水平布局：icon + 文字在同一行）────────
+    # 导航按钮未激活样式（水平布局：icon + 文字在同一行）
     - id: nav_btn_inactivate
       bg_opa: TRANSP
       width: 150
@@ -167,7 +164,7 @@ lvgl:
       shadow_opa: TRANSP
       pad_all: 0
 
-    # ── 语音助手按钮激活样式（橙色高亮，区别于普通导航）─────────
+    # 语音助手按钮激活样式（橙色高亮，区别于普通导航）
     - id: va_btn_activate
       bg_color: 0xFF8C00    # 橙色：突出语音助手激活态
       bg_opa: COVER
@@ -178,18 +175,18 @@ lvgl:
       shadow_opa: TRANSP
       pad_all: 0
 
-    # ── 导航图标激活样式 ─────────────────────────────────────────
+    # 导航图标激活样式
     # 不设置 align，由按钮的 flex 布局统一控制位置
     - id: nav_icon_activate
       text_font: extra_icon_80
       text_color: 0x1A4A4A
 
-    # ── 导航图标未激活样式 ───────────────────────────────────────
+    # 导航图标未激活样式
     - id: nav_icon_inactivate
       text_font: extra_icon_80
       text_color: 0x3F4948
 
-    # ── 内容容器样式 ─────────────────────────────────────────────
+    # 内容容器样式
     - id: content_container
       align: CENTER
       bg_opa: COVER
@@ -200,18 +197,18 @@ lvgl:
       pad_top: 30
       pad_left: 20
 
-    # ── 语音助手页面：状态卡片样式 ──────────────────────────────
+    # 语音助手页面：状态卡片样式
     - id: va_status_card
       bg_color: 0xFFFFFF
       bg_opa: COVER
       border_opa: TRANSP
       radius: 24
       width: 900
-      height: 180           # ← 缩小高度，使页面更简洁
+      height: 180
       pad_all: 24
       shadow_opa: TRANSP
 
-    # ── 语音助手页面：对话气泡样式（用户问）─────────────────────
+    # 语音助手页面：对话气泡样式（用户问）
     - id: va_request_bubble
       bg_color: 0xCCE8E7
       bg_opa: COVER
@@ -223,7 +220,7 @@ lvgl:
       pad_all: 24
       shadow_opa: TRANSP
 
-    # ── 语音助手页面：对话气泡样式（助手答复）───────────────────
+    # 语音助手页面：对话气泡样式（助手答复）
     - id: va_response_bubble
       bg_color: 0xFFE0B2
       bg_opa: COVER
@@ -311,9 +308,7 @@ lvgl:
                         - lvgl.page.show: system_page
 
 
-            # ── 语音助手导航按钮（侧边栏第 4 项）─────────────────
-            # 点击：跳转到语音页面 + 主动启动一次语音对话（push-to-talk）
-            # 唤醒："okay nabu" 也可自动启动
+            # 语音助手导航按钮（侧边栏第 4 项）
             - obj:
                 styles: nav_btn_container
                 widgets:
@@ -774,6 +769,87 @@ lvgl:
                         grid_cell_row_pos: 2
                         grid_cell_x_align: START
                         grid_cell_y_align: CENTER
+              # ── 新增：底部操作按钮行 ─────────────────────────
+              - obj:
+                  width: 950
+                  height: 160        # 按钮行高度
+                  align: CENTER
+                  y: 200            # 根据实际情况调整 Y 坐标
+                  bg_opa: TRANSP
+                  border_opa: TRANSP
+                  layout:
+                    type: FLEX
+                    flex_flow: ROW
+                    pad_column: 40      # 按钮间距
+                    flex_align_main: CENTER
+                    flex_align_cross: CENTER
+                  widgets:
+                    # Wi-Fi 配网按钮
+                    - button:
+                        id: btn_wifi_config
+                        width: 160
+                        height: 160
+                        radius: 20
+                        pad_all: 12
+                        text_color: 0xFFFFFF
+                        bg_color: 0x3498DB  # 蓝色
+                        checkable: false     # 非切换按钮
+                        on_press:
+                          - script.execute: enter_wifi_config_mode
+                        widgets:
+                          - label:
+                              text_font: extra_icon_80
+                              align: top_mid
+                              text: "\U000F05A9" # WiFi 图标
+                          - label:
+                              text_font: noto_sans_sc_32
+                              text: "配网"
+                              align: bottom_mid
+
+                    # 重启按钮
+                    - button:
+                        id: btn_restart
+                        width: 160
+                        height: 160
+                        radius: 20
+                        pad_all: 12
+                        text_color: 0xFFFFFF
+                        bg_color: 0x27AE60  # 绿色
+                        checkable: false
+                        on_press:
+                          - button.press: restart_button
+                        widgets:
+                          - label:
+                              text_font: extra_icon_80
+                              align: top_mid
+                              text: "\U000F0451" # Restart 图标 (如无此图标可换为 \U000F0896)
+                          - label:
+                              text_font: noto_sans_sc_32
+                              text: "重启"
+                              align: bottom_mid
+
+                  # 关机按钮
+                  - button:
+                      id: btn_shutdown
+                      width: 160
+                      height: 160
+                      radius: 20
+                      pad_all: 12
+                      text_color: 0xFFFFFF
+                      bg_color: 0xE74C3C  # 红色
+                      checkable: false
+                      on_press:
+                        - button.press: shutdown_button
+                      widgets:
+                        - label:
+                            text_font: extra_icon_80
+                            align: top_mid
+                            text: "\U000F0343" # Power Standby 图标
+                        - label:
+                            text_font: noto_sans_sc_32
+                            text: "关机"
+                            align: bottom_mid
+
 
     # ========== 语音助手页面 ==========
     # 由 voice_ui_update 脚本驱动：

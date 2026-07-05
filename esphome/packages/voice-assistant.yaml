@@ -1,8 +1,5 @@
-# ═════════════════════════════════════════════════════════════════
 # 语音助手核心配置（适配 LVGL UI 版本）
-# 严格对齐参考项目: https://github.com/pysn2012/wake-word-voice-assistants/blob/main/m5-tab5/m5-tab5.yaml
 # 唤醒词: "okay nabu"  →  唤醒后可进行语音对话或语音控制
-# ═════════════════════════════════════════════════════════════════
 
 # ── 全局变量 ──────────────────────────────────────────────────────
 globals:
@@ -11,7 +8,7 @@ globals:
     type: bool
     restore_value: false
     initial_value: "true"
-  # 当前语音助手所处的阶段 ID（参考 substitutions 中的 voice_assist_*_phase_id）
+  # 当前语音助手所处的阶段 ID（substitutions 中的 voice_assist_*_phase_id）
   - id: voice_assistant_phase
     type: int
     restore_value: false
@@ -32,11 +29,11 @@ globals:
     restore_value: false
     initial_value: "0"
 
-# ── 扬声器配置（I2S + ES8388 DAC）──────────────────────────────────
+# 扬声器配置（I2S + ES8388 DAC）
 speaker:
   - platform: i2s_audio
     id: box_speaker
-    i2s_audio_id: mic_bus           # ★ 显式引用 i2s_audio 总线（与 hardware.yaml 中的 mic_bus 对应）
+    i2s_audio_id: mic_bus
     i2s_dout_pin: GPIO26
     audio_dac: es8388_dac
     dac_type: external
@@ -46,7 +43,7 @@ speaker:
     bits_per_sample: 16bit
     sample_rate: 48000
 
-# ── 媒体播放器（用于播放 TTS 和提示音）─────────────────────────────
+# 媒体播放器（用于播放 TTS 和提示音）
 media_player:
   - platform: speaker
     name: None
@@ -93,11 +90,7 @@ media_player:
             - script.execute: start_wake_word
             - script.execute: set_idle_or_mute_phase
             - script.execute: voice_ui_update
-    # ── HA → TAB5 音量同步 ──────────────────────────────────────
-    # 当 HA 端直接调节媒体播放器音量时，on_state 触发器会捕获到变化，
-    # 将音量值同步回 TAB5 的滑块、标签和全局变量。
-    # on_state 在任何状态变化时都会触发，因此需要用 static 变量记录上次音量，
-    # 仅在音量实际变化时才更新 UI，避免不必要的刷新和循环。
+    # HA → TAB5 音量同步
     on_state:
       - if:
           condition:
@@ -124,21 +117,17 @@ media_player:
                   snprintf(buf, sizeof(buf), "%d %%", int(id(speaker_media_player)->volume * 100 + 0.5));
                   return buf;
 
-# ── 设备端唤醒词引擎 microWakeWord ─────────────────────────────────
-# 与参考项目 m5-tab5 完全对齐
-# 加载 2 个唤醒词模型，HA 端可分别启用/禁用每个模型
+# 设备端唤醒词引擎 microWakeWord
 micro_wake_word:
   id: mww
   models:
     - okay_nabu
-    - model: https://raw.githubusercontent.com/pysn2012/wake-word-voice-assistants/refs/heads/main/models/hey_sarah.json
   on_wake_word_detected:
     - logger.log: "★ micro_wake_word: 检测到唤醒词！"
     - voice_assistant.start:
         wake_word: !lambda return wake_word;
 
-# ── 语音助手核心 ──────────────────────────────────────────────────
-# 严格按参考项目 m5-tab5 配置，不添加任何"优化"项，避免引入兼容性问题
+# 语音助手核心
 voice_assistant:
   id: va
   microphone: tab5_microphone
@@ -259,16 +248,6 @@ voice_assistant:
     - lambda: id(voice_assistant_phase) = ${voice_assist_timer_finished_phase_id};
     - script.execute: voice_ui_update
 
-# ── 脚本（Scripts）说明 ───────────────────────────────────────────
-# 以下脚本定义在 packages/script.yaml 中，以避免与该文件中已有的 script: 块冲突：
-#   - start_wake_word        : 根据 wake_word_engine_location 启动 mWW 或流式唤醒
-#   - stop_wake_word         : 停止对应唤醒词引擎
-#   - set_idle_or_mute_phase : 根据 mute 开关设置 idle/muted 阶段
-#   - voice_ui_update        : 根据 voice_assistant_phase 切换 LVGL 页面、更新图标/文字、
-#                              高亮侧边栏语音按钮
-#   - return_to_previous_page: 从语音页面返回启动前的页面
-
-# ── 开关（Switches） ──────────────────────────────────────────────
 switch:
   # 软件静音开关（控制麦克风）
   - platform: template
@@ -317,7 +296,7 @@ switch:
       - delay: 15min
       - switch.turn_off: timer_ringing
 
-# ── 选择器：唤醒词引擎运行位置 ─────────────────────────────────────
+# 选择器：唤醒词引擎运行位置
 select:
   - platform: template
     entity_category: config
@@ -362,7 +341,7 @@ select:
                       then:
                         - micro_wake_word.start
 
-# ── 文本传感器：用户问 / 答复 ─────────────────────────────────────
+# 文本传感器：用户问 / 答复
 # 不截断文本，由 LVGL 标签的 long_mode: WRAP 自动换行显示
 text_sensor:
   # 用户问（STT 结果）

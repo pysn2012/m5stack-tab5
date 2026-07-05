@@ -107,10 +107,7 @@ script:
               id(desk_power_val), id(desk_total_val));
             return buf;
 
-  # ── 语音助手 UI 更新脚本（核心）──────────────────────────────
-  # 根据 voice_assistant_phase 更新 widget 文字/图标 + 高亮侧边栏语音按钮
-  # 注意：页面切换不能在 lambda 中调用 LVGL C API（id(voice_page) 是 LvPageType* 不是 lv_obj_t*）
-  #       需要切换页面时设置全局变量 voice_page_pending，由后续 YAML action 处理
+  # 语音助手 UI 更新脚本（核心）
   - id: voice_ui_update
     then:
       - lambda: |-

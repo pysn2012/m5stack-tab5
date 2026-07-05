@@ -72,12 +72,17 @@ ota:
 wifi:
   ssid: !secret wifi_ssid
   password: !secret wifi_password
+  ap:
+    ssid: "Tab5-ap-Setup"
+    password: "12345678"
   on_connect:
     then:
       - lvgl.widget.show: wifi_icon_label
   on_disconnect:
     then:
       - lvgl.widget.hide: wifi_icon_label
+
+captive_portal:
 
 packages:
   hardware: !include packages/hardware.yaml

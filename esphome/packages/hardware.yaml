@@ -167,10 +167,17 @@ touchscreen:
 
 # 背光 PWM 输出配置
 output:
+  # 背光 PWM 输出配置
   - platform: ledc
     pin: GPIO22
     id: backlight_pwm
     frequency: 1000Hz
+  # 关机脉冲
+  - platform: gpio
+    pin:
+      pi4ioe5v6408: pi4ioe2
+      number: 4
+    id: shutdown_output
 
 # 背光亮度控制配置
 light:
@@ -201,7 +208,7 @@ audio_adc:
 microphone:
   - platform: i2s_audio
     id: tab5_microphone
-    i2s_audio_id: mic_bus          # ★ 显式引用 i2s_audio 总线（packages 拆分配置时必须指定）
+    i2s_audio_id: mic_bus
     i2s_din_pin: GPIO28
     sample_rate: 16000
     bits_per_sample: 16bit
