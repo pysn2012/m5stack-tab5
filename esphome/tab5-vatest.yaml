@@ -81,7 +81,7 @@ wifi:
       # 判断 Wi-Fi 配置面板是否可见，如果可见则关闭它
       - if:
           condition: 
-            lvgl.widget.is_visible: wifi_config_panel
+            lambda: 'return !lv_obj_has_flag(id(wifi_config_panel), LV_OBJ_FLAG_HIDDEN);'
           then:
             - lvgl.widget.hide: wifi_config_panel
             - lvgl.textarea.update:
