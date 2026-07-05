@@ -84,12 +84,12 @@ wifi:
             lvgl.widget.is_visible: wifi_config_panel
           then:
             - lvgl.widget.hide: wifi_config_panel
-            - text_area.set_value:
+            - lvgl.textarea.update:
                 id: ta_wifi_ssid
-                value: ""
-            - text_area.set_value:
+                text: ""
+            - lvgl.textarea.update:
                 id: ta_wifi_pass
-                value: ""
+                text: ""
   on_disconnect:
     then:
       - lvgl.widget.hide: wifi_icon_label

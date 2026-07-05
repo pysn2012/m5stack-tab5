@@ -498,12 +498,12 @@ lvgl:
                       radius: 10
                       on_press:
                         - lvgl.widget.hide: wifi_config_panel
-                        - text_area.set_value:
+                        - lvgl.textarea.update:
                             id: ta_wifi_ssid
-                            value: ""
-                        - text_area.set_value:
+                            text: ""
+                        - lvgl.textarea.update:
                             id: ta_wifi_pass
-                            value: ""
+                            text: ""
                       widgets:
                         - label:
                             text_font: noto_sans_sc_32
