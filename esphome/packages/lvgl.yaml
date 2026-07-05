@@ -93,6 +93,34 @@ lvgl:
 
   byte_order: little_endian
   color_depth: 16
+  # 自动息屏
+  on_idle:
+    # 超时时间动态读取自 system.yaml 中定义的 select 组件
+    timeout: !lambda |-
+      int timeout_sec = 30; // 默认 30 秒
+      if (id(screen_off_timeout_sec).has_state()) {
+        std::string opt = id(screen_off_timeout_sec).state;
+        if (opt == "Never") return UINT32_MAX; // 永不超时
+        timeout_sec = atoi(opt.c_str());
+      }
+      return timeout_sec * 1000;
+
+    then:
+      - if:
+          condition:
+            # 判断是否处于语音助手活跃状态
+            - lambda: |-
+                int phase = id(voice_assistant_phase);
+                // 活跃状态包括：聆听(2)、思考(3)、回复(4)、计时结束响铃(20)
+                return (phase == ${voice_assist_listening_phase_id} ||
+                        phase == ${voice_assist_thinking_phase_id} ||
+                        phase == ${voice_assist_replying_phase_id} ||
+                        phase == ${voice_assist_timer_finished_phase_id});
+          then:
+            - logger.log: "语音助手活跃中，阻止息屏"
+          else:
+            # 如果语音助手未活跃，执行息屏脚本
+            - script.execute: screen_off
 
   # ═══════════════════════════════════════════════════════════════
   # LVGL 样式定义

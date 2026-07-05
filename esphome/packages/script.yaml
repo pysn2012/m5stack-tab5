@@ -278,3 +278,25 @@ script:
             lambda: return id(return_page_target) == 2;
           then:
             - lvgl.page.show: system_page
+
+  # 关闭屏幕（息屏）
+  - id: screen_off
+    then:
+      - logger.log: "执行息屏..."
+      - light.turn_off:
+          id: backlight
+          transition_length: 500ms # 平滑过渡
+      - lvgl.pause:
+
+  # 唤醒屏幕（亮屏）
+  - id: screen_wakeup
+    then:
+      - if:
+          condition: lvgl.is_paused
+          then:
+            - logger.log: "执行亮屏..."
+            - lvgl.resume:
+            - lvgl.widget.redraw:
+            - light.turn_on:
+                id: backlight
+                transition_length: 300ms

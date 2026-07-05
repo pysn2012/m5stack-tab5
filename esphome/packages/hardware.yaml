@@ -161,10 +161,9 @@ touchscreen:
       - if:
           condition: lvgl.is_paused
           then:
-            - logger.log: "LVGL 恢复中"
-            - lvgl.resume:
-            - lvgl.widget.redraw:
-            - light.turn_on: backlight
+            - logger.log: "触摸亮屏"
+            - script.execute: screen_wakeup
+          else:
 
 # 背光 PWM 输出配置
 output:

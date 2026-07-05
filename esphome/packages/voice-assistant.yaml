@@ -150,6 +150,7 @@ voice_assistant:
 
   # 开始监听用户语音
   on_listening:
+    - script.execute: screen_wakeup # 强制亮屏
     - lambda: id(voice_assistant_phase) = ${voice_assist_listening_phase_id};
     - text_sensor.template.publish:
         id: text_request
@@ -251,6 +252,7 @@ voice_assistant:
   on_timer_tick:
     - script.execute: voice_ui_update
   on_timer_finished:
+    - script.execute: screen_wakeup # 强制亮屏
     - switch.turn_on: timer_ringing
     - wait_until:
         media_player.is_announcing:

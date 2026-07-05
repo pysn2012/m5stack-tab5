@@ -1,0 +1,90 @@
+# 语音助手阶段 ID（用于内部状态机判断）
+substitutions:
+  voice_assist_idle_phase_id: "1"
+  voice_assist_listening_phase_id: "2"
+  voice_assist_thinking_phase_id: "3"
+  voice_assist_replying_phase_id: "4"
+  voice_assist_not_ready_phase_id: "10"
+  voice_assist_error_phase_id: "11"
+  voice_assist_muted_phase_id: "12"
+  voice_assist_timer_finished_phase_id: "20"
+
+# ESPHOME 基础配置
+esphome:
+  name: tab5-ha-hmi-ew
+  friendly_name: M5Stack Tab5
+  min_version: 2025.12.0
+  # ★ 关键：project.name 必须设为 "esphome.voice-assistant"
+  #   这是 Home Assistant 识别 ESPHome 设备为「Assist satellite」的标识
+  #   没有这个配置，HA 设备页面不会出现「Assist satellite」配置面板
+  #   （即无法选择 pipeline、唤醒词等）
+  #   参考: https://github.com/esphome/wake-word-voice-assistants
+  project:
+    name: esphome.voice-assistant
+    version: dev
+  # 启动时初始化：先更新 UI，30 秒后如果还在初始化状态就强制重置
+  # （与参考项目 m5-tab5 对齐，防止 HA 长时间未连接导致 UI 卡在初始化状态）
+  on_boot:
+    priority: 600
+    then:
+      - script.execute: voice_ui_update
+      - delay: 30s
+      - if:
+          condition:
+            lambda: return id(init_in_progress);
+          then:
+            - lambda: id(init_in_progress) = false;
+            - script.execute: voice_ui_update
+
+# 日志配置
+logger:
+  hardware_uart: USB_SERIAL_JTAG
+  level: DEBUG
+  logs:
+    sensor: INFO
+    binary_sensor: INFO
+    voice_assistant: INFO
+    micro_wake_word: INFO
+
+# Home Assistant API 配置
+api:
+  on_client_connected:
+    then:
+      - lvgl.widget.show: api_icon_label
+      # HA 连接成功后启动唤醒词监听
+      - lambda: id(init_in_progress) = false;
+      - script.execute: start_wake_word
+      - script.execute: set_idle_or_mute_phase
+      - script.execute: voice_ui_update
+  on_client_disconnected:
+    then:
+      - lvgl.widget.hide: api_icon_label
+      # HA 断开后停止唤醒词并显示"未就绪"状态
+      - script.execute: stop_wake_word
+      - lambda: id(voice_assistant_phase) = ${voice_assist_not_ready_phase_id};
+      - script.execute: voice_ui_update
+
+# OTA 远程更新配置
+ota:
+  platform: esphome
+
+# WiFi 网络配置
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+  on_connect:
+    then:
+      - lvgl.widget.show: wifi_icon_label
+  on_disconnect:
+    then:
+      - lvgl.widget.hide: wifi_icon_label
+
+packages:
+  hardware: !include packages/hardware.yaml
+  system: !include packages/system.yaml
+  time: !include packages/time.yaml
+  fonts: !include packages/fonts.yaml
+  sensor: !include packages/sensor.yaml
+  script: !include packages/script.yaml
+  lvgl: !include packages/lvgl.yaml
+  voice: !include packages/voice-assistant.yaml

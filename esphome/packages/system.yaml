@@ -69,6 +69,21 @@ select:
             - switch.turn_off: wifi_antenna_int_ext   # 关闭外置天线开关
           else:
             - switch.turn_on: wifi_antenna_int_ext    # 打开外置天线开关
+  # 屏幕息屏超时设置
+  - platform: template
+    name: "Screen off timeout"
+    id: screen_off_timeout_sec
+    optimistic: true
+    restore_value: true
+    initial_option: "30"
+    entity_category: config
+    options:
+      - "15"
+      - "30"
+      - "60"
+      - "90"
+      - "120"
+      - "Never" # 新增永不关闭选项
 
 # 二进制传感器配置
 binary_sensor:
