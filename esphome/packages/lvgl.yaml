@@ -828,27 +828,27 @@ lvgl:
                               text: "重启"
                               align: bottom_mid
 
-                  # 关机按钮
-                  - button:
-                      id: btn_shutdown
-                      width: 160
-                      height: 160
-                      radius: 20
-                      pad_all: 12
-                      text_color: 0xFFFFFF
-                      bg_color: 0xE74C3C  # 红色
-                      checkable: false
-                      on_press:
-                        - button.press: shutdown_button
-                      widgets:
-                        - label:
-                            text_font: extra_icon_80
-                            align: top_mid
-                            text: "\U000F0343" # Power Standby 图标
-                        - label:
-                            text_font: noto_sans_sc_32
-                            text: "关机"
-                            align: bottom_mid
+                    # 关机按钮
+                    - button:
+                        id: btn_shutdown
+                        width: 160
+                        height: 160
+                        radius: 20
+                        pad_all: 12
+                        text_color: 0xFFFFFF
+                        bg_color: 0xE74C3C  # 红色
+                        checkable: false
+                        on_press:
+                          - button.press: shutdown_button
+                        widgets:
+                          - label:
+                              text_font: extra_icon_80
+                              align: top_mid
+                              text: "\U000F0343" # Power Standby 图标
+                          - label:
+                              text_font: noto_sans_sc_32
+                              text: "关机"
+                              align: bottom_mid
 
 
     # ========== 语音助手页面 ==========
