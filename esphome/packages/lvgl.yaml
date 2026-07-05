@@ -400,7 +400,7 @@ lvgl:
                 bg_opa: TRANSP
                 layout:
                   type: GRID
-                  grid_columns: [200, FR(1)]
+                  grid_columns: [120, FR(1)]
                   grid_rows: [60, 60]
                   pad_column: 10
                   pad_row: 5
@@ -418,8 +418,9 @@ lvgl:
                       id: ta_wifi_ssid
                       grid_cell_column_pos: 1
                       grid_cell_row_pos: 0
-                      width: 780
+                      width: 720
                       height: 50
+                      pad_all: 0
                       text_font: montserrat_26
                       placeholder_text: "WiFi SSID"
                       border_width: 1
@@ -439,8 +440,9 @@ lvgl:
                       id: ta_wifi_pass
                       grid_cell_column_pos: 1
                       grid_cell_row_pos: 1
-                      width: 780
+                      width: 720
                       height: 50
+                      pad_all: 0
                       text_font: montserrat_26
                       placeholder_text: "WiFi PASSWORD"
                       password_mode: true
@@ -470,9 +472,9 @@ lvgl:
             # 底部按钮（连接/取消）
             - obj:
                 width: 1000
-                height: 80
+                height: 100
                 bg_opa: TRANSP
-                pad_all: 0 
+                pad_all: 5 
                 layout:
                   type: FLEX
                   flex_flow: ROW
@@ -913,28 +915,28 @@ lvgl:
                         grid_cell_row_pos: 2
                         grid_cell_x_align: START
                         grid_cell_y_align: CENTER
-              # ── 新增：底部操作按钮行 ─────────────────────────
+              # 底部操作按钮行 ─────────────────────────
               - obj:
                   width: 950
-                  height: 160        # 按钮行高度
+                  height: 120        # 按钮行高度
                   align: CENTER
-                  y: 200            # 根据实际情况调整 Y 坐标
+                  y: 220            # 根据实际情况调整 Y 坐标
                   bg_opa: TRANSP
                   border_opa: TRANSP
                   layout:
                     type: FLEX
                     flex_flow: ROW
                     pad_column: 40      # 按钮间距
-                    flex_align_main: CENTER
+                    flex_align_main: START
                     flex_align_cross: CENTER
                   widgets:
                     # Wi-Fi 配网按钮
                     - button:
                         id: btn_wifi_config
-                        width: 160
-                        height: 160
+                        width: 100
+                        height: 100
                         radius: 20
-                        pad_all: 12
+                        pad_all: 6
                         text_color: 0xFFFFFF
                         bg_color: 0x3498DB  # 蓝色
                         checkable: false     # 非切换按钮
@@ -942,7 +944,7 @@ lvgl:
                           - lvgl.widget.show: wifi_config_panel
                         widgets:
                           - label:
-                              text_font: extra_icon_80
+                              text_font: extra_icon
                               align: top_mid
                               text: "\U000F05A9" # WiFi 图标
                           - label:
@@ -953,10 +955,10 @@ lvgl:
                     # 重启按钮
                     - button:
                         id: btn_restart
-                        width: 160
-                        height: 160
+                        width: 100
+                        height: 100
                         radius: 20
-                        pad_all: 12
+                        pad_all: 6
                         text_color: 0xFFFFFF
                         bg_color: 0x27AE60  # 绿色
                         checkable: false
@@ -964,7 +966,7 @@ lvgl:
                           - button.press: restart_button
                         widgets:
                           - label:
-                              text_font: extra_icon_80
+                              text_font: extra_icon
                               align: top_mid
                               text: "\U000F0451" # Restart 图标 (如无此图标可换为 \U000F0896)
                           - label:
@@ -975,10 +977,10 @@ lvgl:
                     # 关机按钮
                     - button:
                         id: btn_shutdown
-                        width: 160
-                        height: 160
+                        width: 100
+                        height: 100
                         radius: 20
-                        pad_all: 12
+                        pad_all: 6
                         text_color: 0xFFFFFF
                         bg_color: 0xE74C3C  # 红色
                         checkable: false
@@ -986,7 +988,7 @@ lvgl:
                           - button.press: shutdown_button
                         widgets:
                           - label:
-                              text_font: extra_icon_80
+                              text_font: extra_icon
                               align: top_mid
                               text: "\U000F0343" # Power Standby 图标
                           - label:
