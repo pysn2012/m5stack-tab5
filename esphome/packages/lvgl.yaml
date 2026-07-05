@@ -374,7 +374,7 @@ lvgl:
           hidden: true
           align: CENTER
           width: 1100
-          height: 650
+          height: 700
           bg_color: 0xFFFFFF
           bg_opa: COVER
           border_width: 2
@@ -385,11 +385,11 @@ lvgl:
             flex_flow: COLUMN
             flex_align_main: CENTER
             flex_align_cross: CENTER
-            pad_row: 12
+            pad_row: 10
           widgets:
             # 标题
             - label:
-                text_font: noto_sans_sc_48
+                text_font: noto_sans_sc_32
                 text: "WiFi设置"
                 text_color: 0x333333
             
@@ -403,7 +403,7 @@ lvgl:
                   grid_columns: [200, FR(1)]
                   grid_rows: [60, 60]
                   pad_column: 10
-                  pad_row: 6
+                  pad_row: 5
                 widgets:
                   # SSID 标签
                   - label:
@@ -419,17 +419,17 @@ lvgl:
                       grid_cell_column_pos: 1
                       grid_cell_row_pos: 0
                       width: 780
-                      height: 60
+                      height: 50
                       text_font: montserrat_26
                       placeholder_text: "WiFi SSID"
                       border_width: 1
-                      on_click:  # ↓↓↓ 添加 lambda 切换键盘绑定
+                      on_click:  # lambda 切换键盘绑定
                         - lambda: lv_keyboard_set_textarea(id(kb_wifi)->obj, id(ta_wifi_ssid));
                         
                   # 密码标签
                   - label:
                       text_font: montserrat_26
-                      text: "PASSWORD:"
+                      text: "PWD:"
                       grid_cell_column_pos: 0
                       grid_cell_row_pos: 1
                       grid_cell_x_align: END
@@ -440,12 +440,12 @@ lvgl:
                       grid_cell_column_pos: 1
                       grid_cell_row_pos: 1
                       width: 780
-                      height: 60
+                      height: 50
                       text_font: montserrat_26
                       placeholder_text: "WiFi PASSWORD"
                       password_mode: true
                       border_width: 1
-                      on_click:  # ↓↓↓ 添加 lambda 切换键盘绑定
+                      on_click:  # lambda 切换键盘绑定
                         - lambda: lv_keyboard_set_textarea(id(kb_wifi)->obj, id(ta_wifi_pass));
 
             # 虚拟键盘
@@ -470,8 +470,9 @@ lvgl:
             # 底部按钮（连接/取消）
             - obj:
                 width: 1000
-                height: SIZE_CONTENT
+                height: 80
                 bg_opa: TRANSP
+                pad_all: 0 
                 layout:
                   type: FLEX
                   flex_flow: ROW
