@@ -108,16 +108,6 @@ font:
     id: montserrat_26
     size: 26
     bpp: 4
-    glyphs: [
-      # ↓↓↓ 添加 LVGL keyboard 需要的符号 ↓↓↓
-      "\U000F0FD",  # Enter (LV_SYMBOL_NEW_LINE)
-      "\U000F088",  # Backspace (LV_SYMBOL_BACKSPACE)
-      "\U000F18A",  # Shift Up (LV_SYMBOL_UP)
-      "\U000F18B",  # Shift Down (LV_SYMBOL_DOWN)
-      # ↓↓↓ 保留基本字母数字 ↓↓↓
-      "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890",
-      "!@#$%^&*()_+-=[]{}|;:'\",<.>/? "
-    ]
 
   # Noto Sans SC 中文字体（32px）
   - file: gfonts://Noto+Sans+SC
