@@ -99,7 +99,7 @@ lvgl:
     timeout: !lambda |-
       int timeout_sec = 30; // 默认 30 秒
       if (id(screen_off_timeout_sec).has_state()) {
-        std::string opt = id(screen_off_timeout_sec).state;
+        std::string opt = id(screen_off_timeout_sec).current_option();
         if (opt == "Never") return UINT32_MAX; // 永不超时
         timeout_sec = atoi(opt.c_str());
       }
@@ -424,7 +424,7 @@ lvgl:
                       placeholder_text: "请输入WiFi名称"
                       border_width: 1
                       on_click:
-                        - lambda: lv_keyboard_set_textarea(id(kb_wifi), obj);
+                        - lambda: lv_keyboard_set_textarea(id(kb_wifi)->obj, id(ta_wifi_ssid)->obj);
                         
                   # 密码标签
                   - label:
@@ -446,7 +446,7 @@ lvgl:
                       password_mode: true
                       border_width: 1
                       on_click:
-                        - lambda: lv_keyboard_set_textarea(id(kb_wifi), obj);
+                        - lambda: lv_keyboard_set_textarea(id(kb_wifi)->obj, id(ta_wifi_pass)->obj);
 
             # 虚拟键盘
             - keyboard:
@@ -939,7 +939,7 @@ lvgl:
                         checkable: false     # 非切换按钮
                         on_press:
                           - lvgl.widget.show: wifi_config_panel
-                          - lambda: lv_keyboard_set_textarea(id(kb_wifi), id(ta_wifi_ssid)); # 默认聚焦 SSID 框
+                          - lambda: lv_keyboard_set_textarea(id(kb_wifi)->obj, id(ta_wifi_ssid)->obj); # 默认聚焦 SSID 框
                         widgets:
                           - label:
                               text_font: extra_icon_80
