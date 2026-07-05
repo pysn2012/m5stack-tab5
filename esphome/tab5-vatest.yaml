@@ -78,8 +78,10 @@ wifi:
   on_connect:
     then:
       - lvgl.widget.show: wifi_icon_label
+      # 判断 Wi-Fi 配置面板是否可见，如果可见则关闭它
       - if:
-          condition: lvgl.widget.is_visible: wifi_config_panel
+          condition: 
+            lvgl.widget.is_visible: wifi_config_panel
           then:
             - lvgl.widget.hide: wifi_config_panel
             - text_area.set_value:
