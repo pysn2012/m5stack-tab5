@@ -423,8 +423,6 @@ lvgl:
                       text_font: noto_sans_sc_32
                       placeholder_text: "请输入WiFi名称"
                       border_width: 1
-                      on_click:
-                        - lambda: lv_keyboard_set_textarea(id(kb_wifi)->obj, id(ta_wifi_ssid)->obj);
                         
                   # 密码标签
                   - label:
@@ -445,8 +443,6 @@ lvgl:
                       placeholder_text: "请输入WiFi密码"
                       password_mode: true
                       border_width: 1
-                      on_click:
-                        - lambda: lv_keyboard_set_textarea(id(kb_wifi)->obj, id(ta_wifi_pass)->obj);
 
             # 虚拟键盘
             - keyboard:
@@ -939,7 +935,6 @@ lvgl:
                         checkable: false     # 非切换按钮
                         on_press:
                           - lvgl.widget.show: wifi_config_panel
-                          - lambda: lv_keyboard_set_textarea(id(kb_wifi)->obj, id(ta_wifi_ssid)->obj); # 默认聚焦 SSID 框
                         widgets:
                           - label:
                               text_font: extra_icon_80
