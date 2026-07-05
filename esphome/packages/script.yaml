@@ -297,3 +297,29 @@ script:
             - light.turn_on:
                 id: backlight
                 transition_length: 300ms
+  # Wi-Fi 配网脚本
+  - id: connect_wifi_action
+    then:
+      - logger.log: "读取屏幕 Wi-Fi 信息..."
+      - lambda: |-
+          // 获取 SSID 和密码文本
+          std::string ssid = lv_textarea_get_text(id(ta_wifi_ssid));
+          std::string pass = lv_textarea_get_text(id(ta_wifi_pass));
+          
+          if (ssid.empty()) {
+            ESP_LOGW("wifi_action", "SSID 为空，取消连接");
+            return;
+          }
+          
+          ESP_LOGI("wifi_action", "尝试连接 SSID: %s", ssid.c_str());
+          
+          // 使用 ESP-IDF API 动态配置 Wi-Fi (适用于您的 ESP32-P4 配置)
+          wifi_config_t sta_config = {};
+          strncpy((char *)sta_config.sta.ssid, ssid.c_str(), sizeof(sta_config.sta.ssid));
+          strncpy((char *)sta_config.sta.password, pass.c_str(), sizeof(sta_config.sta.password));
+          
+          // 应用配置并启动连接
+          esp_wifi_set_config(WIFI_IF_STA, &sta_config);
+          esp_wifi_disconnect(); // 先断开旧连接（如果有）
+          esp_wifi_connect();    // 发起新连接
+      - logger.log: "Wi-Fi 连接指令已发送"

@@ -73,8 +73,6 @@ font:
       "\U000F1B3F", # 机器人（助手形象）
       "\U000F1B40", # 机器人轮廓
       "\U000F018C", # 信息提示
-      "\U000F0451", # restart 重启
-      "\U000F0343", # power-standby 关机/待机
     ]
 
   - file: "fonts/materialdesignicons-webfont.ttf"
@@ -88,6 +86,9 @@ font:
       "\U000F08BB", # 齿轮（轮廓）
       "\U000F05CB", # 声音助手（侧边栏语音按钮）
       "\U000F0425", # 电源
+      "\U000F0451", # restart 重启
+      "\U000F0343", # power-standby 关机/待机
+      "\U000F05A9", # WiFi
     ]
 
   # Montserrat 字体（96px，用于时间显示）

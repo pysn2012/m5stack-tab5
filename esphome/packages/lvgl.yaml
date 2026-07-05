@@ -368,6 +368,132 @@ lvgl:
                 text_font: extra_icon
                 text: "\U000F109B"
 
+      # Wi-Fi 配置弹窗（默认隐藏）
+      - obj:
+          id: wifi_config_panel
+          hidden: true
+          align: CENTER
+          width: 1100
+          height: 720
+          bg_color: 0xFFFFFF
+          bg_opa: COVER
+          border_width: 2
+          border_color: 0xCCCCCC
+          radius: 20
+          layout:
+            type: flex
+            flex_flow: COLUMN
+            flex_align_main: CENTER
+            flex_align_cross: CENTER
+            pad_row: 20
+          widgets:
+            # 标题
+            - label:
+                text_font: noto_sans_sc_48
+                text: "Wi-Fi 设置"
+                text_color: 0x333333
+            
+            # 输入框容器（SSID + 密码）
+            - obj:
+                width: 1000
+                height: SIZE_CONTENT
+                bg_opa: TRANSP
+                layout:
+                  type: GRID
+                  grid_columns: [200, FR(1)]
+                  grid_rows: [70, 70]
+                  pad_column: 10
+                  pad_row: 10
+                widgets:
+                  # SSID 标签
+                  - label:
+                      text_font: noto_sans_sc_32
+                      text: "网络名称:"
+                      grid_cell_column_pos: 0
+                      grid_cell_row_pos: 0
+                      grid_cell_x_align: END
+                      grid_cell_y_align: CENTER
+                  # SSID 输入框
+                  - text_area:
+                      id: ta_wifi_ssid
+                      grid_cell_column_pos: 1
+                      grid_cell_row_pos: 0
+                      width: 780
+                      height: 60
+                      text_font: noto_sans_sc_32
+                      placeholder: "请输入 Wi-Fi 名称"
+                      border_width: 1
+                      on_click:
+                        - lambda: lv_keyboard_set_textarea(id(kb_wifi), obj);
+                        
+                  # 密码标签
+                  - label:
+                      text_font: noto_sans_sc_32
+                      text: "密码:"
+                      grid_cell_column_pos: 0
+                      grid_cell_row_pos: 1
+                      grid_cell_x_align: END
+                      grid_cell_y_align: CENTER
+                  # 密码输入框
+                  - text_area:
+                      id: ta_wifi_pass
+                      grid_cell_column_pos: 1
+                      grid_cell_row_pos: 1
+                      width: 780
+                      height: 60
+                      text_font: noto_sans_sc_32
+                      placeholder: "请输入 Wi-Fi 密码"
+                      password_mode: true
+                      border_width: 1
+                      on_click:
+                        - lambda: lv_keyboard_set_textarea(id(kb_wifi), obj);
+
+            # 虚拟键盘
+            - keyboard:
+                id: kb_wifi
+                width: 1000
+                height: 320
+                
+            # 底部按钮（连接/取消）
+            - obj:
+                width: 1000
+                height: SIZE_CONTENT
+                bg_opa: TRANSP
+                layout:
+                  type: FLEX
+                  flex_flow: ROW
+                  pad_column: 40
+                  flex_align_main: CENTER
+                widgets:
+                  - button:
+                      width: 180
+                      height: 60
+                      bg_color: 0x3498DB
+                      radius: 10
+                      on_press:
+                        - script.execute: connect_wifi_action
+                      widgets:
+                        - label:
+                            text_font: noto_sans_sc_32
+                            text: "连接"
+                            text_color: 0xFFFFFF
+                            align: CENTER
+                  - button:
+                      width: 180
+                      height: 60
+                      bg_color: 0xCCCCCC
+                      radius: 10
+                      on_press:
+                        - lvgl.widget.hide: wifi_config_panel
+                        - text_area.set_value: id: ta_wifi_ssid value: ""
+                        - text_area.set_value: id: ta_wifi_pass value: ""
+                      widgets:
+                        - label:
+                            text_font: noto_sans_sc_32
+                            text: "取消"
+                            text_color: 0xFFFFFF
+                            align: CENTER
+
   # LVGL 页面定义
   pages:
     # ========== 主页页面 ==========
@@ -795,7 +921,8 @@ lvgl:
                         bg_color: 0x3498DB  # 蓝色
                         checkable: false     # 非切换按钮
                         on_press:
-                          - script.execute: enter_wifi_config_mode
+                          - lvgl.widget.show: wifi_config_panel
+                          - lambda: lv_keyboard_set_textarea(id(kb_wifi), id(ta_wifi_ssid)); # 默认聚焦 SSID 框
                         widgets:
                           - label:
                               text_font: extra_icon_80

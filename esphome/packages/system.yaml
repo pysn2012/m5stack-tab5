@@ -303,10 +303,4 @@ button:
       - delay: 100ms  # 维持脉冲
       - output.turn_off: shutdown_output
 
-# Wi-Fi 配网脚本（清除凭据并重启进入 AP 模式）
-script:
-  - id: enter_wifi_config_mode
-    then:
-      - logger.log: "正在进入 Wi-Fi 配网模式..."
-      - delay: 500ms
-      - button.press: restart_button   # 重启设备，启动 AP 模式
+

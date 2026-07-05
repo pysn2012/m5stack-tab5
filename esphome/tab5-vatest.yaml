@@ -78,6 +78,16 @@ wifi:
   on_connect:
     then:
       - lvgl.widget.show: wifi_icon_label
+      - if:
+          condition: lvgl.widget.is_visible: wifi_config_panel
+          then:
+            - lvgl.widget.hide: wifi_config_panel
+            - text_area.set_value:
+                id: ta_wifi_ssid
+                value: ""
+            - text_area.set_value:
+                id: ta_wifi_pass
+                value: ""
   on_disconnect:
     then:
       - lvgl.widget.hide: wifi_icon_label
