@@ -779,7 +779,6 @@ lvgl:
                         text_font: noto_sans_sc_32
                         text: "显示"
                         text_color: 0x1A4A4A
-                        align: START
                     # 亮度行
                     - obj:
                         width: 900
@@ -862,8 +861,7 @@ lvgl:
                               id: screen_off_timeout_dropdown
                               width: 200
                               height: 50
-                              text_font: noto_sans_sc_32
-                              symbol: "▼"
+                              text_font: montserrat_26
                               bg_color: 0xF5F5F5
                               bg_opa: COVER
                               border_width: 0
@@ -901,7 +899,6 @@ lvgl:
                         text_font: noto_sans_sc_32
                         text: "声音"
                         text_color: 0x1A4A4A
-                        align: START
                     # 音量行
                     - obj:
                         width: 900
@@ -971,8 +968,7 @@ lvgl:
                               id: tab5_dac_output_dropdown
                               width: 200
                               height: 50
-                              text_font: noto_sans_sc_32
-                              symbol: "▼"
+                              text_font: montserrat_26
                               bg_color: 0xF5F5F5
                               bg_opa: COVER
                               border_width: 0
@@ -1007,7 +1003,6 @@ lvgl:
                         text_font: noto_sans_sc_32
                         text: "网络"
                         text_color: 0x1A4A4A
-                        align: START
                     # 配网按钮行
                     - obj:
                         width: 900
@@ -1036,13 +1031,11 @@ lvgl:
                         text_font: noto_sans_sc_32
                         text: "IP地址：0.0.0.0"
                         text_color: 0x333333
-                        align: START
                     - label:
                         id: sys_rssi_label
                         text_font: noto_sans_sc_32
                         text: "信号：-- dBm"
                         text_color: 0x333333
-                        align: START
 
               # 横线分隔
               - obj:
@@ -1067,7 +1060,6 @@ lvgl:
                         text_font: noto_sans_sc_32
                         text: "关于"
                         text_color: 0x1A4A4A
-                        align: START
                     # 按钮行
                     - obj:
                         width: 900
@@ -1116,7 +1108,6 @@ lvgl:
                         text_font: noto_sans_sc_32
                         text: "运行：--:--:--"
                         text_color: 0x333333
-                        align: START
 
 
     # ========== 语音助手页面 ==========
