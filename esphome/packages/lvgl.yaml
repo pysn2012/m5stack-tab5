@@ -865,7 +865,14 @@ lvgl:
                                     bg_opa: COVER
                                     border_width: 0
                                     radius: 10
-                                    select: screen_off_timeout_sec
+                                    options:
+                                      - "15"
+                                      - "30"
+                                      - "60"
+                                      - "90"
+                                      - "120"
+                                      - "Never"
+                                    selected_index: 2
                     # 模块：网络
                     - obj:
                         width: 520
@@ -1009,7 +1016,11 @@ lvgl:
                                     bg_opa: COVER
                                     border_width: 0
                                     radius: 10
-                                    select: tab5_dac_output_template
+                                    options:
+                                      - "LINE1"
+                                      - "LINE2"
+                                      - "BOTH"
+                                    selected_index: 0
                     # 模块：关于
                     - obj:
                         width: 520

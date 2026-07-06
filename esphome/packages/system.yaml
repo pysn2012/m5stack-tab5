@@ -36,20 +36,18 @@ select:
     dac_output:
       id: es8388_dac_output
       internal: true
-  - platform: template
-    name: "Tab5 DAC Output"
+  # DAC 输出
+  - platform: lvgl
+    widget: tab5_dac_output_dropdown
     id: tab5_dac_output_template
-    options:
-      - "LINE1"    # 板载扬声器
-      - "LINE2"    # 耳机
-      - "BOTH"
+    name: "Tab5 DAC Output"
     restore_value: true
-    optimistic: true
     on_value:
       then:
         - select.set:
             id: es8388_dac_output
             option: !lambda "return x;"
+
   # WiFi 天线切换
   - platform: template
     id: wifi_antenna_select
@@ -67,20 +65,12 @@ select:
           else:
             - switch.turn_on: wifi_antenna_int_ext    # 打开外置天线开关
   # 屏幕息屏超时设置
-  - platform: template
-    name: "Screen off timeout"
+  - platform: lvgl
+    widget: screen_off_timeout_dropdown
     id: screen_off_timeout_sec
-    optimistic: true
-    restore_value: true
-    initial_option: "30"
+    name: "Screen off timeout"
     entity_category: config
-    options:
-      - "15"
-      - "30"
-      - "60"
-      - "90"
-      - "120"
-      - "Never"
+    restore_value: true
 
 # 二进制传感器配置
 binary_sensor:
