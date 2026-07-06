@@ -232,6 +232,64 @@ lvgl:
       pad_all: 24
       shadow_opa: TRANSP
 
+  # 苹果风格卡片容器
+  - id: apple_card
+    bg_color: 0x1E1E1E  # 深灰色背景
+    bg_opa: COVER
+    radius: 16          # 圆角16px
+    border_opa: TRANSP
+    shadow_opa: 30      # 轻微阴影透明度
+    shadow_color: 0x000000  # 阴影颜色
+    shadow_spread: 8    # 阴影扩散距离
+    shadow_offset_x: 0  # 阴影X偏移
+    shadow_offset_y: 4  # 阴影Y偏移（向下偏移增加立体感）
+    pad_all: 24        # 内边距24px
+
+  # 卡片标题样式
+  - id: card_title
+    text_font: noto_sans_sc_32
+    text_color: 0xFFFFFF  # 白色标题
+    align: LEFT
+    pad_bottom: 16
+
+  # 模块内元素容器（平直边框，无圆角）
+  - id: module_content
+    bg_opa: TRANSP
+    border_opa: TRANSP
+    pad_all: 0
+
+  # 模块内标签样式
+  - id: module_label
+    text_font: noto_sans_sc_26
+    text_color: 0xCCCCCC  # 浅灰色文字
+    align: LEFT
+    pad_bottom: 8
+
+  # 模块内控件容器
+  - id: control_container
+    bg_opa: TRANSP
+    border_opa: TRANSP
+    layout:
+      type: FLEX
+      flex_flow: ROW
+      flex_align_main: SPACE_BETWEEN
+      flex_align_cross: CENTER
+      pad_column: 20
+
+  # 圆角按钮样式（用于WiFi配置、重启、关机）
+  - id: apple_button
+    bg_color: 0x2C2C2C  # 深灰色按钮背景
+    bg_opa: COVER
+    radius: 12          # 按钮圆角12px
+    border_opa: TRANSP
+    shadow_opa: 20
+    shadow_color: 0x000000
+    shadow_spread: 4
+    shadow_offset_x: 0
+    shadow_offset_y: 2
+    pad_all: 12         # 按钮内边距
+
+
   # 顶层导航栏和模态框
   top_layer:
     widgets:
@@ -748,76 +806,63 @@ lvgl:
             align: TOP_LEFT
             x: 120
             y: 30
-            text_color: 0x1A4A4A
-        
+            text_color: 0xFFFFFF
+
         # 内容容器
         - obj:
             styles: content_container
-            pad_top: 110
-            pad_left: 40
-            pad_right: 40
+            pad_top: 100
             layout:
               type: FLEX
               flex_flow: COLUMN
               flex_align_main: START
               flex_align_cross: CENTER
-              pad_row: 0
+              pad_row: 20  # 模块间间距20px
+
             widgets:
               # ─── 显示模块 ───
               - obj:
+                  styles: apple_card
                   width: 900
                   height: SIZE_CONTENT
-                  bg_opa: TRANSP
-                  border_opa: TRANSP
-                  pad_bottom: 20
                   layout:
                     type: FLEX
                     flex_flow: COLUMN
-                    pad_row: 25
+                    pad_row: 20
+
                   widgets:
                     - label:
-                        text_font: noto_sans_sc_32
+                        styles: card_title
                         text: "显示"
-                        text_color: 0x1A4A4A
-                    # 亮度行
+
                     - obj:
-                        width: 900
-                        height: 60
-                        bg_opa: TRANSP
+                        styles: module_content
                         layout:
                           type: FLEX
-                          flex_flow: ROW
-                          flex_align_main: SPACE_BETWEEN
-                          flex_align_cross: CENTER
+                          flex_flow: COLUMN
+                          pad_row: 16
+
                         widgets:
-                          - label:
-                              text_font: noto_sans_sc_32
-                              text: "亮度"
-                              text_color: 0x333333
+                          # 亮度行
                           - obj:
-                              width: 600
-                              height: 50
-                              bg_opa: TRANSP
-                              layout:
-                                type: FLEX
-                                flex_flow: ROW
-                                flex_align_main: START
-                                flex_align_cross: CENTER
-                                pad_column: 15
+                              styles: control_container
                               widgets:
+                                - label:
+                                    styles: module_label
+                                    text: "亮度:"
                                 - slider:
                                     id: backlight_slider
                                     width: 400
                                     height: 40
-                                    radius: 20
+                                    radius: 8  # 滑块圆角8px
                                     min_value: 0
                                     max_value: 255
                                     value: 153
-                                    bg_color: 0xECECEC
+                                    bg_color: 0x333333
                                     bg_opa: COVER
                                     indicator:
-                                      radius: 20
-                                      bg_color: 0xFFB90B
+                                      radius: 8
+                                      bg_color: 0x4A90E2
                                     knob:
                                       bg_opa: TRANSP
                                     on_release:
@@ -840,104 +885,77 @@ lvgl:
                                 - label:
                                     id: backlight_bright_label
                                     text_font: montserrat_32
-                                    text_color: 0x333333
+                                    text_color: 0xCCCCCC
                                     text: "60 %"
-                    # 息屏时间行
-                    - obj:
-                        width: 900
-                        height: 60
-                        bg_opa: TRANSP
-                        layout:
-                          type: FLEX
-                          flex_flow: ROW
-                          flex_align_main: SPACE_BETWEEN
-                          flex_align_cross: CENTER
-                        widgets:
-                          - label:
-                              text_font: noto_sans_sc_32
-                              text: "息屏时间"
-                              text_color: 0x333333
-                          - dropdown:
-                              id: screen_off_timeout_dropdown
-                              width: 200
-                              height: 50
-                              text_font: montserrat_26
-                              bg_color: 0xF5F5F5
-                              bg_opa: COVER
-                              border_width: 0
-                              radius: 10
-                              options:
-                                - "15"
-                                - "30"
-                                - "60"
-                                - "90"
-                                - "120"
-                                - "Never"
-                              selected_index: 1
 
-              # 横线分隔
-              - obj:
-                  width: 900
-                  height: 2
-                  bg_color: 0xE0E0E0
-                  bg_opa: COVER
+                          # 息屏时间行
+                          - obj:
+                              styles: control_container
+                              widgets:
+                                - label:
+                                    styles: module_label
+                                    text: "息屏时间:"
+                                - dropdown:
+                                    id: screen_off_timeout_dropdown
+                                    width: 200
+                                    height: 50
+                                    text_font: noto_sans_sc_26
+                                    bg_color: 0x2C2C2C
+                                    bg_opa: COVER
+                                    border_width: 0
+                                    radius: 8  # 下拉框圆角8px
+                                    options:
+                                      - "15"
+                                      - "30"
+                                      - "60"
+                                      - "90"
+                                      - "120"
+                                      - "Never"
+                                    selected_index: 1
 
               # ─── 声音模块 ───
               - obj:
+                  styles: apple_card
                   width: 900
                   height: SIZE_CONTENT
-                  bg_opa: TRANSP
-                  border_opa: TRANSP
-                  pad_top: 20
-                  pad_bottom: 20
                   layout:
                     type: FLEX
                     flex_flow: COLUMN
-                    pad_row: 25
+                    pad_row: 20
+
                   widgets:
                     - label:
-                        text_font: noto_sans_sc_32
+                        styles: card_title
                         text: "声音"
-                        text_color: 0x1A4A4A
-                    # 音量行
+
                     - obj:
-                        width: 900
-                        height: 60
-                        bg_opa: TRANSP
+                        styles: module_content
                         layout:
                           type: FLEX
-                          flex_flow: ROW
-                          flex_align_main: SPACE_BETWEEN
-                          flex_align_cross: CENTER
+                          flex_flow: COLUMN
+                          pad_row: 16
+
                         widgets:
-                          - label:
-                              text_font: noto_sans_sc_32
-                              text: "音量"
-                              text_color: 0x333333
+                          # 音量行
                           - obj:
-                              width: 600
-                              height: 50
-                              bg_opa: TRANSP
-                              layout:
-                                type: FLEX
-                                flex_flow: ROW
-                                flex_align_main: START
-                                flex_align_cross: CENTER
-                                pad_column: 15
+                              styles: control_container
                               widgets:
+                                - label:
+                                    styles: module_label
+                                    text: "音量:"
                                 - slider:
                                     id: volume_slider
                                     width: 400
                                     height: 40
-                                    radius: 20
+                                    radius: 8
                                     min_value: 0
                                     max_value: 100
                                     value: 60
-                                    bg_color: 0xECECEC
+                                    bg_color: 0x333333
                                     bg_opa: COVER
                                     indicator:
-                                      radius: 20
-                                      bg_color: 0x4A6363
+                                      radius: 8
+                                      bg_color: 0x4A90E2
                                     knob:
                                       bg_opa: TRANSP
                                     on_release:
@@ -947,167 +965,164 @@ lvgl:
                                 - label:
                                     id: volume_label
                                     text_font: montserrat_32
-                                    text_color: 0x333333
+                                    text_color: 0xCCCCCC
                                     text: "60 %"
-                    # DAC输出行
-                    - obj:
-                        width: 900
-                        height: 60
-                        bg_opa: TRANSP
-                        layout:
-                          type: FLEX
-                          flex_flow: ROW
-                          flex_align_main: SPACE_BETWEEN
-                          flex_align_cross: CENTER
-                        widgets:
-                          - label:
-                              text_font: noto_sans_sc_32
-                              text: "DAC输出"
-                              text_color: 0x333333
-                          - dropdown:
-                              id: tab5_dac_output_dropdown
-                              width: 200
-                              height: 50
-                              text_font: montserrat_26
-                              bg_color: 0xF5F5F5
-                              bg_opa: COVER
-                              border_width: 0
-                              radius: 10
-                              options:
-                                - "LINE1"
-                                - "LINE2"
-                                - "BOTH"
-                              selected_index: 0
 
-              # 横线分隔
-              - obj:
-                  width: 900
-                  height: 2
-                  bg_color: 0xE0E0E0
-                  bg_opa: COVER
+                          # DAC输出行
+                          - obj:
+                              styles: control_container
+                              widgets:
+                                - label:
+                                    styles: module_label
+                                    text: "输出:"
+                                - dropdown:
+                                    id: tab5_dac_output_dropdown
+                                    width: 200
+                                    height: 50
+                                    text_font: noto_sans_sc_26
+                                    bg_color: 0x2C2C2C
+                                    bg_opa: COVER
+                                    border_width: 0
+                                    radius: 8
+                                    options:
+                                      - "LINE1"
+                                      - "LINE2"
+                                      - "BOTH"
+                                    selected_index: 0
 
               # ─── 网络模块 ───
               - obj:
+                  styles: apple_card
                   width: 900
                   height: SIZE_CONTENT
-                  bg_opa: TRANSP
-                  border_opa: TRANSP
-                  pad_top: 20
-                  pad_bottom: 20
                   layout:
                     type: FLEX
                     flex_flow: COLUMN
-                    pad_row: 25
+                    pad_row: 20
+
                   widgets:
                     - label:
-                        text_font: noto_sans_sc_32
+                        styles: card_title
                         text: "网络"
-                        text_color: 0x1A4A4A
-                    # 配网按钮行
+
                     - obj:
-                        width: 900
-                        height: 50
-                        bg_opa: TRANSP
+                        styles: module_content
+                        layout:
+                          type: FLEX
+                          flex_flow: COLUMN
+                          pad_row: 16
+
                         widgets:
-                          - button:
-                              id: btn_wifi_config
-                              width: 180
-                              height: 50
-                              radius: 10
-                              text_color: 0xFFFFFF
-                              bg_color: 0x3498DB
-                              checkable: false
-                              on_press:
-                                - lvgl.widget.show: wifi_config_panel
+                          # IP地址行
+                          - obj:
+                              styles: control_container
                               widgets:
                                 - label:
-                                    text_font: noto_sans_sc_32
-                                    text: "WiFi配网"
-                                    align: CENTER
-                                    text_color: 0xFFFFFF
-                    # IP与信号
-                    - label:
-                        id: sys_ip_label
-                        text_font: noto_sans_sc_32
-                        text: "IP地址：0.0.0.0"
-                        text_color: 0x333333
-                    - label:
-                        id: sys_rssi_label
-                        text_font: noto_sans_sc_32
-                        text: "信号：-- dBm"
-                        text_color: 0x333333
+                                    styles: module_label
+                                    text: "IP地址:"
+                                - label:
+                                    id: sys_ip_label
+                                    text_font: noto_sans_sc_26
+                                    text_color: 0xCCCCCC
+                                    text: "0.0.0.0"
 
-              # 横线分隔
-              - obj:
-                  width: 900
-                  height: 2
-                  bg_color: 0xE0E0E0
-                  bg_opa: COVER
+                          # WIFI信号行
+                          - obj:
+                              styles: control_container
+                              widgets:
+                                - label:
+                                    styles: module_label
+                                    text: "WIFI信号:"
+                                - label:
+                                    id: sys_rssi_label
+                                    text_font: noto_sans_sc_26
+                                    text_color: 0xCCCCCC
+                                    text: "-- dBm"
+
+                          # WiFi配置按钮
+                          - obj:
+                              styles: control_container
+                              widgets:
+                                - button:
+                                    id: btn_wifi_config
+                                    styles: apple_button
+                                    width: 180
+                                    height: 50
+                                    text_font: noto_sans_sc_26
+                                    text: "WiFi配置"
+                                    text_color: 0xFFFFFF
+                                    checkable: false
+                                    on_press:
+                                      - lvgl.widget.show: wifi_config_panel
 
               # ─── 关于模块 ───
               - obj:
+                  styles: apple_card
                   width: 900
                   height: SIZE_CONTENT
-                  bg_opa: TRANSP
-                  border_opa: TRANSP
-                  pad_top: 20
                   layout:
                     type: FLEX
                     flex_flow: COLUMN
-                    pad_row: 25
+                    pad_row: 20
+
                   widgets:
                     - label:
-                        text_font: noto_sans_sc_32
+                        styles: card_title
                         text: "关于"
-                        text_color: 0x1A4A4A
-                    # 按钮行
+
                     - obj:
-                        width: 900
-                        height: 50
-                        bg_opa: TRANSP
+                        styles: module_content
                         layout:
                           type: FLEX
-                          flex_flow: ROW
-                          pad_column: 20
+                          flex_flow: COLUMN
+                          pad_row: 16
+
                         widgets:
-                          - button:
-                              id: btn_restart
-                              width: 150
-                              height: 50
-                              radius: 10
-                              text_color: 0xFFFFFF
-                              bg_color: 0x27AE60
-                              checkable: false
-                              on_press:
-                                - button.press: restart_button
+                          # 运行时间行
+                          - obj:
+                              styles: control_container
                               widgets:
                                 - label:
-                                    text_font: noto_sans_sc_32
+                                    styles: module_label
+                                    text: "运行:"
+                                - label:
+                                    id: sys_uptime_label
+                                    text_font: noto_sans_sc_26
+                                    text_color: 0xCCCCCC
+                                    text: "--:--:--"
+
+                          # 重启/关机按钮行
+                          - obj:
+                              styles: control_container
+                              layout:
+                                type: FLEX
+                                flex_flow: ROW
+                                pad_column: 20
+
+                              widgets:
+                                - button:
+                                    id: btn_restart
+                                    styles: apple_button
+                                    width: 180
+                                    height: 50
+                                    text_font: noto_sans_sc_26
                                     text: "重启"
-                                    align: CENTER
-                                    text_color: 0xFFFFFF
-                          - button:
-                              id: btn_shutdown
-                              width: 150
-                              height: 50
-                              radius: 10
-                              text_color: 0xFFFFFF
-                              bg_color: 0xE74C3C
-                              checkable: false
-                              on_press:
-                                - button.press: shutdown_button
-                              widgets:
-                                - label:
-                                    text_font: noto_sans_sc_32
+                                    text_color: 0x4CAF50
+                                    checkable: false
+                                    on_press:
+                                      - button.press: restart_button
+
+                                - button:
+                                    id: btn_shutdown
+                                    styles: apple_button
+                                    width: 180
+                                    height: 50
+                                    text_font: noto_sans_sc_26
                                     text: "关机"
-                                    align: CENTER
-                                    text_color: 0xFFFFFF
-                    # 运行时间
-                    - label:
-                        id: sys_uptime_label
-                        text_font: noto_sans_sc_32
-                        text: "运行：--:--:--"
-                        text_color: 0x333333
+                                    text_color: 0xF44336
+                                    checkable: false
+                                    on_press:
+                                      - button.press: shutdown_button
 
 
     # ========== 语音助手页面 ==========
