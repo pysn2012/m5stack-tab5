@@ -239,7 +239,7 @@ lvgl:
       radius: 16        # 16px圆角
       border_opa: TRANSP
       shadow_opa: 30%    # 轻微阴影透明度（百分比格式）
-      shadow_color: 0x000000  # 阴影颜色
+      shadow_color: 0x000000  # 阴影颜色（十六进制）
       shadow_spread: 8   # 阴影扩散距离
       shadow_offset_x: 0 # 阴影X偏移
       shadow_offset_y: 4 # 阴影Y偏移（向下偏移增加立体感）
@@ -248,8 +248,8 @@ lvgl:
     # 卡片标题样式
     - id: card_title
       text_font: noto_sans_sc_32
-      text_color: 0xFFFFFF  # 白色标题
-      align: LEFT
+      text_color: 0xFFFFFF  # 白色标题（十六进制）
+      align: LEFT_MID      # 左中（官方合法值）
       pad_bottom: 16
 
     # 模块内元素容器（平直边框，无圆角）
@@ -261,8 +261,8 @@ lvgl:
     # 模块内标签样式
     - id: module_label
       text_font: noto_sans_sc_26
-      text_color: 0xCCCCCC  # 浅灰色文字
-      align: LEFT
+      text_color: 0xCCCCCC  # 浅灰色文字（十六进制）
+      align: LEFT_MID      # 左中（官方合法值）
       pad_bottom: 8
 
     # 模块内控件容器
@@ -278,17 +278,16 @@ lvgl:
 
     # 圆角按钮样式（用于WiFi配置、重启、关机）
     - id: apple_button
-      bg_color: 0x2C2C2C  # 深灰色按钮背景
+      bg_color: 0x2C2C2C  # 深灰色按钮背景（十六进制）
       bg_opa: COVER
       radius: 12        # 按钮圆角12px
       border_opa: TRANSP
-      shadow_opa: 20%    # 轻微阴影
-      shadow_color: 0x000000
+      shadow_opa: 20%    # 轻微阴影（百分比格式）
+      shadow_color: 0x000000  # 阴影颜色（十六进制）
       shadow_spread: 4   # 阴影扩散
       shadow_offset_x: 0 # 阴影X偏移
       shadow_offset_y: 2 # 阴影Y偏移
       pad_all: 12       # 按钮内边距
-
 
   # 顶层导航栏和模态框
   top_layer:
