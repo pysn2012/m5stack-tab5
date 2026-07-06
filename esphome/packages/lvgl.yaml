@@ -269,12 +269,6 @@ lvgl:
     - id: control_container
       bg_opa: TRANSP
       border_opa: TRANSP
-      layout:
-        type: FLEX
-        flex_flow: ROW
-        flex_align_main: SPACE_BETWEEN
-        flex_align_cross: CENTER
-        pad_column: 20
 
     # 圆角按钮样式（用于WiFi配置、重启、关机）
     - id: apple_button
@@ -845,6 +839,12 @@ lvgl:
                           # 亮度行
                           - obj:
                               styles: control_container
+                              layout:
+                                type: FLEX
+                                flex_flow: ROW
+                                flex_align_main: SPACE_BETWEEN
+                                flex_align_cross: CENTER
+                                pad_column: 20
                               widgets:
                                 - label:
                                     styles: module_label
