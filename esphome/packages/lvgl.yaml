@@ -232,63 +232,62 @@ lvgl:
       pad_all: 24
       shadow_opa: TRANSP
 
-  # 苹果风格卡片容器
-  - id: apple_card
-    bg_color: 0x1E1E1E  # 深灰色背景
-    bg_opa: COVER
-    radius: 16          # 圆角16px
-    border_opa: TRANSP
-    shadow_opa: 30      # 轻微阴影透明度
-    shadow_color: 0x000000  # 阴影颜色
-    shadow_spread: 8    # 阴影扩散距离
-    shadow_offset_x: 0  # 阴影X偏移
-    shadow_offset_y: 4  # 阴影Y偏移（向下偏移增加立体感）
-    pad_all: 24        # 内边距24px
+    # 苹果风格卡片样式
+    - id: apple_card
+      bg_color: 0x1E1E1E  # 深灰色背景（苹果深色模式）
+      bg_opa: COVER
+      radius: 16        # 16px圆角
+      border_opa: TRANSP
+      shadow_opa: 30     # 轻微阴影透明度
+      shadow_color: 0x000000  # 阴影颜色
+      shadow_spread: 8   # 阴影扩散距离
+      shadow_offset_x: 0 # 阴影X偏移
+      shadow_offset_y: 4 # 阴影Y偏移（向下偏移增加立体感）
+      pad_all: 24       # 内边距24px
 
-  # 卡片标题样式
-  - id: card_title
-    text_font: noto_sans_sc_32
-    text_color: 0xFFFFFF  # 白色标题
-    align: LEFT
-    pad_bottom: 16
+    # 卡片标题样式
+    - id: card_title
+      text_font: noto_sans_sc_32
+      text_color: 0xFFFFFF  # 白色标题
+      align: LEFT
+      pad_bottom: 16
 
-  # 模块内元素容器（平直边框，无圆角）
-  - id: module_content
-    bg_opa: TRANSP
-    border_opa: TRANSP
-    pad_all: 0
+    # 模块内元素容器（平直边框，无圆角）
+    - id: module_content
+      bg_opa: TRANSP
+      border_opa: TRANSP
+      pad_all: 0
 
-  # 模块内标签样式
-  - id: module_label
-    text_font: noto_sans_sc_26
-    text_color: 0xCCCCCC  # 浅灰色文字
-    align: LEFT
-    pad_bottom: 8
+    # 模块内标签样式
+    - id: module_label
+      text_font: noto_sans_sc_26
+      text_color: 0xCCCCCC  # 浅灰色文字
+      align: LEFT
+      pad_bottom: 8
 
-  # 模块内控件容器
-  - id: control_container
-    bg_opa: TRANSP
-    border_opa: TRANSP
-    layout:
-      type: FLEX
-      flex_flow: ROW
-      flex_align_main: SPACE_BETWEEN
-      flex_align_cross: CENTER
-      pad_column: 20
+    # 模块内控件容器
+    - id: control_container
+      bg_opa: TRANSP
+      border_opa: TRANSP
+      layout:
+        type: FLEX
+        flex_flow: ROW
+        flex_align_main: SPACE_BETWEEN
+        flex_align_cross: CENTER
+        pad_column: 20
 
-  # 圆角按钮样式（用于WiFi配置、重启、关机）
-  - id: apple_button
-    bg_color: 0x2C2C2C  # 深灰色按钮背景
-    bg_opa: COVER
-    radius: 12          # 按钮圆角12px
-    border_opa: TRANSP
-    shadow_opa: 20
-    shadow_color: 0x000000
-    shadow_spread: 4
-    shadow_offset_x: 0
-    shadow_offset_y: 2
-    pad_all: 12         # 按钮内边距
-
+    # 圆角按钮样式（用于WiFi配置、重启、关机）
+    - id: apple_button
+      bg_color: 0x2C2C2C  # 深灰色按钮背景
+      bg_opa: COVER
+      radius: 12        # 按钮圆角12px
+      border_opa: TRANSP
+      shadow_opa: 20     # 轻微阴影
+      shadow_color: 0x000000
+      shadow_spread: 4   # 阴影扩散
+      shadow_offset_x: 0 # 阴影X偏移
+      shadow_offset_y: 2 # 阴影Y偏移
+      pad_all: 12       # 按钮内边距
 
   # 顶层导航栏和模态框
   top_layer:
