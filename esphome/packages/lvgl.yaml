@@ -865,7 +865,7 @@ lvgl:
                                     bg_opa: COVER
                                     border_width: 0
                                     radius: 10
-                                    items:
+                                    options:
                                       - "15"
                                       - "30"
                                       - "60"
@@ -1019,7 +1019,7 @@ lvgl:
                                     bg_opa: COVER
                                     border_width: 0
                                     radius: 10
-                                    items:
+                                    options:
                                       - "LINE1"
                                       - "LINE2"
                                       - "BOTH"
