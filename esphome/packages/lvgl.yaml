@@ -238,7 +238,7 @@ lvgl:
       bg_opa: COVER
       radius: 16        # 16px圆角
       border_opa: TRANSP
-      shadow_opa: 30     # 轻微阴影透明度
+      shadow_opa: 30%    # 轻微阴影透明度（百分比格式）
       shadow_color: 0x000000  # 阴影颜色
       shadow_spread: 8   # 阴影扩散距离
       shadow_offset_x: 0 # 阴影X偏移
@@ -282,12 +282,13 @@ lvgl:
       bg_opa: COVER
       radius: 12        # 按钮圆角12px
       border_opa: TRANSP
-      shadow_opa: 20     # 轻微阴影
+      shadow_opa: 20%    # 轻微阴影
       shadow_color: 0x000000
       shadow_spread: 4   # 阴影扩散
       shadow_offset_x: 0 # 阴影X偏移
       shadow_offset_y: 2 # 阴影Y偏移
       pad_all: 12       # 按钮内边距
+
 
   # 顶层导航栏和模态框
   top_layer:
