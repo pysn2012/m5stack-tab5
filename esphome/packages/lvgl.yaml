@@ -408,10 +408,10 @@ lvgl:
                   # SSID 标签
                   - label:
                       text_font: montserrat_26
-                      text: "SSID"
+                      text: "SSID:"
                       grid_cell_column_pos: 0
                       grid_cell_row_pos: 0
-                      grid_cell_x_align: END
+                      grid_cell_x_align: CENTER
                       grid_cell_y_align: CENTER
                   # SSID 输入框
                   - textarea:
@@ -420,7 +420,7 @@ lvgl:
                       grid_cell_row_pos: 0
                       width: 720
                       height: 50
-                      pad_all: 0
+                      pad_all: 2
                       text_font: montserrat_26
                       placeholder_text: "WiFi SSID"
                       border_width: 1
@@ -430,10 +430,10 @@ lvgl:
                   # 密码标签
                   - label:
                       text_font: montserrat_26
-                      text: "PWD:"
+                      text: "PWD: "
                       grid_cell_column_pos: 0
                       grid_cell_row_pos: 1
-                      grid_cell_x_align: END
+                      grid_cell_x_align: CENTER
                       grid_cell_y_align: CENTER
                   # 密码输入框
                   - textarea:
@@ -442,7 +442,7 @@ lvgl:
                       grid_cell_row_pos: 1
                       width: 720
                       height: 50
-                      pad_all: 0
+                      pad_all: 2
                       text_font: montserrat_26
                       placeholder_text: "WiFi PASSWORD"
                       password_mode: true
@@ -741,260 +741,357 @@ lvgl:
     # ========== 系统页面 ==========
     - id: system_page
       widgets:
+        # 左上角页面标题
+        - label:
+            text_font: noto_sans_sc_48
+            text: "设置"
+            align: TOP_LEFT
+            x: 120
+            y: 30
+            text_color: 0x1A4A4A
+        # 内容容器
         - obj:
             styles: content_container
+            pad_top: 100 # 留出顶部标题空间
+            layout:
+              type: FLEX
+              flex_flow: ROW
+              flex_align_main: SPACE_EVENLY
+              flex_align_cross: START
             widgets:
-              # 亮度控制条（第1行）
+              # 左列容器
               - obj:
-                  width: 950
-                  height: 150
-                  align: CENTER
-                  y: -200
-                  bg_opa: TRANSP
-                  border_opa: TRANSP
-                  layout:
-                    type: GRID
-                    grid_columns: [100, FR(1)]
-                    grid_rows: [FR(1)]
-                    pad_column: 12
-                  widgets:
-                    - label:
-                        text_font: noto_sans_sc_32
-                        text: "亮度："
-                        grid_cell_column_pos: 0
-                        grid_cell_row_pos: 0
-                        grid_cell_x_align: START
-                        grid_cell_y_align: CENTER
-                    - obj:
-                        grid_cell_column_pos: 1
-                        grid_cell_row_pos: 0
-                        grid_cell_x_align: START
-                        grid_cell_y_align: CENTER
-                        width: 560
-                        height: 90
-                        bg_opa: TRANSP
-                        border_opa: TRANSP
-                        widgets:
-                          - slider:
-                              width: 500
-                              height: 40
-                              radius: 20
-                              align: CENTER
-                              min_value: 0
-                              max_value: 255
-                              value: 153
-                              id: backlight_slider
-                              bg_color: 0xECECEC
-                              bg_opa: COVER
-                              indicator:
-                                radius: 20
-                                bg_color: 0xFFB90B
-                              knob:
-                                bg_opa: TRANSP
-                              on_release:
-                                - light.turn_on:
-                                    id: backlight
-                                    brightness: !lambda return x / 255.0;
-                                - lambda: id(backlight_brightness_val) = int(x);
-                                - lvgl.label.update:
-                                    id: backlight_bright_label
-                                    text: !lambda |-
-                                      static char buf[16];
-                                      int percent = int(x) * 100 / 255;
-                                      snprintf(buf, sizeof(buf), "%d %%", percent);
-                                      return buf;
-                                - homeassistant.action:
-                                    action: light.turn_on
-                                    data:
-                                      entity_id: light.tab5_display_backlight
-                                      brightness: !lambda return int(x);
-                          - label:
-                              id: backlight_bright_label
-                              text_font: montserrat_32
-                              text_color: 0x333333
-                              text: "60 %"
-                              align: CENTER
-                              y: 2
-              # 音量控制条（第2行）
-              - obj:
-                  width: 950
-                  height: 150
-                  align: CENTER
-                  y: -100
-                  bg_opa: TRANSP
-                  border_opa: TRANSP
-                  layout:
-                    type: GRID
-                    grid_columns: [100, FR(1)]
-                    grid_rows: [FR(1)]
-                    pad_column: 12
-                  widgets:
-                    - label:
-                        text_font: noto_sans_sc_32
-                        text: "音量："
-                        grid_cell_column_pos: 0
-                        grid_cell_row_pos: 0
-                        grid_cell_x_align: START
-                        grid_cell_y_align: CENTER
-                    - obj:
-                        grid_cell_column_pos: 1
-                        grid_cell_row_pos: 0
-                        grid_cell_x_align: START
-                        grid_cell_y_align: CENTER
-                        width: 560
-                        height: 90
-                        bg_opa: TRANSP
-                        border_opa: TRANSP
-                        widgets:
-                          - slider:
-                              width: 500
-                              height: 40
-                              radius: 20
-                              align: CENTER
-                              min_value: 0
-                              max_value: 100
-                              value: 60
-                              id: volume_slider
-                              bg_color: 0xECECEC
-                              bg_opa: COVER
-                              indicator:
-                                radius: 20
-                                bg_color: 0x4A6363
-                              knob:
-                                bg_opa: TRANSP
-                              on_release:
-                                # 通过 number 组件统一设置音量（触发 HA 同步 + 媒体播放器音量 + UI 更新）
-                                - number.set:
-                                    id: volume_number
-                                    value: !lambda return int(x);
-                          - label:
-                              id: volume_label
-                              text_font: montserrat_32
-                              text_color: 0x333333
-                              text: "60 %"
-                              align: CENTER
-                              y: 2
-              # 系统信息区域（3行左对齐）
-              - obj:
-                  width: 950
-                  height: 240
-                  align: CENTER
-                  y: 50
-                  bg_opa: TRANSP
-                  border_opa: TRANSP
-                  layout:
-                    type: GRID
-                    grid_columns: [FR(1)]
-                    grid_rows: [FR(1), FR(1), FR(1)]
-                    pad_row: 12
-                  widgets:
-                    # IP地址行
-                    - label:
-                        id: sys_ip_label
-                        text_font: noto_sans_sc_32
-                        text: "IP地址：0.0.0.0"
-                        grid_cell_column_pos: 0
-                        grid_cell_row_pos: 0
-                        grid_cell_x_align: START
-                        grid_cell_y_align: CENTER
-                    # 信号行
-                    - label:
-                        id: sys_rssi_label
-                        text_font: noto_sans_sc_32
-                        text: "信号：-- dBm"
-                        grid_cell_column_pos: 0
-                        grid_cell_row_pos: 1
-                        grid_cell_x_align: START
-                        grid_cell_y_align: CENTER
-                    # 运行行
-                    - label:
-                        id: sys_uptime_label
-                        text_font: noto_sans_sc_32
-                        text: "运行：--:--:--"
-                        grid_cell_column_pos: 0
-                        grid_cell_row_pos: 2
-                        grid_cell_x_align: START
-                        grid_cell_y_align: CENTER
-              # 底部操作按钮行 ─────────────────────────
-              - obj:
-                  width: 950
-                  height: 120        # 按钮行高度
-                  align: CENTER
-                  y: 220            # 根据实际情况调整 Y 坐标
+                  width: 520
+                  height: 580
                   bg_opa: TRANSP
                   border_opa: TRANSP
                   layout:
                     type: FLEX
-                    flex_flow: ROW
-                    pad_column: 40      # 按钮间距
-                    flex_align_main: START
-                    flex_align_cross: CENTER
+                    flex_flow: COLUMN
+                    flex_align_main: SPACE_EVENLY
                   widgets:
-                    # Wi-Fi 配网按钮
-                    - button:
-                        id: btn_wifi_config
-                        width: 100
-                        height: 100
+                    # 模块：显示
+                    - obj:
+                        width: 520
+                        height: 280
+                        bg_color: 0xFFFFFF
+                        bg_opa: COVER
                         radius: 20
-                        pad_all: 6
-                        text_color: 0xFFFFFF
-                        bg_color: 0x3498DB  # 蓝色
-                        checkable: false     # 非切换按钮
-                        on_press:
-                          - lvgl.widget.show: wifi_config_panel
+                        border_opa: TRANSP
+                        pad_all: 24
+                        layout:
+                          type: FLEX
+                          flex_flow: COLUMN
+                          pad_row: 20
                         widgets:
                           - label:
-                              text_font: extra_icon
-                              align: top_mid
-                              text: "\U000F05A9" # WiFi 图标
+                              text_font: noto_sans_sc_32
+                              text: "显示"
+                              text_color: 0x1A4A4A
+                          # 亮度行
+                          - obj:
+                              width: 470
+                              height: 80
+                              bg_opa: TRANSP
+                              layout:
+                                type: FLEX
+                                flex_flow: ROW
+                                flex_align_main: START
+                                flex_align_cross: CENTER
+                                pad_column: 10
+                              widgets:
+                                - label:
+                                    text_font: noto_sans_sc_32
+                                    text: "亮度"
+                                    text_color: 0x333333
+                                - slider:
+                                    id: backlight_slider
+                                    width: 230
+                                    height: 40
+                                    radius: 20
+                                    min_value: 0
+                                    max_value: 255
+                                    value: 153
+                                    bg_color: 0xECECEC
+                                    bg_opa: COVER
+                                    indicator:
+                                      radius: 20
+                                      bg_color: 0xFFB90B
+                                    knob:
+                                      bg_opa: TRANSP
+                                    on_release:
+                                      - light.turn_on:
+                                          id: backlight
+                                          brightness: !lambda return x / 255.0;
+                                      - lambda: id(backlight_brightness_val) = int(x);
+                                      - lvgl.label.update:
+                                          id: backlight_bright_label
+                                          text: !lambda |-
+                                            static char buf[16];
+                                            int percent = int(x) * 100 / 255;
+                                            snprintf(buf, sizeof(buf), "%d %%", percent);
+                                            return buf;
+                                      - homeassistant.action:
+                                          action: light.turn_on
+                                          data:
+                                            entity_id: light.tab5_display_backlight
+                                            brightness: !lambda return int(x);
+                                - label:
+                                    id: backlight_bright_label
+                                    text_font: montserrat_32
+                                    text_color: 0x333333
+                                    text: "60 %"
+                          # 息屏时间行
+                          - obj:
+                              width: 470
+                              height: 80
+                              bg_opa: TRANSP
+                              layout:
+                                type: FLEX
+                                flex_flow: ROW
+                                flex_align_main: SPACE_BETWEEN
+                                flex_align_cross: CENTER
+                              widgets:
+                                - label:
+                                    text_font: noto_sans_sc_32
+                                    text: "息屏时间"
+                                    text_color: 0x333333
+                                - dropdown:
+                                    id: screen_off_timeout_dropdown
+                                    width: 160
+                                    height: 60
+                                    text_font: noto_sans_sc_32
+                                    bg_color: 0xF5F5F5
+                                    bg_opa: COVER
+                                    border_width: 0
+                                    radius: 10
+                                    items:
+                                      - "15"
+                                      - "30"
+                                      - "60"
+                                      - "90"
+                                      - "120"
+                                      - "Never"
+                                    on_value:
+                                      - select.set:
+                                          id: screen_off_timeout_sec
+                                          option: !lambda return x.c_str();
+                    # 模块：网络
+                    - obj:
+                        width: 520
+                        height: 280
+                        bg_color: 0xFFFFFF
+                        bg_opa: COVER
+                        radius: 20
+                        border_opa: TRANSP
+                        pad_all: 24
+                        layout:
+                          type: FLEX
+                          flex_flow: COLUMN
+                          pad_row: 20
+                        widgets:
                           - label:
                               text_font: noto_sans_sc_32
-                              text: "配网"
-                              align: bottom_mid
+                              text: "网络"
+                              text_color: 0x1A4A4A
+                          - obj:
+                              width: 470
+                              height: 60
+                              bg_opa: TRANSP
+                              widgets:
+                                - button:
+                                    id: btn_wifi_config
+                                    width: 160
+                                    height: 50
+                                    radius: 10
+                                    text_color: 0xFFFFFF
+                                    bg_color: 0x3498DB
+                                    checkable: false
+                                    on_press:
+                                      - lvgl.widget.show: wifi_config_panel
+                                    widgets:
+                                      - label:
+                                          text_font: noto_sans_sc_32
+                                          text: "WiFi配网"
+                                          align: CENTER
+                                          text_color: 0xFFFFFF
+                          - label:
+                              id: sys_ip_label
+                              text_font: noto_sans_sc_32
+                              text: "IP地址：0.0.0.0"
+                              text_color: 0x333333
+                          - label:
+                              id: sys_rssi_label
+                              text_font: noto_sans_sc_32
+                              text: "信号：-- dBm"
+                              text_color: 0x333333
 
-                    # 重启按钮
-                    - button:
-                        id: btn_restart
-                        width: 100
-                        height: 100
+              # 右列容器
+              - obj:
+                  width: 520
+                  height: 580
+                  bg_opa: TRANSP
+                  border_opa: TRANSP
+                  layout:
+                    type: FLEX
+                    flex_flow: COLUMN
+                    flex_align_main: SPACE_EVENLY
+                  widgets:
+                    # 模块：声音
+                    - obj:
+                        width: 520
+                        height: 280
+                        bg_color: 0xFFFFFF
+                        bg_opa: COVER
                         radius: 20
-                        pad_all: 6
-                        text_color: 0xFFFFFF
-                        bg_color: 0x27AE60  # 绿色
-                        checkable: false
-                        on_press:
-                          - button.press: restart_button
+                        border_opa: TRANSP
+                        pad_all: 24
+                        layout:
+                          type: FLEX
+                          flex_flow: COLUMN
+                          pad_row: 20
                         widgets:
                           - label:
-                              text_font: extra_icon
-                              align: top_mid
-                              text: "\U000F0451" # Restart 图标 (如无此图标可换为 \U000F0896)
+                              text_font: noto_sans_sc_32
+                              text: "声音"
+                              text_color: 0x1A4A4A
+                          # 音量行
+                          - obj:
+                              width: 470
+                              height: 80
+                              bg_opa: TRANSP
+                              layout:
+                                type: FLEX
+                                flex_flow: ROW
+                                flex_align_main: START
+                                flex_align_cross: CENTER
+                                pad_column: 10
+                              widgets:
+                                - label:
+                                    text_font: noto_sans_sc_32
+                                    text: "音量"
+                                    text_color: 0x333333
+                                - slider:
+                                    id: volume_slider
+                                    width: 230
+                                    height: 40
+                                    radius: 20
+                                    min_value: 0
+                                    max_value: 100
+                                    value: 60
+                                    bg_color: 0xECECEC
+                                    bg_opa: COVER
+                                    indicator:
+                                      radius: 20
+                                      bg_color: 0x4A6363
+                                    knob:
+                                      bg_opa: TRANSP
+                                    on_release:
+                                      - number.set:
+                                          id: volume_number
+                                          value: !lambda return int(x);
+                                - label:
+                                    id: volume_label
+                                    text_font: montserrat_32
+                                    text_color: 0x333333
+                                    text: "60 %"
+                          # DAC输出行
+                          - obj:
+                              width: 470
+                              height: 80
+                              bg_opa: TRANSP
+                              layout:
+                                type: FLEX
+                                flex_flow: ROW
+                                flex_align_main: SPACE_BETWEEN
+                                flex_align_cross: CENTER
+                              widgets:
+                                - label:
+                                    text_font: noto_sans_sc_32
+                                    text: "DAC输出"
+                                    text_color: 0x333333
+                                - dropdown:
+                                    id: tab5_dac_output_dropdown
+                                    width: 160
+                                    height: 60
+                                    text_font: noto_sans_sc_32
+                                    bg_color: 0xF5F5F5
+                                    bg_opa: COVER
+                                    border_width: 0
+                                    radius: 10
+                                    items:
+                                      - "LINE1"
+                                      - "LINE2"
+                                      - "BOTH"
+                                    on_value:
+                                      - select.set:
+                                          id: tab5_dac_output_template
+                                          option: !lambda return x.c_str();
+                    # 模块：关于
+                    - obj:
+                        width: 520
+                        height: 280
+                        bg_color: 0xFFFFFF
+                        bg_opa: COVER
+                        radius: 20
+                        border_opa: TRANSP
+                        pad_all: 24
+                        layout:
+                          type: FLEX
+                          flex_flow: COLUMN
+                          pad_row: 20
+                        widgets:
                           - label:
                               text_font: noto_sans_sc_32
-                              text: "重启"
-                              align: bottom_mid
+                              text: "关于"
+                              text_color: 0x1A4A4A
+                          - obj:
+                              width: 470
+                              height: 60
+                              bg_opa: TRANSP
+                              layout:
+                                type: FLEX
+                                flex_flow: ROW
+                                pad_column: 20
+                              widgets:
+                                - button:
+                                    id: btn_restart
+                                    width: 120
+                                    height: 50
+                                    radius: 10
+                                    text_color: 0xFFFFFF
+                                    bg_color: 0x27AE60
+                                    checkable: false
+                                    on_press:
+                                      - button.press: restart_button
+                                    widgets:
+                                      - label:
+                                          text_font: noto_sans_sc_32
+                                          text: "重启"
+                                          align: CENTER
+                                          text_color: 0xFFFFFF
+                                - button:
+                                    id: btn_shutdown
+                                    width: 120
+                                    height: 50
+                                    radius: 10
+                                    text_color: 0xFFFFFF
+                                    bg_color: 0xE74C3C
+                                    checkable: false
+                                    on_press:
+                                      - button.press: shutdown_button
+                                    widgets:
+                                      - label:
+                                          text_font: noto_sans_sc_32
+                                          text: "关机"
+                                          align: CENTER
+                                          text_color: 0xFFFFFF
+                          - label:
+                              id: sys_uptime_label
+                              text_font: noto_sans_sc_32
+                              text: "运行：--:--:--"
+                              text_color: 0x333333
 
-                    # 关机按钮
-                    - button:
-                        id: btn_shutdown
-                        width: 100
-                        height: 100
-                        radius: 20
-                        pad_all: 6
-                        text_color: 0xFFFFFF
-                        bg_color: 0xE74C3C  # 红色
-                        checkable: false
-                        on_press:
-                          - button.press: shutdown_button
-                        widgets:
-                          - label:
-                              text_font: extra_icon
-                              align: top_mid
-                              text: "\U000F0343" # Power Standby 图标
-                          - label:
-                              text_font: noto_sans_sc_32
-                              text: "关机"
-                              align: bottom_mid
 
 
     # ========== 语音助手页面 ==========
