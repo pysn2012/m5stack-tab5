@@ -751,7 +751,7 @@ lvgl:
               flex_flow: COLUMN
               flex_align_main: START
               flex_align_cross: CENTER
-              pad_row: 20          # 卡片间距
+              pad_row: 20
             widgets:
               # ─── 显示模块 ───
               - obj:
@@ -769,12 +769,23 @@ lvgl:
                         styles: module_divider
                     - obj:
                         styles: setting_row
+                        layout:
+                          type: FLEX
+                          flex_flow: ROW
+                          flex_align_main: SPACE_BETWEEN
+                          flex_align_cross: CENTER
                         widgets:
                           - label:
                               styles: setting_label
                               text: "亮度"
                           - obj:
                               styles: control_group
+                              layout:
+                                type: FLEX
+                                flex_flow: ROW
+                                flex_align_main: END
+                                flex_align_cross: CENTER
+                                pad_column: 12
                               widgets:
                                 - slider:
                                     id: backlight_slider
@@ -815,6 +826,11 @@ lvgl:
                                     text: "60 %"
                     - obj:
                         styles: setting_row
+                        layout:
+                          type: FLEX
+                          flex_flow: ROW
+                          flex_align_main: SPACE_BETWEEN
+                          flex_align_cross: CENTER
                         widgets:
                           - label:
                               styles: setting_label
@@ -853,12 +869,23 @@ lvgl:
                         styles: module_divider
                     - obj:
                         styles: setting_row
+                        layout:
+                          type: FLEX
+                          flex_flow: ROW
+                          flex_align_main: SPACE_BETWEEN
+                          flex_align_cross: CENTER
                         widgets:
                           - label:
                               styles: setting_label
                               text: "音量"
                           - obj:
                               styles: control_group
+                              layout:
+                                type: FLEX
+                                flex_flow: ROW
+                                flex_align_main: END
+                                flex_align_cross: CENTER
+                                pad_column: 12
                               widgets:
                                 - slider:
                                     id: volume_slider
@@ -886,6 +913,11 @@ lvgl:
                                     text: "60 %"
                     - obj:
                         styles: setting_row
+                        layout:
+                          type: FLEX
+                          flex_flow: ROW
+                          flex_align_main: SPACE_BETWEEN
+                          flex_align_cross: CENTER
                         widgets:
                           - label:
                               styles: setting_label
@@ -921,6 +953,11 @@ lvgl:
                         styles: module_divider
                     - obj:
                         styles: setting_row
+                        layout:
+                          type: FLEX
+                          flex_flow: ROW
+                          flex_align_main: SPACE_BETWEEN
+                          flex_align_cross: CENTER
                         widgets:
                           - label:
                               styles: setting_label
@@ -943,6 +980,11 @@ lvgl:
                                     text_color: 0xFFFFFF
                     - obj:
                         styles: setting_row
+                        layout:
+                          type: FLEX
+                          flex_flow: ROW
+                          flex_align_main: SPACE_BETWEEN
+                          flex_align_cross: CENTER
                         widgets:
                           - label:
                               styles: setting_label
@@ -953,6 +995,11 @@ lvgl:
                               text: "0.0.0.0"
                     - obj:
                         styles: setting_row
+                        layout:
+                          type: FLEX
+                          flex_flow: ROW
+                          flex_align_main: SPACE_BETWEEN
+                          flex_align_cross: CENTER
                         widgets:
                           - label:
                               styles: setting_label
@@ -978,12 +1025,23 @@ lvgl:
                         styles: module_divider
                     - obj:
                         styles: setting_row
+                        layout:
+                          type: FLEX
+                          flex_flow: ROW
+                          flex_align_main: SPACE_BETWEEN
+                          flex_align_cross: CENTER
                         widgets:
                           - label:
                               styles: setting_label
                               text: "设备控制"
                           - obj:
                               styles: control_group
+                              layout:
+                                type: FLEX
+                                flex_flow: ROW
+                                flex_align_main: END
+                                flex_align_cross: CENTER
+                                pad_column: 12
                               widgets:
                                 - button:
                                     id: btn_restart
@@ -1019,6 +1077,11 @@ lvgl:
                                           text_color: 0xFFFFFF
                     - obj:
                         styles: setting_row
+                        layout:
+                          type: FLEX
+                          flex_flow: ROW
+                          flex_align_main: SPACE_BETWEEN
+                          flex_align_cross: CENTER
                         widgets:
                           - label:
                               styles: setting_label
@@ -1028,7 +1091,6 @@ lvgl:
                               styles: setting_label
                               text: "--:--:--"
 
-        # 页面标题
         - label:
             text_font: noto_sans_sc_48
             text: "设置"
