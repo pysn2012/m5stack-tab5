@@ -741,7 +741,6 @@ lvgl:
     # ========== 系统页面 ==========
     - id: system_page
       widgets:  
-        # 内容容器
         - obj:
             styles: content_container
             pad_top: 110
@@ -752,62 +751,43 @@ lvgl:
               flex_flow: COLUMN
               flex_align_main: START
               flex_align_cross: CENTER
-              pad_row: 0
+              pad_row: 20          # 卡片间距
             widgets:
               # ─── 显示模块 ───
               - obj:
-                  width: 900
+                  styles: module_card
                   height: SIZE_CONTENT
-                  bg_opa: TRANSP
-                  border_opa: TRANSP
-                  pad_bottom: 20
                   layout:
                     type: FLEX
                     flex_flow: COLUMN
-                    pad_row: 25
+                    pad_row: 14
                   widgets:
                     - label:
-                        text_font: noto_sans_sc_32
+                        styles: module_title
                         text: "显示"
-                        text_color: 0x1A4A4A
-                    # 亮度行
                     - obj:
-                        width: 900
-                        height: 60
-                        bg_opa: TRANSP
-                        layout:
-                          type: FLEX
-                          flex_flow: ROW
-                          flex_align_main: SPACE_BETWEEN
-                          flex_align_cross: CENTER
+                        styles: module_divider
+                    - obj:
+                        styles: setting_row
                         widgets:
                           - label:
-                              text_font: noto_sans_sc_32
+                              styles: setting_label
                               text: "亮度"
-                              text_color: 0x333333
                           - obj:
-                              width: 600
-                              height: 50
-                              bg_opa: TRANSP
-                              layout:
-                                type: FLEX
-                                flex_flow: ROW
-                                flex_align_main: START
-                                flex_align_cross: CENTER
-                                pad_column: 15
+                              styles: control_group
                               widgets:
                                 - slider:
                                     id: backlight_slider
-                                    width: 400
-                                    height: 40
-                                    radius: 20
+                                    width: 380
+                                    height: 36
+                                    radius: 18
                                     min_value: 0
                                     max_value: 255
                                     value: 153
                                     bg_color: 0xECECEC
                                     bg_opa: COVER
                                     indicator:
-                                      radius: 20
+                                      radius: 18
                                       bg_color: 0xFFB90B
                                     knob:
                                       bg_opa: TRANSP
@@ -833,30 +813,21 @@ lvgl:
                                     text_font: montserrat_32
                                     text_color: 0x333333
                                     text: "60 %"
-                    # 息屏时间行
                     - obj:
-                        width: 900
-                        height: 60
-                        bg_opa: TRANSP
-                        layout:
-                          type: FLEX
-                          flex_flow: ROW
-                          flex_align_main: SPACE_BETWEEN
-                          flex_align_cross: CENTER
+                        styles: setting_row
                         widgets:
                           - label:
-                              text_font: noto_sans_sc_32
+                              styles: setting_label
                               text: "息屏时间"
-                              text_color: 0x333333
                           - dropdown:
                               id: screen_off_timeout_dropdown
-                              width: 200
-                              height: 50
+                              width: 180
+                              height: 44
                               text_font: montserrat_26
                               bg_color: 0xF5F5F5
                               bg_opa: COVER
                               border_width: 0
-                              radius: 10
+                              radius: 8
                               options:
                                 - "15"
                                 - "30"
@@ -866,68 +837,41 @@ lvgl:
                                 - "Never"
                               selected_index: 1
 
-              # 横线分隔
-              - obj:
-                  width: 900
-                  height: 2
-                  bg_color: 0xE0E0E0
-                  bg_opa: COVER
-
               # ─── 声音模块 ───
               - obj:
-                  width: 900
+                  styles: module_card
                   height: SIZE_CONTENT
-                  bg_opa: TRANSP
-                  border_opa: TRANSP
-                  pad_top: 20
-                  pad_bottom: 20
                   layout:
                     type: FLEX
                     flex_flow: COLUMN
-                    pad_row: 25
+                    pad_row: 14
                   widgets:
                     - label:
-                        text_font: noto_sans_sc_32
+                        styles: module_title
                         text: "声音"
-                        text_color: 0x1A4A4A
-                    # 音量行
                     - obj:
-                        width: 900
-                        height: 60
-                        bg_opa: TRANSP
-                        layout:
-                          type: FLEX
-                          flex_flow: ROW
-                          flex_align_main: SPACE_BETWEEN
-                          flex_align_cross: CENTER
+                        styles: module_divider
+                    - obj:
+                        styles: setting_row
                         widgets:
                           - label:
-                              text_font: noto_sans_sc_32
+                              styles: setting_label
                               text: "音量"
-                              text_color: 0x333333
                           - obj:
-                              width: 600
-                              height: 50
-                              bg_opa: TRANSP
-                              layout:
-                                type: FLEX
-                                flex_flow: ROW
-                                flex_align_main: START
-                                flex_align_cross: CENTER
-                                pad_column: 15
+                              styles: control_group
                               widgets:
                                 - slider:
                                     id: volume_slider
-                                    width: 400
-                                    height: 40
-                                    radius: 20
+                                    width: 380
+                                    height: 36
+                                    radius: 18
                                     min_value: 0
                                     max_value: 100
                                     value: 60
                                     bg_color: 0xECECEC
                                     bg_opa: COVER
                                     indicator:
-                                      radius: 20
+                                      radius: 18
                                       bg_color: 0x4A6363
                                     knob:
                                       bg_opa: TRANSP
@@ -940,71 +884,52 @@ lvgl:
                                     text_font: montserrat_32
                                     text_color: 0x333333
                                     text: "60 %"
-                    # DAC输出行
                     - obj:
-                        width: 900
-                        height: 60
-                        bg_opa: TRANSP
-                        layout:
-                          type: FLEX
-                          flex_flow: ROW
-                          flex_align_main: SPACE_BETWEEN
-                          flex_align_cross: CENTER
+                        styles: setting_row
                         widgets:
                           - label:
-                              text_font: noto_sans_sc_32
+                              styles: setting_label
                               text: "DAC输出"
-                              text_color: 0x333333
                           - dropdown:
                               id: tab5_dac_output_dropdown
-                              width: 200
-                              height: 50
+                              width: 180
+                              height: 44
                               text_font: montserrat_26
                               bg_color: 0xF5F5F5
                               bg_opa: COVER
                               border_width: 0
-                              radius: 10
+                              radius: 8
                               options:
                                 - "LINE1"
                                 - "LINE2"
                                 - "BOTH"
                               selected_index: 0
 
-              # 横线分隔
-              - obj:
-                  width: 900
-                  height: 2
-                  bg_color: 0xE0E0E0
-                  bg_opa: COVER
-
               # ─── 网络模块 ───
               - obj:
-                  width: 900
+                  styles: module_card
                   height: SIZE_CONTENT
-                  bg_opa: TRANSP
-                  border_opa: TRANSP
-                  pad_top: 20
-                  pad_bottom: 20
                   layout:
                     type: FLEX
                     flex_flow: COLUMN
-                    pad_row: 25
+                    pad_row: 14
                   widgets:
                     - label:
-                        text_font: noto_sans_sc_32
+                        styles: module_title
                         text: "网络"
-                        text_color: 0x1A4A4A
-                    # 配网按钮行
                     - obj:
-                        width: 900
-                        height: 50
-                        bg_opa: TRANSP
+                        styles: module_divider
+                    - obj:
+                        styles: setting_row
                         widgets:
+                          - label:
+                              styles: setting_label
+                              text: "WiFi配置"
                           - button:
                               id: btn_wifi_config
-                              width: 180
-                              height: 50
-                              radius: 10
+                              width: 160
+                              height: 44
+                              radius: 8
                               text_color: 0xFFFFFF
                               bg_color: 0x3498DB
                               checkable: false
@@ -1013,93 +938,97 @@ lvgl:
                               widgets:
                                 - label:
                                     text_font: noto_sans_sc_32
-                                    text: "WiFi配网"
+                                    text: "配网"
                                     align: CENTER
                                     text_color: 0xFFFFFF
-                    # IP与信号
-                    - label:
-                        id: sys_ip_label
-                        text_font: noto_sans_sc_32
-                        text: "IP地址：0.0.0.0"
-                        text_color: 0x333333
-                    - label:
-                        id: sys_rssi_label
-                        text_font: noto_sans_sc_32
-                        text: "信号：-- dBm"
-                        text_color: 0x333333
-
-              # 横线分隔
-              - obj:
-                  width: 900
-                  height: 2
-                  bg_color: 0xE0E0E0
-                  bg_opa: COVER
+                    - obj:
+                        styles: setting_row
+                        widgets:
+                          - label:
+                              styles: setting_label
+                              text: "IP地址"
+                          - label:
+                              id: sys_ip_label
+                              styles: setting_label
+                              text: "0.0.0.0"
+                    - obj:
+                        styles: setting_row
+                        widgets:
+                          - label:
+                              styles: setting_label
+                              text: "信号强度"
+                          - label:
+                              id: sys_rssi_label
+                              styles: setting_label
+                              text: "-- dBm"
 
               # ─── 关于模块 ───
               - obj:
-                  width: 900
+                  styles: module_card
                   height: SIZE_CONTENT
-                  bg_opa: TRANSP
-                  border_opa: TRANSP
-                  pad_top: 20
                   layout:
                     type: FLEX
                     flex_flow: COLUMN
-                    pad_row: 25
+                    pad_row: 14
                   widgets:
                     - label:
-                        text_font: noto_sans_sc_32
+                        styles: module_title
                         text: "关于"
-                        text_color: 0x1A4A4A
-                    # 按钮行
                     - obj:
-                        width: 900
-                        height: 50
-                        bg_opa: TRANSP
-                        layout:
-                          type: FLEX
-                          flex_flow: ROW
-                          pad_column: 20
+                        styles: module_divider
+                    - obj:
+                        styles: setting_row
                         widgets:
-                          - button:
-                              id: btn_restart
-                              width: 150
-                              height: 50
-                              radius: 10
-                              text_color: 0xFFFFFF
-                              bg_color: 0x27AE60
-                              checkable: false
-                              on_press:
-                                - button.press: restart_button
+                          - label:
+                              styles: setting_label
+                              text: "设备控制"
+                          - obj:
+                              styles: control_group
                               widgets:
-                                - label:
-                                    text_font: noto_sans_sc_32
-                                    text: "重启"
-                                    align: CENTER
+                                - button:
+                                    id: btn_restart
+                                    width: 120
+                                    height: 44
+                                    radius: 8
                                     text_color: 0xFFFFFF
-                          - button:
-                              id: btn_shutdown
-                              width: 150
-                              height: 50
-                              radius: 10
-                              text_color: 0xFFFFFF
-                              bg_color: 0xE74C3C
-                              checkable: false
-                              on_press:
-                                - button.press: shutdown_button
-                              widgets:
-                                - label:
-                                    text_font: noto_sans_sc_32
-                                    text: "关机"
-                                    align: CENTER
+                                    bg_color: 0x27AE60
+                                    checkable: false
+                                    on_press:
+                                      - button.press: restart_button
+                                    widgets:
+                                      - label:
+                                          text_font: noto_sans_sc_32
+                                          text: "重启"
+                                          align: CENTER
+                                          text_color: 0xFFFFFF
+                                - button:
+                                    id: btn_shutdown
+                                    width: 120
+                                    height: 44
+                                    radius: 8
                                     text_color: 0xFFFFFF
-                    # 运行时间
-                    - label:
-                        id: sys_uptime_label
-                        text_font: noto_sans_sc_32
-                        text: "运行：--:--:--"
-                        text_color: 0x333333
-        # 左上角页面标题
+                                    bg_color: 0xE74C3C
+                                    checkable: false
+                                    on_press:
+                                      - button.press: shutdown_button
+                                    widgets:
+                                      - label:
+                                          text_font: noto_sans_sc_32
+                                          text: "关机"
+                                          align: CENTER
+                                          text_color: 0xFFFFFF
+                    - obj:
+                        styles: setting_row
+                        widgets:
+                          - label:
+                              styles: setting_label
+                              text: "运行时间"
+                          - label:
+                              id: sys_uptime_label
+                              styles: setting_label
+                              text: "--:--:--"
+
+        # 页面标题
         - label:
             text_font: noto_sans_sc_48
             text: "设置"

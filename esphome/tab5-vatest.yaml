@@ -104,4 +104,5 @@ packages:
   sensor: !include packages/sensor.yaml
   script: !include packages/script.yaml
   lvgl: !include packages/lvgl.yaml
+  theme: !include packages/theme.yaml
   voice: !include packages/voice-assistant.yaml
