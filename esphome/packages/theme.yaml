@@ -10,7 +10,7 @@ substitutions:
 
 lvgl:
   style_definitions:
-    # 模块卡片（圆角矩形容器）
+    # 模块卡片（唯一有视觉样式的圆角容器）
     - id: module_card
       bg_color: $card_bg_color
       bg_opa: COVER
@@ -24,32 +24,28 @@ lvgl:
       pad_bottom: 18
       shadow_width: 0
 
-    # 模块标题
     - id: module_title
       text_font: $text_font
       text_color: $title_color
       bg_opa: TRANSP
       align: TOP_LEFT
 
-    # 分隔线
     - id: module_divider
       bg_color: 0xEEEEEE
       bg_opa: COVER
       height: 1
       width: 100%
 
-    # 设置项行（仅视觉属性，不含 layout）
+    # 设置项行：完全透明，仅用于横向布局，绝不可见任何边框/圆角
     - id: setting_row
       bg_opa: TRANSP
+      border_opa: TRANSP
+      border_width: 0
+      radius: 0
       width: 100%
       height: 56
 
-    # 设置项标签
     - id: setting_label
       text_font: $text_font
       text_color: $text_color
-      bg_opa: TRANSP
-
-    # 控件容器（仅视觉属性，不含 layout）
-    - id: control_group
       bg_opa: TRANSP
