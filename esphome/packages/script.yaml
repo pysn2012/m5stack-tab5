@@ -66,23 +66,44 @@ script:
   - id: update_outdoor_label
     then:
       - lvgl.label.update:
-          id: outdoor_label
+          id: outdoor_temp_label
           text: !lambda |-
-            static char buf[128];
-            snprintf(buf, sizeof(buf), "室外：温度%.1f℃  湿度%.1f%%  气压%.1fhPa  颗粒物%.0fppm",
-              id(outdoor_temp_val), id(outdoor_humi_val),
-              id(outdoor_pres_val), id(outdoor_pm25_val));
+            static char buf[16];
+            snprintf(buf, sizeof(buf), "%.1f ℃", id(outdoor_temp_val));
+            return buf;
+      - lvgl.label.update:
+          id: outdoor_humi_label
+          text: !lambda |-
+            static char buf[16];
+            snprintf(buf, sizeof(buf), "%.1f %%", id(outdoor_humi_val));
+            return buf;
+      - lvgl.label.update:
+          id: outdoor_pres_label
+          text: !lambda |-
+            static char buf[16];
+            snprintf(buf, sizeof(buf), "%.1f hPa", id(outdoor_pres_val));
+            return buf;
+      - lvgl.label.update:
+          id: outdoor_pm25_label
+          text: !lambda |-
+            static char buf[16];
+            snprintf(buf, sizeof(buf), "%.0f ppm", id(outdoor_pm25_val));
             return buf;
 
   # 更新室内信息标签
   - id: update_indoor_label
     then:
       - lvgl.label.update:
-          id: indoor_label
+          id: indoor_temp_label
           text: !lambda |-
-            static char buf[64];
-            snprintf(buf, sizeof(buf), "室内：温度%.1f℃  湿度%.1f%%",
-              id(indoor_temp_val), id(indoor_humi_val));
+            static char buf[16];
+            snprintf(buf, sizeof(buf), "%.1f ℃", id(indoor_temp_val));
+            return buf;
+      - lvgl.label.update:
+          id: indoor_humi_label
+          text: !lambda |-
+            static char buf[16];
+            snprintf(buf, sizeof(buf), "%.1f %%", id(indoor_humi_val));
             return buf;
 
   # 更新弱电功率标签

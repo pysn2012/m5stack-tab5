@@ -522,70 +522,263 @@ lvgl:
         - obj:
             styles: content_container
             widgets:
-              # 时间显示（大字居中）
+              # 时间显示（大字居中）— 保持不变
               - label:
                   id: time_label
                   text_font: montserrat_96
                   text: "14:07"
                   align: CENTER
                   y: -200
-              # 日期星期（中字居中）
+              # 日期星期（中字居中）— 保持不变
               - label:
                   id: date_label
                   text_font: montserrat_32
                   text: "2026-03-11 Thu"
                   align: CENTER
                   y: -110
-              # 信息区域（3行左对齐）
+
+              # ═══ 信息区域：两列布局 ═══
               - obj:
                   width: 950
-                  height: 300
+                  height: SIZE_CONTENT
                   align: CENTER
                   y: 50
                   bg_opa: TRANSP
                   border_opa: TRANSP
                   layout:
                     type: GRID
-                    grid_columns: [FR(1)]
-                    grid_rows: [FR(1), FR(1), FR(1)]
-                    pad_row: 12
+                    grid_columns: [FR(1), FR(1)]
+                    grid_rows: [SIZE_CONTENT]
+                    pad_column: 16
                   widgets:
-                    # 室外行
-                    - label:
-                        id: outdoor_label
-                        text_font: noto_sans_sc_32
-                        text: "室外：温度--℃  湿度--%  气压--hPa  颗粒物--ppm"
+                    # ─── 左列：天气模块 ───
+                    - obj:
+                        styles: module_card
+                        width: 100%          # 覆盖固定 900，填满单元格
                         grid_cell_column_pos: 0
                         grid_cell_row_pos: 0
-                        grid_cell_x_align: START
-                        grid_cell_y_align: CENTER
-                    # 室内行
-                    - label:
-                        id: indoor_label
-                        text_font: noto_sans_sc_32
-                        text: "室内：温度--℃  湿度--%"
-                        grid_cell_column_pos: 0
-                        grid_cell_row_pos: 1
-                        grid_cell_x_align: START
-                        grid_cell_y_align: CENTER
-                    # 预警行
-                    - label:
-                        id: weather_alert_label
-                        text_font: noto_sans_sc_32
-                        text_color: 0xE74C3C
-                        text: "预警：无预警"
-                        grid_cell_column_pos: 0
-                        grid_cell_row_pos: 2
-                        grid_cell_x_align: START
-                        grid_cell_y_align: CENTER
+                        grid_cell_x_align: STRETCH
+                        grid_cell_y_align: STRETCH
+                        layout:
+                          type: FLEX
+                          flex_flow: COLUMN
+                          pad_row: 0
+                        widgets:
+                          - label:
+                              styles: module_title
+                              text: "天气"
+                          - obj:
+                              styles: module_divider
+                          # 2×2 网格：温度 / 湿度 / 气压 / 颗粒物
+                          - obj:
+                              width: 100%
+                              height: SIZE_CONTENT
+                              bg_opa: TRANSP
+                              layout:
+                                type: GRID
+                                grid_columns: [FR(1), FR(1)]
+                                grid_rows: [FR(1), FR(1)]
+                                pad_row: 12
+                                pad_column: 12
+                              widgets:
+                                # 温度
+                                - obj:
+                                    grid_cell_column_pos: 0
+                                    grid_cell_row_pos: 0
+                                    bg_opa: TRANSP
+                                    layout:
+                                      type: FLEX
+                                      flex_flow: ROW
+                                      flex_align_main: START
+                                      flex_align_cross: CENTER
+                                      pad_column: 8
+                                    widgets:
+                                      - label:
+                                          text_font: extra_icon
+                                          text_color: 0xFF8C00
+                                          text: "\U000F050F"
+                                      - label:
+                                          id: outdoor_temp_label
+                                          text_font: noto_sans_sc_32
+                                          text_color: 0x333333
+                                          text: "-- ℃"
+                                # 湿度
+                                - obj:
+                                    grid_cell_column_pos: 1
+                                    grid_cell_row_pos: 0
+                                    bg_opa: TRANSP
+                                    layout:
+                                      type: FLEX
+                                      flex_flow: ROW
+                                      flex_align_main: START
+                                      flex_align_cross: CENTER
+                                      pad_column: 8
+                                    widgets:
+                                      - label:
+                                          text_font: extra_icon
+                                          text_color: 0x3498DB
+                                          text: "\U000F058E"
+                                      - label:
+                                          id: outdoor_humi_label
+                                          text_font: noto_sans_sc_32
+                                          text_color: 0x333333
+                                          text: "-- %"
+                                # 气压
+                                - obj:
+                                    grid_cell_column_pos: 0
+                                    grid_cell_row_pos: 1
+                                    bg_opa: TRANSP
+                                    layout:
+                                      type: FLEX
+                                      flex_flow: ROW
+                                      flex_align_main: START
+                                      flex_align_cross: CENTER
+                                      pad_column: 8
+                                    widgets:
+                                      - label:
+                                          text_font: extra_icon
+                                          text_color: 0x27AE60
+                                          text: "\U000F029A"
+                                      - label:
+                                          id: outdoor_pres_label
+                                          text_font: noto_sans_sc_32
+                                          text_color: 0x333333
+                                          text: "-- hPa"
+                                # 颗粒物
+                                - obj:
+                                    grid_cell_column_pos: 1
+                                    grid_cell_row_pos: 1
+                                    bg_opa: TRANSP
+                                    layout:
+                                      type: FLEX
+                                      flex_flow: ROW
+                                      flex_align_main: START
+                                      flex_align_cross: CENTER
+                                      pad_column: 8
+                                    widgets:
+                                      - label:
+                                          text_font: extra_icon
+                                          text_color: 0xE74C3C
+                                          text: "\U000F0F30"
+                                      - label:
+                                          id: outdoor_pm25_label
+                                          text_font: noto_sans_sc_32
+                                          text_color: 0x333333
+                                          text: "-- ppm"
+
+                    # ─── 右列：室内 + 预警 ───
+                    - obj:
+                        width: 100%
+                        height: SIZE_CONTENT
+                        grid_cell_column_pos: 1
+                        grid_cell_row_pos: 0
+                        grid_cell_x_align: STRETCH
+                        grid_cell_y_align: STRETCH
+                        bg_opa: TRANSP
+                        border_opa: TRANSP
+                        layout:
+                          type: FLEX
+                          flex_flow: COLUMN
+                          flex_align_main: START
+                          flex_align_cross: CENTER
+                          pad_row: 12
+                        widgets:
+                          # 室内模块
+                          - obj:
+                              styles: module_card
+                              width: 100%
+                              height: SIZE_CONTENT
+                              layout:
+                                type: FLEX
+                                flex_flow: COLUMN
+                                pad_row: 0
+                              widgets:
+                                - label:
+                                    styles: module_title
+                                    text: "室内"
+                                - obj:
+                                    styles: module_divider
+                                - obj:
+                                    width: 100%
+                                    height: SIZE_CONTENT
+                                    bg_opa: TRANSP
+                                    layout:
+                                      type: FLEX
+                                      flex_flow: COLUMN
+                                      pad_row: 12
+                                    widgets:
+                                      - obj:
+                                          width: 100%
+                                          height: SIZE_CONTENT
+                                          bg_opa: TRANSP
+                                          layout:
+                                            type: FLEX
+                                            flex_flow: ROW
+                                            flex_align_main: START
+                                            flex_align_cross: CENTER
+                                            pad_column: 8
+                                          widgets:
+                                            - label:
+                                                text_font: extra_icon
+                                                text_color: 0xFF8C00
+                                                text: "\U000F0F54"
+                                            - label:
+                                                id: indoor_temp_label
+                                                text_font: noto_sans_sc_32
+                                                text_color: 0x333333
+                                                text: "-- ℃"
+                                      - obj:
+                                          width: 100%
+                                          height: SIZE_CONTENT
+                                          bg_opa: TRANSP
+                                          layout:
+                                            type: FLEX
+                                            flex_flow: ROW
+                                            flex_align_main: START
+                                            flex_align_cross: CENTER
+                                            pad_column: 8
+                                          widgets:
+                                            - label:
+                                                text_font: extra_icon
+                                                text_color: 0x3498DB
+                                                text: "\U000F058E"
+                                            - label:
+                                                id: indoor_humi_label
+                                                text_font: noto_sans_sc_32
+                                                text_color: 0x333333
+                                                text: "-- %"
+                          # 预警模块
+                          - obj:
+                              styles: module_card
+                              width: 100%
+                              height: SIZE_CONTENT
+                              layout:
+                                type: FLEX
+                                flex_flow: COLUMN
+                                pad_row: 0
+                              widgets:
+                                - label:
+                                    styles: module_title
+                                    text: "预警"
+                                - obj:
+                                    styles: module_divider
+                                - label:
+                                    id: weather_alert_label
+                                    text_font: noto_sans_sc_32
+                                    text_color: 0xE74C3C
+                                    text: "无预警"
+                                    width: 100%
+                                    long_mode: WRAP
+                                    text_align: LEFT
+
         - label:
-            text_font: noto_sans_sc_48
+            text_font: noto_sans_sc_32
             text: "主页"
             x: 220
             y: 15
             text_color: 0x1A4A4A
 
-    # ========== 插座页面 ==========
+    # ========== 控制页面 ==========
     - id: socket_page
       widgets:
         - obj:
@@ -829,8 +1022,8 @@ lvgl:
                                     text: "-- Wh"
 
         - label:
-            text_font: noto_sans_sc_48
-            text: "插座"
+            text_font: noto_sans_sc_32
+            text: "控制"
             x: 220
             y: 15
             text_color: 0x1A4A4A
@@ -1188,7 +1381,7 @@ lvgl:
                                     text: "--:--:--"
 
         - label:
-            text_font: noto_sans_sc_48
+            text_font: noto_sans_sc_32
             text: "设置"
             x: 220
             y: 15
@@ -1279,8 +1472,8 @@ lvgl:
                         text_align: LEFT
                         long_mode: WRAP             # ← 不截断，自动换行
         - label:
-            text_font: noto_sans_sc_48
-            text: "助手"
+            text_font: noto_sans_sc_32
+            text: "语音助手"
             x: 220
             y: 15
             text_color: 0x1A4A4A

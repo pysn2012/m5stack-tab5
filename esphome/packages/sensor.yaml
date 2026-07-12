@@ -58,12 +58,9 @@ text_sensor:
       - lvgl.label.update:
           id: weather_alert_label
           text: !lambda |-
-            static std::string buf;
             if (x.empty() || x == "None" || x == "null" || x == "unknown" || x == "unavailable")
-                buf = "预警：无预警";
-            else
-                buf = "预警：" + x;
-            return buf.c_str();
+                return "无预警";
+            return x.c_str();
 
 # 数值传感器
 sensor:
