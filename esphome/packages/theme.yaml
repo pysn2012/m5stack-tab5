@@ -35,7 +35,7 @@ lvgl:
       border_color: $card_border_color
       border_opa: COVER
       radius: $radius
-      width: 460                      # 固定宽度
+      width: 450                      # 固定宽度
       pad_all: $padding               # 四周内边距 10px
       pad_top: 2                      # 顶部额外压缩，减小标题与上边框距离
       pad_bottom: 2                   # 底部额外压缩

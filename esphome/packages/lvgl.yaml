@@ -543,10 +543,10 @@ lvgl:
 
               # ═══ 信息区域：FLEX 两列 ═══
               - obj:
-                  width: 950
-                  height: 360
+                  width: 980
+                  height: 400
                   align: CENTER
-                  y: 85
+                  y: 100
                   bg_opa: TRANSP
                   border_opa: TRANSP
                   layout:

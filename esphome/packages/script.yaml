@@ -81,7 +81,7 @@ script:
           id: outdoor_pres_label
           text: !lambda |-
             static char buf[16];
-            snprintf(buf, sizeof(buf), "%.1f hPa", id(outdoor_pres_val));
+            snprintf(buf, sizeof(buf), "%.0f hPa", id(outdoor_pres_val));
             return buf;
       - lvgl.label.update:
           id: outdoor_pm25_label
