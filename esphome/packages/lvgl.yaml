@@ -676,7 +676,7 @@ lvgl:
                                     id: indoor_humi_label
                                     text_font: noto_sans_sc_32
                                     text_color: 0x333333
-                                          text: "-- %"
+                                    text: "-- %"
 
                           # ─── 预警模块（圆角卡片） ───
                           - obj:
