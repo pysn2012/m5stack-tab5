@@ -747,9 +747,10 @@ lvgl:
               # 模块容器：透明背景，采用 align:CENTER + y偏移定位
               # 与其他页面（main_page/socket_page）保持一致
               - obj:
-                  align: CENTER
-                  y: -40
-                  width: 900
+                  align: TOP_LEFT
+                  y: 30
+                  x: 20
+                  width: 950
                   height: SIZE_CONTENT
                   bg_opa: TRANSP
                   border_opa: TRANSP

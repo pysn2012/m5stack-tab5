@@ -69,4 +69,13 @@ jobs:
             ${{ steps.find_fw.outputs.OTA }}
             ${{ steps.find_fw.outputs.FACTORY }}
             esphome/tab5-vatest.yaml
+            esphome/packages/lvgl.yaml
+            esphome/packages/theme.yaml
+            esphome/packages/system.yaml
+            esphome/packages/fonts.yaml
+            esphome/packages/script.yaml
+            esphome/packages/voice-assistant.yaml
+            esphome/packages/hardware.yaml
+            esphome/packages/sensor.yaml
+            esphome/packages/time.yaml
           retention-days: 30
