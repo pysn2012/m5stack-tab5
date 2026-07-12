@@ -124,5 +124,5 @@ font:
     id: noto_sans_sc_48
     size: 48
     bpp: 4
-    glyphs: "客厅仪表盘系统设置亮度插座弱电书桌音量功耗总室外内预警地址信号运行语聆听思考回复错误静唤醒对话助手你正在中到点连接请说或击图标出了重试麦克风已计算时器abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890"
+    glyphs: "主页插座设置助手"
     ignore_missing_glyphs: true

@@ -578,6 +578,12 @@ lvgl:
                         grid_cell_row_pos: 2
                         grid_cell_x_align: START
                         grid_cell_y_align: CENTER
+        - label:
+            text_font: noto_sans_sc_48
+            text: "主页"
+            x: 220
+            y: 15
+            text_color: 0x1A4A4A
 
     # ========== 插座页面 ==========
     - id: socket_page
@@ -585,158 +591,249 @@ lvgl:
         - obj:
             styles: content_container
             widgets:
-              # 4个插座按钮（并排）
               - obj:
+                  align: TOP_LEFT
+                  y: 30
+                  x: 20
                   width: 950
-                  height: 240
-                  align: CENTER
-                  y: -160
+                  height: SIZE_CONTENT
                   bg_opa: TRANSP
                   border_opa: TRANSP
                   layout:
                     type: FLEX
-                    flex_flow: ROW
-                    pad_column: 24
+                    flex_flow: COLUMN
                     flex_align_main: START
                     flex_align_cross: CENTER
-                  widgets:
-                    # 插座1按钮
-                    - button:
-                        id: chuangmi_socket1_button
-                        width: 160
-                        height: 160
-                        radius: 20               # 圆角
-                        pad_all: 12              # 内边距
-                        text_color: 0xFFFFFF     # 文字颜色
-                        checkable: true
-                        bg_color: 0xE9EFEE       # 关闭状态颜色灰色
-                        checked:
-                          bg_color: 0xFF8C00     # 开启状态颜色橙色
-                        widgets:
-                          - label:
-                              text_font: extra_icon_80
-                              align: top_mid
-                              text: "\U000F0425"
-                          - label:
-                              text_font: noto_sans_sc_32
-                              text: "插座1"
-                              align: bottom_mid
-                        on_click:
-                          - homeassistant.action:
-                              action: switch.toggle
-                              data:
-                                entity_id: switch.chuangmi_cn_125697630_m3_on_p_2_1
-                    # 插座2按钮
-                    - button:
-                        id: chuangmi_socket2_button
-                        width: 160
-                        height: 160
-                        radius: 20               # 圆角
-                        pad_all: 12              # 内边距
-                        text_color: 0xFFFFFF     # 文字颜色
-                        checkable: true
-                        bg_color: 0xE9EFEE       # 关闭状态颜色灰色
-                        checked:
-                          bg_color: 0xFF8C00     # 开启状态颜色橙色
-                        widgets:
-                          - label:
-                              text_font: extra_icon_80
-                              align: top_mid
-                              text: "\U000F0425"
-                          - label:
-                              text_font: noto_sans_sc_32
-                              text: "插座2"
-                              align: bottom_mid
-                        on_click:
-                          - homeassistant.action:
-                              action: switch.toggle
-                              data:
-                                entity_id: switch.chuangmi_cn_125796823_m3_on_p_2_1
-                    # 插座3按钮
-                    - button:
-                        id: chuangmi_socket3_button
-                        width: 160
-                        height: 160
-                        radius: 20               # 圆角
-                        pad_all: 12              # 内边距
-                        text_color: 0xFFFFFF     # 文字颜色
-                        checkable: true
-                        bg_color: 0xE9EFEE       # 关闭状态颜色灰色
-                        checked:
-                          bg_color: 0xFF8C00     # 开启状态颜色橙色
-                        widgets:
-                          - label:
-                              text_font: extra_icon_80
-                              align: top_mid
-                              text: "\U000F0425"
-                          - label:
-                              text_font: noto_sans_sc_32
-                              text: "插座3"
-                              align: bottom_mid
-                        on_click:
-                          - homeassistant.action:
-                              action: switch.toggle
-                              data:
-                                entity_id: switch.chuangmi_cn_125520813_m3_on_p_2_1
-                    # 插座4按钮
-                    - button:
-                        id: chuangmi_socket4_button
-                        width: 160
-                        height: 160
-                        radius: 20               # 圆角
-                        pad_all: 12              # 内边距
-                        text_color: 0xFFFFFF     # 文字颜色
-                        checkable: true
-                        bg_color: 0xE9EFEE       # 关闭状态颜色灰色
-                        checked:
-                          bg_color: 0xFF8C00     # 开启状态颜色橙色
-                        widgets:
-                          - label:
-                              text_font: extra_icon_80
-                              align: top_mid
-                              text: "\U000F0425"
-                          - label:
-                              text_font: noto_sans_sc_32
-                              text: "插座4"
-                              align: bottom_mid
-                        on_click:
-                          - homeassistant.action:
-                              action: switch.toggle
-                              data:
-                                entity_id: switch.chuangmi_cn_393289534_212a01_on_p_2_1
-
-              # 信息区域（2行左对齐）
-              - obj:
-                  width: 950
-                  height: 200
-                  align: CENTER
-                  y: 30
-                  bg_opa: TRANSP
-                  border_opa: TRANSP
-                  layout:
-                    type: GRID
-                    grid_columns: [FR(1)]
-                    grid_rows: [FR(1), FR(1)]
                     pad_row: 12
                   widgets:
-                    # 弱电行
-                    - label:
-                        id: weak_power_label
-                        text_font: noto_sans_sc_32
-                        text: "弱电：功耗--W  总电量--Wh"
-                        grid_cell_column_pos: 0
-                        grid_cell_row_pos: 0
-                        grid_cell_x_align: START
-                        grid_cell_y_align: CENTER
-                    # 书桌行
-                    - label:
-                        id: desk_power_label
-                        text_font: noto_sans_sc_32
-                        text: "书桌：功耗--W  总电量--Wh"
-                        grid_cell_column_pos: 0
-                        grid_cell_row_pos: 1
-                        grid_cell_x_align: START
-                        grid_cell_y_align: CENTER
+                    # ─── 模块1：插座 ───
+                    - obj:
+                        styles: module_card
+                        height: SIZE_CONTENT
+                        layout:
+                          type: FLEX
+                          flex_flow: COLUMN
+                          pad_row: 0
+                        widgets:
+                          - label:
+                              styles: module_title
+                              text: "插座"
+                          - obj:
+                              styles: module_divider
+                          - obj:
+                              styles: setting_row
+                              layout:
+                                type: FLEX
+                                flex_flow: ROW
+                                flex_align_main: START
+                                flex_align_cross: CENTER
+                                pad_column: 24
+                              widgets:
+                                - button:
+                                    id: chuangmi_socket1_button
+                                    width: 160
+                                    height: 160
+                                    radius: 20
+                                    pad_all: 12
+                                    text_color: 0xFFFFFF
+                                    checkable: true
+                                    bg_color: 0xE9EFEE
+                                    checked:
+                                      bg_color: 0xFF8C00
+                                    widgets:
+                                      - label:
+                                          text_font: extra_icon_80
+                                          align: top_mid
+                                          text: "\U000F0425"
+                                      - label:
+                                          text_font: noto_sans_sc_32
+                                          text: "插座1"
+                                          align: bottom_mid
+                                    on_click:
+                                      - homeassistant.action:
+                                          action: switch.toggle
+                                          data:
+                                            entity_id: switch.chuangmi_cn_125697630_m3_on_p_2_1
+                                - button:
+                                    id: chuangmi_socket2_button
+                                    width: 160
+                                    height: 160
+                                    radius: 20
+                                    pad_all: 12
+                                    text_color: 0xFFFFFF
+                                    checkable: true
+                                    bg_color: 0xE9EFEE
+                                    checked:
+                                      bg_color: 0xFF8C00
+                                    widgets:
+                                      - label:
+                                          text_font: extra_icon_80
+                                          align: top_mid
+                                          text: "\U000F0425"
+                                      - label:
+                                          text_font: noto_sans_sc_32
+                                          text: "插座2"
+                                          align: bottom_mid
+                                    on_click:
+                                      - homeassistant.action:
+                                          action: switch.toggle
+                                          data:
+                                            entity_id: switch.chuangmi_cn_125796823_m3_on_p_2_1
+                                - button:
+                                    id: chuangmi_socket3_button
+                                    width: 160
+                                    height: 160
+                                    radius: 20
+                                    pad_all: 12
+                                    text_color: 0xFFFFFF
+                                    checkable: true
+                                    bg_color: 0xE9EFEE
+                                    checked:
+                                      bg_color: 0xFF8C00
+                                    widgets:
+                                      - label:
+                                          text_font: extra_icon_80
+                                          align: top_mid
+                                          text: "\U000F0425"
+                                      - label:
+                                          text_font: noto_sans_sc_32
+                                          text: "插座3"
+                                          align: bottom_mid
+                                    on_click:
+                                      - homeassistant.action:
+                                          action: switch.toggle
+                                          data:
+                                            entity_id: switch.chuangmi_cn_125520813_m3_on_p_2_1
+                                - button:
+                                    id: chuangmi_socket4_button
+                                    width: 160
+                                    height: 160
+                                    radius: 20
+                                    pad_all: 12
+                                    text_color: 0xFFFFFF
+                                    checkable: true
+                                    bg_color: 0xE9EFEE
+                                    checked:
+                                      bg_color: 0xFF8C00
+                                    widgets:
+                                      - label:
+                                          text_font: extra_icon_80
+                                          align: top_mid
+                                          text: "\U000F0425"
+                                      - label:
+                                          text_font: noto_sans_sc_32
+                                          text: "插座4"
+                                          align: bottom_mid
+                                    on_click:
+                                      - homeassistant.action:
+                                          action: switch.toggle
+                                          data:
+                                            entity_id: switch.chuangmi_cn_393289534_212a01_on_p_2_1
+
+                    # ─── 模块2：弱电箱 ───
+                    - obj:
+                        styles: module_card
+                        height: SIZE_CONTENT
+                        layout:
+                          type: FLEX
+                          flex_flow: COLUMN
+                          pad_row: 0
+                        widgets:
+                          - label:
+                              styles: module_title
+                              text: "弱电箱"
+                          - obj:
+                              styles: module_divider
+                          - obj:
+                              styles: setting_row
+                              layout:
+                                type: FLEX
+                                flex_flow: ROW
+                                flex_align_main: START
+                                flex_align_cross: CENTER
+                                pad_column: 12
+                              widgets:
+                                - label:
+                                    styles: setting_label
+                                    text: "功率"
+                                    flex_grow: 1
+                                - label:
+                                    id: weak_power_value_label
+                                    styles: setting_label
+                                    text: "-- W"
+                          - obj:
+                              styles: setting_row
+                              layout:
+                                type: FLEX
+                                flex_flow: ROW
+                                flex_align_main: START
+                                flex_align_cross: CENTER
+                                pad_column: 12
+                              widgets:
+                                - label:
+                                    styles: setting_label
+                                    text: "总电量"
+                                    flex_grow: 1
+                                - label:
+                                    id: weak_total_value_label
+                                    styles: setting_label
+                                    text: "-- Wh"
+
+                    # ─── 模块3：书桌 ───
+                    - obj:
+                        styles: module_card
+                        height: SIZE_CONTENT
+                        layout:
+                          type: FLEX
+                          flex_flow: COLUMN
+                          pad_row: 0
+                        widgets:
+                          - label:
+                              styles: module_title
+                              text: "书桌"
+                          - obj:
+                              styles: module_divider
+                          - obj:
+                              styles: setting_row
+                              layout:
+                                type: FLEX
+                                flex_flow: ROW
+                                flex_align_main: START
+                                flex_align_cross: CENTER
+                                pad_column: 12
+                              widgets:
+                                - label:
+                                    styles: setting_label
+                                    text: "功率"
+                                    flex_grow: 1
+                                - label:
+                                    id: desk_power_value_label
+                                    styles: setting_label
+                                    text: "-- W"
+                          - obj:
+                              styles: setting_row
+                              layout:
+                                type: FLEX
+                                flex_flow: ROW
+                                flex_align_main: START
+                                flex_align_cross: CENTER
+                                pad_column: 12
+                              widgets:
+                                - label:
+                                    styles: setting_label
+                                    text: "总电量"
+                                    flex_grow: 1
+                                - label:
+                                    id: desk_total_value_label
+                                    styles: setting_label
+                                    text: "-- Wh"
+
+        - label:
+            text_font: noto_sans_sc_48
+            text: "插座"
+            x: 220
+            y: 15
+            text_color: 0x1A4A4A
 
     # ========== 系统页面 ==========
     - id: system_page
@@ -842,7 +939,7 @@ lvgl:
                                     id: screen_off_timeout_dropdown
                                     width: 180
                                     height: 44
-                                    text_font: montserrat_26
+                                    text_font: montserrat_32
                                     bg_color: 0xF5F5F5
                                     bg_opa: COVER
                                     border_width: 0
@@ -924,7 +1021,7 @@ lvgl:
                                     id: tab5_dac_output_dropdown
                                     width: 180
                                     height: 44
-                                    text_font: montserrat_26
+                                    text_font: montserrat_32
                                     bg_color: 0xF5F5F5
                                     bg_opa: COVER
                                     border_width: 0
@@ -1091,7 +1188,7 @@ lvgl:
                                     text: "--:--:--"
 
         - label:
-            text_font: noto_sans_sc_32
+            text_font: noto_sans_sc_48
             text: "设置"
             x: 220
             y: 15
@@ -1181,3 +1278,9 @@ lvgl:
                         width: 750
                         text_align: LEFT
                         long_mode: WRAP             # ← 不截断，自动换行
+        - label:
+            text_font: noto_sans_sc_48
+            text: "助手"
+            x: 220
+            y: 15
+            text_color: 0x1A4A4A

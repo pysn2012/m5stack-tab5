@@ -117,7 +117,7 @@ sensor:
           id: sys_rssi_label
           text: !lambda |-
             static char buf[32];
-            snprintf(buf, sizeof(buf), "信号：%d dBm", int(x));
+            snprintf(buf, sizeof(buf), "%d dBm", int(x));
             return buf;
 
   # 设备运行时间
@@ -134,8 +134,8 @@ sensor:
             int hours = (total % 86400) / 3600;
             int mins = (total % 3600) / 60;
             static char buf[32];
-            if (days > 0) snprintf(buf, sizeof(buf), "运行：%dd %02d:%02d", days, hours, mins);
-            else snprintf(buf, sizeof(buf), "运行：%02d:%02d:%02d", hours, mins, total % 60);
+            if (days > 0) snprintf(buf, sizeof(buf), "%dd %02d:%02d", days, hours, mins);
+            else snprintf(buf, sizeof(buf), "%02d:%02d:%02d", hours, mins, total % 60);
             return buf;
 
   # 电池电量百分比计算（基于电压）
@@ -272,7 +272,7 @@ text_sensor:
               id: sys_ip_label
               text: !lambda |-
                 static std::string buf;
-                buf = "IP地址：" + x;
+                buf = x;
                 return buf.c_str();
 
 button:

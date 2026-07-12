@@ -89,22 +89,32 @@ script:
   - id: update_weak_power_label
     then:
       - lvgl.label.update:
-          id: weak_power_label
+          id: weak_power_value_label
           text: !lambda |-
-            static char buf[64];
-            snprintf(buf, sizeof(buf), "弱电：功率%.1fW  总电量%.0fWh",
-              id(weak_power_val), id(weak_total_val));
+            static char buf[16];
+            snprintf(buf, sizeof(buf), "%.1f W", id(weak_power_val));
+            return buf;
+      - lvgl.label.update:
+          id: weak_total_value_label
+          text: !lambda |-
+            static char buf[16];
+            snprintf(buf, sizeof(buf), "%.0f Wh", id(weak_total_val));
             return buf;
 
   # 更新书桌功率标签
   - id: update_desk_power_label
     then:
       - lvgl.label.update:
-          id: desk_power_label
+          id: desk_power_value_label
           text: !lambda |-
-            static char buf[64];
-            snprintf(buf, sizeof(buf), "书桌：功率%.1fW  总电量%.0fWh",
-              id(desk_power_val), id(desk_total_val));
+            static char buf[16];
+            snprintf(buf, sizeof(buf), "%.1f W", id(desk_power_val));
+            return buf;
+      - lvgl.label.update:
+          id: desk_total_value_label
+          text: !lambda |-
+            static char buf[16];
+            snprintf(buf, sizeof(buf), "%.0f Wh", id(desk_total_val));
             return buf;
 
   # 语音助手 UI 更新脚本（核心）
