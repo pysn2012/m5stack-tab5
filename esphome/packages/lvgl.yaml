@@ -554,11 +554,11 @@ lvgl:
                     # ─── 左列：天气模块 ───
                     - obj:
                         styles: module_card
-                        width: 100%          # 覆盖固定 900，填满单元格
+                        width: 100%          # 覆盖 module_card 的 900
                         grid_cell_column_pos: 0
                         grid_cell_row_pos: 0
                         grid_cell_x_align: STRETCH
-                        grid_cell_y_align: STRETCH
+                        grid_cell_y_align: START   # ← 改：避免 STRETCH 与 SIZE_CONTENT 循环
                         layout:
                           type: FLEX
                           flex_flow: COLUMN
@@ -577,7 +577,7 @@ lvgl:
                               layout:
                                 type: GRID
                                 grid_columns: [FR(1), FR(1)]
-                                grid_rows: [FR(1), FR(1)]
+                                grid_rows: [SIZE_CONTENT, SIZE_CONTENT]   # ← 改：FR→SIZE_CONTENT
                                 pad_row: 12
                                 pad_column: 12
                               widgets:
@@ -673,7 +673,7 @@ lvgl:
                         grid_cell_column_pos: 1
                         grid_cell_row_pos: 0
                         grid_cell_x_align: STRETCH
-                        grid_cell_y_align: STRETCH
+                        grid_cell_y_align: START   # ← 改：避免 STRETCH 与 SIZE_CONTENT 循环
                         bg_opa: TRANSP
                         border_opa: TRANSP
                         layout:
@@ -686,7 +686,7 @@ lvgl:
                           # 室内模块
                           - obj:
                               styles: module_card
-                              width: 100%
+                              width: 100%          # ← 加：防止 900 宽度溢出
                               height: SIZE_CONTENT
                               layout:
                                 type: FLEX
@@ -750,7 +750,7 @@ lvgl:
                           # 预警模块
                           - obj:
                               styles: module_card
-                              width: 100%
+                              width: 100%          # ← 加：防止 900 宽度溢出
                               height: SIZE_CONTENT
                               layout:
                                 type: FLEX
