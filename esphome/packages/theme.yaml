@@ -26,6 +26,21 @@ lvgl:
       pad_bottom: 2                   # 底部额外压缩
       shadow_width: 0                 # 无阴影，扁平风格
 
+    # ========== 小模块卡片样式 ==========
+    # 设置页面上每个功能模块的外边框，白色圆角矩形
+    - id: small_card
+      bg_color: $card_bg_color
+      bg_opa: COVER
+      border_width: 1
+      border_color: $card_border_color
+      border_opa: COVER
+      radius: $radius
+      width: 460                      # 固定宽度
+      pad_all: $padding               # 四周内边距 10px
+      pad_top: 2                      # 顶部额外压缩，减小标题与上边框距离
+      pad_bottom: 2                   # 底部额外压缩
+      shadow_width: 0                 # 无阴影，扁平风格
+
     # ========== 模块标题样式 ==========
     # 卡片内的大标题，如"显示""声音"等
     - id: module_title

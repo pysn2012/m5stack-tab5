@@ -544,7 +544,7 @@ lvgl:
               # ═══ 信息区域：FLEX 两列 ═══
               - obj:
                   width: 950
-                  height: 360
+                  height: 500
                   align: CENTER
                   y: 85
                   bg_opa: TRANSP
@@ -558,179 +558,124 @@ lvgl:
                   widgets:
                     # ─── 左列：天气模块（圆角卡片） ───
                     - obj:
-                        width: 467
+                        styles: small_card
                         height: 100%
-                        bg_color: 0xFFFFFF
-                        bg_opa: COVER
-                        border_width: 1
-                        border_color: 0xE5E5E5
-                        border_opa: COVER
-                        radius: 12
-                        pad_all: 10
-                        pad_top: 8
-                        pad_bottom: 8
                         layout:
                           type: FLEX
                           flex_flow: COLUMN
-                          flex_align_main: START
-                          pad_row: 4
+                          pad_row: 0
                         widgets:
                           # 标题
                           - label:
-                              text_font: noto_sans_sc_32
-                              text_color: 0x1A4A4A
+                              styles: module_title
                               text: "天气"
                           # 分隔线
                           - obj:
-                              bg_color: 0xEEEEEE
-                              bg_opa: COVER
-                              height: 1
-                              width: 100%
+                              styles: module_divider
                           # 内容区：4个传感器直接排列，无额外容器包裹
                           - obj:
-                              width: 100%
-                              height: 290
-                              bg_opa: TRANSP
+                              styles: setting_row
                               layout:
                                 type: FLEX
-                                flex_flow: COLUMN
-                                pad_row: 16
+                                flex_flow: ROW
+                                flex_align_main: START
+                                flex_align_cross: CENTER
+                                pad_column: 12
                               widgets:
-                                # 第1行：温度 + 湿度
-                                - obj:
-                                    width: 100%
-                                    height: 50
-                                    bg_opa: TRANSP
-                                    layout:
-                                      type: FLEX
-                                      flex_flow: ROW
-                                      flex_align_main: START
-                                      flex_align_cross: CENTER
-                                      pad_column: 30
-                                    widgets:
-                                      # 温度（图标+文本，直接放，无obj包裹）
-                                      - label:
-                                          text_font: extra_icon
-                                          text_color: 0xFF8C00
-                                          text: "\U000F050F"
-                                      - label:
-                                          id: outdoor_temp_label
-                                          text_font: noto_sans_sc_32
-                                          text_color: 0x333333
-                                          text: "-- ℃"
-                                      # 湿度（图标+文本，直接放）
-                                      - label:
-                                          text_font: extra_icon
-                                          text_color: 0x3498DB
-                                          text: "\U000F058E"
-                                      - label:
-                                          id: outdoor_humi_label
-                                          text_font: noto_sans_sc_32
-                                          text_color: 0x333333
-                                          text: "-- %"
+                                # 温度（图标+文本，直接放，无obj包裹）
+                                - label:
+                                    text_font: extra_icon
+                                    text_color: 0xFF8C00
+                                    text: "\U000F050F"
+                                    - label:
+                                    id: outdoor_temp_label
+                                    text_font: noto_sans_sc_32
+                                    text_color: 0x333333
+                                    text: "-- ℃"
+                                # 湿度（图标+文本，直接放）
+                                - label:
+                                    text_font: extra_icon
+                                    text_color: 0x3498DB
+                                    text: "\U000F058E"
+                                - label:
+                                    id: outdoor_humi_label
+                                    text_font: noto_sans_sc_32
+                                    text_color: 0x333333
+                                    text: "-- %"
                                 # 第2行：气压 + 颗粒物
-                                - obj:
-                                    width: 100%
-                                    height: 50
-                                    bg_opa: TRANSP
-                                    layout:
-                                      type: FLEX
-                                      flex_flow: ROW
-                                      flex_align_main: START
-                                      flex_align_cross: CENTER
-                                      pad_column: 30
-                                    widgets:
-                                      # 气压
-                                      - label:
-                                          text_font: extra_icon
-                                          text_color: 0x27AE60
-                                          text: "\U000F029A"
-                                      - label:
-                                          id: outdoor_pres_label
-                                          text_font: noto_sans_sc_32
-                                          text_color: 0x333333
-                                          text: "-- hPa"
-                                      # 颗粒物
-                                      - label:
-                                          text_font: extra_icon
-                                          text_color: 0xE74C3C
-                                          text: "\U000F0F30"
-                                      - label:
-                                          id: outdoor_pm25_label
-                                          text_font: noto_sans_sc_32
-                                          text_color: 0x333333
-                                          text: "-- ppm"
+                          - obj:
+                              styles: setting_row
+                              layout:
+                                type: FLEX
+                                flex_flow: ROW
+                                flex_align_main: START
+                                flex_align_cross: CENTER
+                                pad_column: 12
+                              widgets:
+                                # 气压
+                                - label:
+                                    text_font: extra_icon
+                                    text_color: 0x27AE60
+                                    text: "\U000F029A"
+                                - label:
+                                    id: outdoor_pres_label
+                                    text_font: noto_sans_sc_32
+                                    text_color: 0x333333
+                                    text: "-- hPa"
+                                # 颗粒物
+                                - label:
+                                    text_font: extra_icon
+                                    text_color: 0xE74C3C
+                                    text: "\U000F0F30"
+                                - label:
+                                    id: outdoor_pm25_label
+                                    text_font: noto_sans_sc_32
+                                    text_color: 0x333333
+                                    text: "-- ppm"
 
                     # ─── 右列：室内 + 预警 ───
                     - obj:
-                        width: 467
+                        styles: small_card
                         height: 100%
-                        bg_opa: TRANSP
-                        border_opa: TRANSP
                         layout:
                           type: FLEX
                           flex_flow: COLUMN
-                          flex_align_main: START
-                          flex_align_cross: STRETCH
-                          pad_row: 12
+                          pad_row: 0
                         widgets:
-                          # ─── 室内模块（圆角卡片） ───
+                          # 标题
+                          - label:
+                              styles: module_title
+                              text: "室内"
+                          # 分隔线
                           - obj:
-                              width: 100%
-                              height: 130
-                              bg_color: 0xFFFFFF
-                              bg_opa: COVER
-                              border_width: 1
-                              border_color: 0xE5E5E5
-                              border_opa: COVER
-                              radius: 12
-                              pad_all: 10
-                              pad_top: 8
-                              pad_bottom: 8
+                              styles: module_divider
+                          # 内容区：2个传感器直接排列
+                          - obj:
+                              styles: setting_row
                               layout:
                                 type: FLEX
-                                flex_flow: COLUMN
+                                flex_flow: ROW
                                 flex_align_main: START
-                                pad_row: 4
+                                flex_align_cross: CENTER
+                                pad_column: 12
                               widgets:
                                 - label:
+                                    text_font: extra_icon
+                                    text_color: 0xFF8C00
+                                    text: "\U000F0F54"
+                                - label:
+                                    id: indoor_temp_label
                                     text_font: noto_sans_sc_32
-                                    text_color: 0x1A4A4A
-                                    text: "室内"
-                                - obj:
-                                    bg_color: 0xEEEEEE
-                                    bg_opa: COVER
-                                    height: 1
-                                    width: 100%
-                                # 温度+湿度横向排列，直接放无包裹
-                                - obj:
-                                    width: 100%
-                                    height: 60
-                                    bg_opa: TRANSP
-                                    layout:
-                                      type: FLEX
-                                      flex_flow: ROW
-                                      flex_align_main: START
-                                      flex_align_cross: CENTER
-                                      pad_column: 30
-                                    widgets:
-                                      - label:
-                                          text_font: extra_icon
-                                          text_color: 0xFF8C00
-                                          text: "\U000F0F54"
-                                      - label:
-                                          id: indoor_temp_label
-                                          text_font: noto_sans_sc_32
-                                          text_color: 0x333333
-                                          text: "-- ℃"
-                                      - label:
-                                          text_font: extra_icon
-                                          text_color: 0x3498DB
-                                          text: "\U000F058E"
-                                      - label:
-                                          id: indoor_humi_label
-                                          text_font: noto_sans_sc_32
-                                          text_color: 0x333333
+                                    text_color: 0x333333
+                                    text: "-- ℃"
+                                - label:
+                                    text_font: extra_icon
+                                    text_color: 0x3498DB
+                                    text: "\U000F058E"
+                                - label:
+                                    id: indoor_humi_label
+                                    text_font: noto_sans_sc_32
+                                    text_color: 0x333333
                                           text: "-- %"
 
                           # ─── 预警模块（圆角卡片） ───
@@ -826,7 +771,7 @@ lvgl:
                                 - button:
                                     id: chuangmi_socket1_button
                                     width: 160
-                                    height: 160
+                                    height: 120
                                     radius: 20
                                     pad_all: 12
                                     text_color: 0xFFFFFF
@@ -836,7 +781,7 @@ lvgl:
                                       bg_color: 0xFF8C00
                                     widgets:
                                       - label:
-                                          text_font: extra_icon_80
+                                          text_font: extra_icon
                                           align: top_mid
                                           text: "\U000F0425"
                                       - label:
@@ -851,7 +796,7 @@ lvgl:
                                 - button:
                                     id: chuangmi_socket2_button
                                     width: 160
-                                    height: 160
+                                    height: 120
                                     radius: 20
                                     pad_all: 12
                                     text_color: 0xFFFFFF
@@ -861,7 +806,7 @@ lvgl:
                                       bg_color: 0xFF8C00
                                     widgets:
                                       - label:
-                                          text_font: extra_icon_80
+                                          text_font: extra_icon
                                           align: top_mid
                                           text: "\U000F0425"
                                       - label:
@@ -876,7 +821,7 @@ lvgl:
                                 - button:
                                     id: chuangmi_socket3_button
                                     width: 160
-                                    height: 160
+                                    height: 120
                                     radius: 20
                                     pad_all: 12
                                     text_color: 0xFFFFFF
@@ -886,7 +831,7 @@ lvgl:
                                       bg_color: 0xFF8C00
                                     widgets:
                                       - label:
-                                          text_font: extra_icon_80
+                                          text_font: extra_icon
                                           align: top_mid
                                           text: "\U000F0425"
                                       - label:
@@ -901,7 +846,7 @@ lvgl:
                                 - button:
                                     id: chuangmi_socket4_button
                                     width: 160
-                                    height: 160
+                                    height: 120
                                     radius: 20
                                     pad_all: 12
                                     text_color: 0xFFFFFF
@@ -911,7 +856,7 @@ lvgl:
                                       bg_color: 0xFF8C00
                                     widgets:
                                       - label:
-                                          text_font: extra_icon_80
+                                          text_font: extra_icon
                                           align: top_mid
                                           text: "\U000F0425"
                                       - label:
