@@ -191,7 +191,7 @@ lvgl:
       align: CENTER
       bg_opa: COVER
       border_opa: TRANSP
-      height: 100%
+      height: SIZE_CONTENT
       width: 1080
       x: 96
       pad_top: 30
@@ -739,22 +739,18 @@ lvgl:
                         grid_cell_y_align: CENTER
 
     # ========== 系统页面 ==========
-    # 设置页面：4个功能模块（显示/声音/网络/关于），每个用 module_card 圆角卡片包裹
+    # 设置页面：用 module_card 圆角卡片包裹
     - id: system_page
       widgets:  
         # 内容容器：继承 content_container 样式（居中，宽1080，x偏移96避开侧边栏）
-        # 添加 layout: FLEX 使 4 个 module_card 垂直排列
         - obj:
             styles: content_container
-            # pad_top 不覆盖，使用 content_container 默认的 30
-            # 或者显式设为 40 让模块整体下移，避免太贴顶
-            pad_top: 40
             layout:
               type: FLEX
               flex_flow: COLUMN
-              flex_align_main: CENTER       # 垂直居中：4个卡片在可用空间内居中分布
+              flex_align_main: START
               flex_align_cross: CENTER      # 水平居中：卡片在容器内水平居中
-              pad_row: 12                   # 卡片之间的垂直间距
+              pad_row: 20                   # 卡片之间的垂直间距
             widgets:
               # ─── 显示模块 ───
               - obj:
@@ -763,7 +759,7 @@ lvgl:
                   layout:
                     type: FLEX
                     flex_flow: COLUMN
-                    pad_row: 0              # 标题/分隔线/行之间无额外间距
+                    pad_row: 10              # 标题/分隔线/行之间无额外间距
                   widgets:
                     - label:
                         styles: module_title
@@ -1091,7 +1087,7 @@ lvgl:
         - label:
             text_font: noto_sans_sc_48
             text: "设置"
-            align: TOP_LEFT
+            # align: TOP_LEFT
             x: 220
             y: 30
             text_color: 0x1A4A4A
