@@ -13,7 +13,6 @@ lvgl:
   style_definitions:
     # ========== 模块卡片样式 ==========
     # 设置页面上每个功能模块的外边框，白色圆角矩形
-    # 例如：显示、声音、网络、关于，各用一个 module_card 包裹
     - id: module_card
       bg_color: $card_bg_color
       bg_opa: COVER

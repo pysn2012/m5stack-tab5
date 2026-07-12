@@ -526,14 +526,14 @@ lvgl:
         - obj:
             styles: content_container
             widgets:
-              # 时间显示（大字居中）— 保持不变
+              # 时间显示（大字居中）
               - label:
                   id: time_label
                   text_font: montserrat_96
                   text: "14:07"
                   align: CENTER
                   y: -200
-              # 日期星期（中字居中）— 保持不变
+              # 日期星期（中字居中）
               - label:
                   id: date_label
                   text_font: montserrat_32
@@ -544,9 +544,9 @@ lvgl:
               # ═══ 信息区域：FLEX 两列 ═══
               - obj:
                   width: 950
-                  height: 380            # ← 固定高度，避免 SIZE_CONTENT 递归
+                  height: 340
                   align: CENTER
-                  y: 50
+                  y: 80                  # ← 下移30
                   bg_opa: TRANSP
                   border_opa: TRANSP
                   layout:
@@ -558,7 +558,7 @@ lvgl:
                   widgets:
                     # ─── 左列：天气模块 ───
                     - obj:
-                        width: 467        # (950 - 16) / 2
+                        width: 467
                         height: 100%
                         bg_color: 0xFFFFFF
                         bg_opa: COVER
@@ -583,29 +583,28 @@ lvgl:
                               bg_opa: COVER
                               height: 1
                               width: 100%
-                          # 2×2 网格，固定行高
+                          # 第1行：温度 + 湿度（横向排列）
                           - obj:
                               width: 100%
-                              height: 310    # 380 - 标题区约70
+                              height: 55
                               bg_opa: TRANSP
                               layout:
-                                type: GRID
-                                grid_columns: [FR(1), FR(1)]
-                                grid_rows: [140, 140]   # ← 固定行高
-                                pad_row: 15
-                                pad_column: 12
+                                type: FLEX
+                                flex_flow: ROW
+                                flex_align_main: START
+                                flex_align_cross: CENTER
+                                pad_column: 20
                               widgets:
-                                # 温度
                                 - obj:
-                                    grid_cell_column_pos: 0
-                                    grid_cell_row_pos: 0
+                                    width: 200
+                                    height: 40
                                     bg_opa: TRANSP
                                     layout:
                                       type: FLEX
                                       flex_flow: ROW
                                       flex_align_main: START
                                       flex_align_cross: CENTER
-                                      pad_column: 8
+                                      pad_column: 4
                                     widgets:
                                       - label:
                                           text_font: extra_icon
@@ -616,17 +615,16 @@ lvgl:
                                           text_font: noto_sans_sc_32
                                           text_color: 0x333333
                                           text: "-- ℃"
-                                # 湿度
                                 - obj:
-                                    grid_cell_column_pos: 1
-                                    grid_cell_row_pos: 0
+                                    width: 200
+                                    height: 40
                                     bg_opa: TRANSP
                                     layout:
                                       type: FLEX
                                       flex_flow: ROW
                                       flex_align_main: START
                                       flex_align_cross: CENTER
-                                      pad_column: 8
+                                      pad_column: 4
                                     widgets:
                                       - label:
                                           text_font: extra_icon
@@ -637,17 +635,28 @@ lvgl:
                                           text_font: noto_sans_sc_32
                                           text_color: 0x333333
                                           text: "-- %"
-                                # 气压
+                          # 第2行：气压 + 颗粒物（横向排列）
+                          - obj:
+                              width: 100%
+                              height: 55
+                              bg_opa: TRANSP
+                              layout:
+                                type: FLEX
+                                flex_flow: ROW
+                                flex_align_main: START
+                                flex_align_cross: CENTER
+                                pad_column: 20
+                              widgets:
                                 - obj:
-                                    grid_cell_column_pos: 0
-                                    grid_cell_row_pos: 1
+                                    width: 200
+                                    height: 40
                                     bg_opa: TRANSP
                                     layout:
                                       type: FLEX
                                       flex_flow: ROW
                                       flex_align_main: START
                                       flex_align_cross: CENTER
-                                      pad_column: 8
+                                      pad_column: 4
                                     widgets:
                                       - label:
                                           text_font: extra_icon
@@ -658,17 +667,16 @@ lvgl:
                                           text_font: noto_sans_sc_32
                                           text_color: 0x333333
                                           text: "-- hPa"
-                                # 颗粒物
                                 - obj:
-                                    grid_cell_column_pos: 1
-                                    grid_cell_row_pos: 1
+                                    width: 200
+                                    height: 40
                                     bg_opa: TRANSP
                                     layout:
                                       type: FLEX
                                       flex_flow: ROW
                                       flex_align_main: START
                                       flex_align_cross: CENTER
-                                      pad_column: 8
+                                      pad_column: 4
                                     widgets:
                                       - label:
                                           text_font: extra_icon
@@ -696,7 +704,7 @@ lvgl:
                           # 室内模块
                           - obj:
                               width: 100%
-                              height: 180
+                              height: 120
                               bg_color: 0xFFFFFF
                               bg_opa: COVER
                               border_width: 1
@@ -720,17 +728,20 @@ lvgl:
                                     bg_opa: COVER
                                     height: 1
                                     width: 100%
+                                # 温度+湿度横向排列，与天气模块第一行齐高
                                 - obj:
                                     width: 100%
-                                    height: 110
+                                    height: 55
                                     bg_opa: TRANSP
                                     layout:
                                       type: FLEX
-                                      flex_flow: COLUMN
-                                      pad_row: 15
+                                      flex_flow: ROW
+                                      flex_align_main: START
+                                      flex_align_cross: CENTER
+                                      pad_column: 20
                                     widgets:
                                       - obj:
-                                          width: 100%
+                                          width: 200
                                           height: 40
                                           bg_opa: TRANSP
                                           layout:
@@ -738,7 +749,7 @@ lvgl:
                                             flex_flow: ROW
                                             flex_align_main: START
                                             flex_align_cross: CENTER
-                                            pad_column: 8
+                                            pad_column: 4
                                           widgets:
                                             - label:
                                                 text_font: extra_icon
@@ -750,7 +761,7 @@ lvgl:
                                                 text_color: 0x333333
                                                 text: "-- ℃"
                                       - obj:
-                                          width: 100%
+                                          width: 200
                                           height: 40
                                           bg_opa: TRANSP
                                           layout:
@@ -758,7 +769,7 @@ lvgl:
                                             flex_flow: ROW
                                             flex_align_main: START
                                             flex_align_cross: CENTER
-                                            pad_column: 8
+                                            pad_column: 4
                                           widgets:
                                             - label:
                                                 text_font: extra_icon
@@ -772,7 +783,7 @@ lvgl:
                           # 预警模块
                           - obj:
                               width: 100%
-                              height: 188      # 380 - 180 - 12(pad_row)
+                              height: 208
                               bg_color: 0xFFFFFF
                               bg_opa: COVER
                               border_width: 1
@@ -802,7 +813,7 @@ lvgl:
                                     text_color: 0xE74C3C
                                     text: "无预警"
                                     width: 100%
-                                    height: 130
+                                    height: 160
                                     long_mode: WRAP
                                     text_align: LEFT
 
