@@ -743,16 +743,6 @@ lvgl:
       widgets:  
         - obj:
             styles: content_container
-            height: SIZE_CONTENT
-            pad_top: 0
-            pad_left: 40
-            pad_right: 40
-            layout:
-              type: FLEX
-              flex_flow: COLUMN
-              flex_align_main: START
-              flex_align_cross: CENTER
-              pad_row: 8
             widgets:
               # ─── 显示模块 ───
               - obj:
