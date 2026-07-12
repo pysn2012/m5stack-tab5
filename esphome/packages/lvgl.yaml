@@ -1,6 +1,6 @@
 # 全局变量定义
 globals:
-  # 当前页面编号（0=主页, 1=插座, 2=系统, 3=语音）
+  # 当前页面编号（0=主页, 1=控制, 2=系统, 3=语音）
   - id: page_num
     type: int
     restore_value: no
@@ -61,20 +61,25 @@ globals:
 
 # LVGL 图形库配置
 lvgl:
-  rotation: 270
+  rotation: 270                   # 旋转270度
+  byte_order: little_endian       # 字节序：小端模式（与大多数 MCU 和显示屏控制器兼容）
+  color_depth: 16                 # 色深：16位 RGB565
+  # 启动初始化
   on_boot:
-    - light.turn_on: backlight
-    - rx8130.read_time:
-    - script.execute: expand_nav_btn_click_area
-    - script.execute: nav_rail_update
-    - script.execute: sync_ha
+    - light.turn_on: backlight    # 点亮屏幕背光
+    - rx8130.read_time:           # 从RX8130读取时间
+    - script.execute: expand_nav_btn_click_area  # 扩展导航按钮的触控点击区域
+    - script.execute: nav_rail_update            # 更新侧边导航栏的显示状态
+    - script.execute: sync_ha                    # 同步 Home Assistant 实体状态到本地
     # 初始化滑块位置和标签（使用全局初始值 60%）
     - lvgl.slider.update:
         id: backlight_slider
         value: !lambda return id(backlight_brightness_val);
+    # 初始化音量滑块位置（使用全局初始值）
     - lvgl.slider.update:
         id: volume_slider
         value: !lambda return id(volume_val);
+    # 更新背光亮度百分比标签
     - lvgl.label.update:
         id: backlight_bright_label
         text: !lambda |-
@@ -82,6 +87,7 @@ lvgl:
           int percent = id(backlight_brightness_val) * 100 / 255;
           snprintf(buf, sizeof(buf), "%d %%", percent);
           return buf;
+    # 更新音量百分比标签
     - lvgl.label.update:
         id: volume_label
         text: !lambda |-
@@ -90,9 +96,7 @@ lvgl:
           return buf;
     # 设置媒体播放器初始音量
     - media_player.volume_set: !lambda return id(volume_val) / 100.0;
-
-  byte_order: little_endian
-  color_depth: 16
+ 
   # 自动息屏
   on_idle:
     # 超时时间动态读取自 system.yaml 中定义的 select 组件
@@ -268,7 +272,7 @@ lvgl:
                         - lvgl.page.show: main_page
 
 
-            # 插座导航按钮
+            # 控制导航按钮
             - obj:
                 styles: nav_btn_container
                 widgets:
@@ -537,48 +541,58 @@ lvgl:
                   align: CENTER
                   y: -110
 
-              # ═══ 信息区域：两列布局 ═══
+              # ═══ 信息区域：FLEX 两列 ═══
               - obj:
                   width: 950
-                  height: SIZE_CONTENT
+                  height: 380            # ← 固定高度，避免 SIZE_CONTENT 递归
                   align: CENTER
                   y: 50
                   bg_opa: TRANSP
                   border_opa: TRANSP
                   layout:
-                    type: GRID
-                    grid_columns: [FR(1), FR(1)]
-                    grid_rows: [SIZE_CONTENT]
+                    type: FLEX
+                    flex_flow: ROW
+                    flex_align_main: START
+                    flex_align_cross: STRETCH
                     pad_column: 16
                   widgets:
                     # ─── 左列：天气模块 ───
                     - obj:
-                        styles: module_card
-                        width: 100%          # 覆盖 module_card 的 900
-                        grid_cell_column_pos: 0
-                        grid_cell_row_pos: 0
-                        grid_cell_x_align: STRETCH
-                        grid_cell_y_align: START   # ← 改：避免 STRETCH 与 SIZE_CONTENT 循环
+                        width: 467        # (950 - 16) / 2
+                        height: 100%
+                        bg_color: 0xFFFFFF
+                        bg_opa: COVER
+                        border_width: 1
+                        border_color: 0xE5E5E5
+                        border_opa: COVER
+                        radius: 12
+                        pad_all: 10
+                        pad_top: 2
+                        pad_bottom: 2
                         layout:
                           type: FLEX
                           flex_flow: COLUMN
                           pad_row: 0
                         widgets:
                           - label:
-                              styles: module_title
+                              text_font: noto_sans_sc_32
+                              text_color: 0x1A4A4A
                               text: "天气"
                           - obj:
-                              styles: module_divider
-                          # 2×2 网格：温度 / 湿度 / 气压 / 颗粒物
+                              bg_color: 0xEEEEEE
+                              bg_opa: COVER
+                              height: 1
+                              width: 100%
+                          # 2×2 网格，固定行高
                           - obj:
                               width: 100%
-                              height: SIZE_CONTENT
+                              height: 310    # 380 - 标题区约70
                               bg_opa: TRANSP
                               layout:
                                 type: GRID
                                 grid_columns: [FR(1), FR(1)]
-                                grid_rows: [SIZE_CONTENT, SIZE_CONTENT]   # ← 改：FR→SIZE_CONTENT
-                                pad_row: 12
+                                grid_rows: [140, 140]   # ← 固定行高
+                                pad_row: 15
                                 pad_column: 12
                               widgets:
                                 # 温度
@@ -668,48 +682,56 @@ lvgl:
 
                     # ─── 右列：室内 + 预警 ───
                     - obj:
-                        width: 100%
-                        height: SIZE_CONTENT
-                        grid_cell_column_pos: 1
-                        grid_cell_row_pos: 0
-                        grid_cell_x_align: STRETCH
-                        grid_cell_y_align: START   # ← 改：避免 STRETCH 与 SIZE_CONTENT 循环
+                        width: 467
+                        height: 100%
                         bg_opa: TRANSP
                         border_opa: TRANSP
                         layout:
                           type: FLEX
                           flex_flow: COLUMN
                           flex_align_main: START
-                          flex_align_cross: CENTER
+                          flex_align_cross: STRETCH
                           pad_row: 12
                         widgets:
                           # 室内模块
                           - obj:
-                              styles: module_card
-                              width: 100%          # ← 加：防止 900 宽度溢出
-                              height: SIZE_CONTENT
+                              width: 100%
+                              height: 180
+                              bg_color: 0xFFFFFF
+                              bg_opa: COVER
+                              border_width: 1
+                              border_color: 0xE5E5E5
+                              border_opa: COVER
+                              radius: 12
+                              pad_all: 10
+                              pad_top: 2
+                              pad_bottom: 2
                               layout:
                                 type: FLEX
                                 flex_flow: COLUMN
                                 pad_row: 0
                               widgets:
                                 - label:
-                                    styles: module_title
+                                    text_font: noto_sans_sc_32
+                                    text_color: 0x1A4A4A
                                     text: "室内"
                                 - obj:
-                                    styles: module_divider
+                                    bg_color: 0xEEEEEE
+                                    bg_opa: COVER
+                                    height: 1
+                                    width: 100%
                                 - obj:
                                     width: 100%
-                                    height: SIZE_CONTENT
+                                    height: 110
                                     bg_opa: TRANSP
                                     layout:
                                       type: FLEX
                                       flex_flow: COLUMN
-                                      pad_row: 12
+                                      pad_row: 15
                                     widgets:
                                       - obj:
                                           width: 100%
-                                          height: SIZE_CONTENT
+                                          height: 40
                                           bg_opa: TRANSP
                                           layout:
                                             type: FLEX
@@ -729,7 +751,7 @@ lvgl:
                                                 text: "-- ℃"
                                       - obj:
                                           width: 100%
-                                          height: SIZE_CONTENT
+                                          height: 40
                                           bg_opa: TRANSP
                                           layout:
                                             type: FLEX
@@ -749,25 +771,38 @@ lvgl:
                                                 text: "-- %"
                           # 预警模块
                           - obj:
-                              styles: module_card
-                              width: 100%          # ← 加：防止 900 宽度溢出
-                              height: SIZE_CONTENT
+                              width: 100%
+                              height: 188      # 380 - 180 - 12(pad_row)
+                              bg_color: 0xFFFFFF
+                              bg_opa: COVER
+                              border_width: 1
+                              border_color: 0xE5E5E5
+                              border_opa: COVER
+                              radius: 12
+                              pad_all: 10
+                              pad_top: 2
+                              pad_bottom: 2
                               layout:
                                 type: FLEX
                                 flex_flow: COLUMN
                                 pad_row: 0
                               widgets:
                                 - label:
-                                    styles: module_title
+                                    text_font: noto_sans_sc_32
+                                    text_color: 0x1A4A4A
                                     text: "预警"
                                 - obj:
-                                    styles: module_divider
+                                    bg_color: 0xEEEEEE
+                                    bg_opa: COVER
+                                    height: 1
+                                    width: 100%
                                 - label:
                                     id: weather_alert_label
                                     text_font: noto_sans_sc_32
                                     text_color: 0xE74C3C
                                     text: "无预警"
                                     width: 100%
+                                    height: 130
                                     long_mode: WRAP
                                     text_align: LEFT
 
