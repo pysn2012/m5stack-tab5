@@ -743,6 +743,13 @@ lvgl:
       widgets:  
         - obj:
             styles: content_container
+            pad_top: 10                   # 减小顶部内边距
+            layout:
+              type: FLEX
+              flex_flow: COLUMN
+              flex_align_main: START      # 从顶部开始排列
+              flex_align_cross: CENTER    # 模块在容器内水平居中
+              pad_row: 12                 # 模块之间的间距
             widgets:
               # ─── 显示模块 ───
               - obj:
