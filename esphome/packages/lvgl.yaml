@@ -739,17 +739,22 @@ lvgl:
                         grid_cell_y_align: CENTER
 
     # ========== 系统页面 ==========
+    # 设置页面：4个功能模块（显示/声音/网络/关于），每个用 module_card 圆角卡片包裹
     - id: system_page
       widgets:  
+        # 内容容器：继承 content_container 样式（居中，宽1080，x偏移96避开侧边栏）
+        # 添加 layout: FLEX 使 4 个 module_card 垂直排列
         - obj:
             styles: content_container
-            pad_top: 10                   # 减小顶部内边距
+            # pad_top 不覆盖，使用 content_container 默认的 30
+            # 或者显式设为 40 让模块整体下移，避免太贴顶
+            pad_top: 40
             layout:
               type: FLEX
               flex_flow: COLUMN
-              flex_align_main: START      # 从顶部开始排列
-              flex_align_cross: CENTER    # 模块在容器内水平居中
-              pad_row: 12                 # 模块之间的间距
+              flex_align_main: CENTER       # 垂直居中：4个卡片在可用空间内居中分布
+              flex_align_cross: CENTER      # 水平居中：卡片在容器内水平居中
+              pad_row: 12                   # 卡片之间的垂直间距
             widgets:
               # ─── 显示模块 ───
               - obj:
@@ -758,7 +763,7 @@ lvgl:
                   layout:
                     type: FLEX
                     flex_flow: COLUMN
-                    pad_row: 0
+                    pad_row: 0              # 标题/分隔线/行之间无额外间距
                   widgets:
                     - label:
                         styles: module_title
@@ -777,7 +782,7 @@ lvgl:
                           - label:
                               styles: setting_label
                               text: "亮度"
-                              flex_grow: 1
+                              flex_grow: 1   # 占据左侧剩余空间，把滑块推到右边
                           - slider:
                               id: backlight_slider
                               width: 380
@@ -1080,11 +1085,14 @@ lvgl:
                               styles: setting_label
                               text: "--:--:--"
 
+        # 页面标题"设置"：固定在左上角
+        # x: 220 = 侧边栏宽192 + 28px间隙，确保不被侧边栏遮挡
+        # y: 30 与内容容器 pad_top: 40 配合，视觉上标题在模块上方
         - label:
             text_font: noto_sans_sc_48
             text: "设置"
             align: TOP_LEFT
-            x: 120
+            x: 220
             y: 30
             text_color: 0x1A4A4A
 

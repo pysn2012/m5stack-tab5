@@ -1,15 +1,19 @@
 substitutions:
-  text_font: noto_sans_sc_32
-  radius: 12px
-  card_bg_color: "0xFFFFFF"
-  card_border_color: "0xE5E5E5"
-  title_color: "0x1A4A4A"
-  text_color: "0x333333"
-  accent_color: "0xFF8C00"
-  padding: 10px
+  # 字体和颜色定义，方便统一修改
+  text_font: noto_sans_sc_32      # 中文字体，32px
+  radius: 12px                      # 全局圆角半径
+  card_bg_color: "0xFFFFFF"         # 模块卡片背景：白色
+  card_border_color: "0xE5E5E5"     # 模块卡片边框：浅灰色
+  title_color: "0x1A4A4A"           # 模块标题颜色：青色
+  text_color: "0x333333"            # 普通文字颜色：深灰
+  accent_color: "0xFF8C00"          # 强调色：橙色（未使用，预留）
+  padding: 10px                     # 卡片内边距
 
 lvgl:
   style_definitions:
+    # ========== 模块卡片样式 ==========
+    # 设置页面上每个功能模块的外边框，白色圆角矩形
+    # 例如：显示、声音、网络、关于，各用一个 module_card 包裹
     - id: module_card
       bg_color: $card_bg_color
       bg_opa: COVER
@@ -17,31 +21,40 @@ lvgl:
       border_color: $card_border_color
       border_opa: COVER
       radius: $radius
-      width: 900
-      pad_all: $padding
-      pad_top: 2
-      pad_bottom: 2
-      shadow_width: 0
+      width: 900                      # 固定宽度，与 content_container 适配
+      pad_all: $padding               # 四周内边距 10px
+      pad_top: 2                      # 顶部额外压缩，减小标题与上边框距离
+      pad_bottom: 2                   # 底部额外压缩
+      shadow_width: 0                 # 无阴影，扁平风格
 
+    # ========== 模块标题样式 ==========
+    # 卡片内的大标题，如"显示""声音"等
     - id: module_title
       text_font: $text_font
       text_color: $title_color
-      bg_opa: TRANSP
+      bg_opa: TRANSP                # 透明背景，不遮挡卡片底色
 
+    # ========== 模块内分隔线样式 ==========
+    # 标题与内容之间的浅灰色细线
     - id: module_divider
       bg_color: 0xEEEEEE
       bg_opa: COVER
       height: 1
-      width: 100%
+      width: 100%                     # 撑满卡片宽度
 
+    # ========== 设置项行样式 ==========
+    # 卡片内每一行设置项的容器，如"亮度 [滑块] 60%"
+    # 关键：高度由内容自适应(SIZE_CONTENT)，避免固定高度导致内部滚动条
     - id: setting_row
-      bg_opa: TRANSP
-      border_opa: TRANSP
-      border_width: 0
-      radius: 0
+      bg_opa: TRANSP                # 完全透明，不显示任何边框或背景
+      border_opa: TRANSP            # 边框透明
+      border_width: 0                 # 无边框
+      radius: 0                       # 无圆角（避免LVGL默认主题加圆角）
       width: 100%
       height: SIZE_CONTENT
 
+    # ========== 设置项标签样式 ==========
+    # 行左侧的文字标签，如"亮度""音量"等
     - id: setting_label
       text_font: $text_font
       text_color: $text_color
