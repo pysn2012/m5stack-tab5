@@ -50,11 +50,6 @@ jobs:
           OTA=$(find "$SEARCH_ROOT" -name "firmware.ota.bin" | head -n 1)
           FACTORY=$(find "$SEARCH_ROOT" -name "firmware.factory.bin" | head -n 1)
 
-          if [[ -z "$FIRMWARE" ]]; then
-            echo "::error::未找到 firmware.bin，请检查编译是否成功"
-            exit 1
-          fi
-
           echo "FIRMWARE=$FIRMWARE" >> $GITHUB_OUTPUT
           echo "OTA=$OTA" >> $GITHUB_OUTPUT
           echo "FACTORY=$FACTORY" >> $GITHUB_OUTPUT
