@@ -955,9 +955,14 @@ lvgl:
 
     # ========== 系统页面 ==========
     - id: system_page
+      pad_top: 100
       widgets:  
         - obj:
             styles: content_container
+            scroll_dir: VER          # 只允许垂直滚动，减少计算
+            scrollbar_mode: ACTIVE   # 只有滚动时显示滚动条
+            scroll_momentum: true    # 惯性滚动
+            scroll_elastic: false    # 关闭弹性回弹，减少卡顿
             widgets:
               # 模块容器：透明背景，采用 align:CENTER + y偏移定位
               # 与其他页面（main_page/socket_page）保持一致
