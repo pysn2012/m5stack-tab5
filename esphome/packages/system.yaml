@@ -80,10 +80,10 @@ binary_sensor:
       pi4ioe5v6408: pi4ioe2
       number: 6
       mode: INPUT_PULLDOWN
-    # on_press:
-    #   - lambda: id(battery_percent).update();
-    # on_release:
-    #   - lambda: id(battery_percent).update();
+    on_press:
+      - lambda: id(battery_percent).update();
+    on_release:
+      - lambda: id(battery_percent).update();
   # 耳机检测
   - platform: gpio
     id: headphone_detect
@@ -162,7 +162,7 @@ sensor:
           text: !lambda |-
             float voltage = id(battery_voltage).state;
             float current = id(battery_current).state;
-            // bool charging_pin = id(charging).state;
+            bool charging_pin = id(charging).state;
             int level = int(x);
 
             // 未检测到电池
@@ -171,8 +171,8 @@ sensor:
             }
 
             // 根据充电状态选择图标集
-            // bool is_charging = (current < -0.1 || charging_pin);
-            bool is_charging = (current < -0.1);
+            bool is_charging = (current < -0.1 || charging_pin);
+            // bool is_charging = (current < -0.1);
 
             // 使用 level/10 分档：0-9=0, 10-19=1, 20-29=2, 等等
             int bracket = level / 10;

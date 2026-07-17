@@ -198,7 +198,7 @@ lvgl:
       height: 100%
       width: 1080
       x: 96
-      pad_top: 30
+      pad_top: 0
       pad_left: 20
 
     # 语音助手页面：状态卡片样式
@@ -707,13 +707,18 @@ lvgl:
 
     # ========== 控制页面 ==========
     - id: socket_page
+      pad_top: 100
       widgets:
         - obj:
             styles: content_container
+            scroll_dir: VER          # 只允许垂直滚动，减少计算
+            scrollbar_mode: ACTIVE   # 只有滚动时显示滚动条
+            scroll_momentum: true    # 惯性滚动
+            scroll_elastic: false    # 关闭弹性回弹，减少卡顿
             widgets:
               - obj:
                   align: TOP_LEFT
-                  y: 30
+                  y: 0
                   x: 20
                   width: 950
                   height: SIZE_CONTENT
@@ -963,7 +968,7 @@ lvgl:
               # 与其他页面（main_page/socket_page）保持一致
               - obj:
                   align: TOP_LEFT
-                  y: 30
+                  y: 0
                   x: 20
                   width: 950
                   height: SIZE_CONTENT
