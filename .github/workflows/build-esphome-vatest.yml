@@ -46,7 +46,7 @@ jobs:
         id: find_fw
         run: |
           SEARCH_ROOT="esphome/.esphome/build"   # 与编译目录对应
-          FIRMWARE=$(find "$SEARCH_ROOT" -name "firmware.bin" | head -n 1)
+          FIRMWARE=$(find "$SEARCH_ROOT" -name "firmware.elf" | head -n 1)
           OTA=$(find "$SEARCH_ROOT" -name "firmware.ota.bin" | head -n 1)
           FACTORY=$(find "$SEARCH_ROOT" -name "firmware.factory.bin" | head -n 1)
 
