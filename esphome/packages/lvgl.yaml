@@ -126,6 +126,116 @@ lvgl:
             # 如果语音助手未活跃，执行息屏脚本
             - script.execute: screen_off
 
+  # LVGL 样式定义
+  style_definitions:
+    # 侧边栏样式
+    - id: sidebar
+      bg_color: 0xE9EFEE
+      bg_opa: COVER
+      border_opa: TRANSP
+      pad_top: 30
+      pad_left: 0
+      pad_right: 0
+      radius: 0
+      width: 192
+      height: 100%
+
+    # 导航按钮容器样式
+    - id: nav_btn_container
+      bg_opa: TRANSP
+      border_opa: TRANSP
+      width: 160
+      height: 160
+      pad_all: 0
+
+    # 导航按钮未激活样式（水平布局：icon + 文字在同一行）
+    - id: nav_btn_inactivate
+      bg_opa: TRANSP
+      width: 150
+      height: 150
+      radius: 28              # 半高圆角，胶囊形底纹不超出按钮
+      border_opa: TRANSP
+      shadow_opa: TRANSP
+      pad_all: 0
+
+    - id: nav_btn_activate
+      bg_color: 0xCCE8E7    # 选中底纹色
+      bg_opa: COVER
+      width: 150
+      height: 150
+      radius: 28
+      border_opa: TRANSP
+      shadow_opa: TRANSP
+      pad_all: 0
+
+    # 语音助手按钮激活样式（橙色高亮，区别于普通导航）
+    - id: va_btn_activate
+      bg_color: 0xFF8C00    # 橙色：突出语音助手激活态
+      bg_opa: COVER
+      width: 150
+      height: 150
+      radius: 28
+      border_opa: TRANSP
+      shadow_opa: TRANSP
+      pad_all: 0
+
+    # 导航图标激活样式
+    # 不设置 align，由按钮的 flex 布局统一控制位置
+    - id: nav_icon_activate
+      text_font: extra_icon_80
+      text_color: 0x1A4A4A
+
+    # 导航图标未激活样式
+    - id: nav_icon_inactivate
+      text_font: extra_icon_80
+      text_color: 0x3F4948
+
+    # 内容容器样式
+    - id: content_container
+      align: CENTER
+      bg_opa: COVER
+      border_opa: TRANSP
+      height: 100%
+      width: 1080
+      x: 96
+      pad_top: 30
+      pad_left: 20
+
+    # 语音助手页面：状态卡片样式
+    - id: va_status_card
+      bg_color: 0xFFFFFF
+      bg_opa: COVER
+      border_opa: TRANSP
+      radius: 24
+      width: 900
+      height: 180
+      pad_all: 24
+      shadow_opa: TRANSP
+
+    # 语音助手页面：对话气泡样式（用户问）
+    - id: va_request_bubble
+      bg_color: 0xCCE8E7
+      bg_opa: COVER
+      border_opa: TRANSP
+      radius: 24
+      width: 800
+      height: SIZE_CONTENT
+      min_height: 80
+      pad_all: 24
+      shadow_opa: TRANSP
+
+    # 语音助手页面：对话气泡样式（助手答复）
+    - id: va_response_bubble
+      bg_color: 0xFFE0B2
+      bg_opa: COVER
+      border_opa: TRANSP
+      radius: 24
+      width: 800
+      height: SIZE_CONTENT
+      min_height: 80
+      pad_all: 24
+      shadow_opa: TRANSP
+
   # 顶层导航栏和模态框
   top_layer:
     widgets:
@@ -237,8 +347,7 @@ lvgl:
           id: status_bar
           width: 1280
           height: 100
-          bg_color: 0xFFFFFF
-          bg_opa: COVER
+          bg_opa: TRANSP
           border_opa: TRANSP
           layout:
             type: FLEX
@@ -262,15 +371,6 @@ lvgl:
                 hidden: true
                 text_font: extra_icon
                 text: "\U000F109B"
-
-      # 页面标题（固定在状态栏区域）
-      - label:
-          id: page_title_label
-          text_font: noto_sans_sc_32
-          text_color: 0x1A4A4A
-          text: "主页"
-          x: 220
-          y: 15
 
       # Wi-Fi 配置弹窗（默认隐藏）
       - obj:
@@ -596,20 +696,22 @@ lvgl:
                               long_mode: WRAP
                               text_align: LEFT
 
+        - label:
+            text_font: noto_sans_sc_32
+            text: "主页"
+            x: 220
+            y: 15
+            text_color: 0x1A4A4A
+
     # ========== 控制页面 ==========
     - id: socket_page
-      pad_top: 100
       widgets:
         - obj:
             styles: content_container
-            scroll_dir: VER          # 只允许垂直滚动，减少计算
-            scrollbar_mode: ACTIVE   # 只有滚动时显示滚动条
-            scroll_momentum: true    # 惯性滚动
-            scroll_elastic: false    # 关闭弹性回弹，减少卡顿
             widgets:
               - obj:
                   align: TOP_LEFT
-                  y: 0
+                  y: 30
                   x: 20
                   width: 950
                   height: SIZE_CONTENT
@@ -844,22 +946,24 @@ lvgl:
                                     styles: setting_label
                                     text: "-- Wh"
 
+        - label:
+            text_font: noto_sans_sc_32
+            text: "控制"
+            x: 220
+            y: 15
+            text_color: 0x1A4A4A
+
     # ========== 系统页面 ==========
     - id: system_page
-      pad_top: 100
       widgets:  
         - obj:
             styles: content_container
-            scroll_dir: VER          # 只允许垂直滚动，减少计算
-            scrollbar_mode: ACTIVE   # 只有滚动时显示滚动条
-            scroll_momentum: true    # 惯性滚动
-            scroll_elastic: false    # 关闭弹性回弹，减少卡顿
             widgets:
               # 模块容器：透明背景，采用 align:CENTER + y偏移定位
               # 与其他页面（main_page/socket_page）保持一致
               - obj:
                   align: TOP_LEFT
-                  y: 0
+                  y: 30
                   x: 20
                   width: 950
                   height: SIZE_CONTENT
@@ -1201,6 +1305,13 @@ lvgl:
                                     styles: setting_label
                                     text: "--:--:--"
 
+        - label:
+            text_font: noto_sans_sc_32
+            text: "设置"
+            x: 220
+            y: 15
+            text_color: 0x1A4A4A
+
     # ========== 语音助手页面 ==========
     # 由 voice_ui_update 脚本驱动：
     #   - va_status_icon   : 顶部大图标（聆听/思考/回复/错误…）
@@ -1285,4 +1396,9 @@ lvgl:
                         width: 750
                         text_align: LEFT
                         long_mode: WRAP             # ← 不截断，自动换行
-
+        - label:
+            text_font: noto_sans_sc_32
+            text: "语音助手"
+            x: 220
+            y: 15
+            text_color: 0x1A4A4A

@@ -19,9 +19,6 @@ script:
     then:
       - lambda: |-
           const int active = id(page_num);
-          const char* titles[] = {"主页", "控制", "设置", "语音助手"};
-          lv_label_set_text(id(page_title_label), titles[active]);
-
           lv_obj_t* buttons[] = {
               id(dash_panel_btn),
               id(socket_panel_btn),
