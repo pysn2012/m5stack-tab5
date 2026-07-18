@@ -76,13 +76,18 @@ lvgl:
 
     # 内容容器样式
     - id: content_container
-      align: CENTER
+      align: TOP_LEFT
       bg_opa: COVER
       border_opa: TRANSP
-      height: 100%
+
+      # 避开顶部状态栏和标题区域
+      x: 192
+      y: 100
+
       width: 1080
-      x: 96
-      pad_top: 30
+      height: 620
+
+      pad_top: 20
       pad_left: 20
 
     # 语音助手页面：状态卡片样式
