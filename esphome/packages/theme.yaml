@@ -10,7 +10,116 @@ substitutions:
   padding: 10px                     # 卡片内边距
 
 lvgl:
+  # LVGL 样式定义
   style_definitions:
+    # 侧边栏样式
+    - id: sidebar
+      bg_color: 0xE9EFEE
+      bg_opa: COVER
+      border_opa: TRANSP
+      pad_top: 30
+      pad_left: 0
+      pad_right: 0
+      radius: 0
+      width: 192
+      height: 100%
+
+    # 导航按钮容器样式
+    - id: nav_btn_container
+      bg_opa: TRANSP
+      border_opa: TRANSP
+      width: 160
+      height: 160
+      pad_all: 0
+
+    # 导航按钮未激活样式（水平布局：icon + 文字在同一行）
+    - id: nav_btn_inactivate
+      bg_opa: TRANSP
+      width: 150
+      height: 150
+      radius: 28              # 半高圆角，胶囊形底纹不超出按钮
+      border_opa: TRANSP
+      shadow_opa: TRANSP
+      pad_all: 0
+
+    - id: nav_btn_activate
+      bg_color: 0xCCE8E7    # 选中底纹色
+      bg_opa: COVER
+      width: 150
+      height: 150
+      radius: 28
+      border_opa: TRANSP
+      shadow_opa: TRANSP
+      pad_all: 0
+
+    # 语音助手按钮激活样式（橙色高亮，区别于普通导航）
+    - id: va_btn_activate
+      bg_color: 0xFF8C00    # 橙色：突出语音助手激活态
+      bg_opa: COVER
+      width: 150
+      height: 150
+      radius: 28
+      border_opa: TRANSP
+      shadow_opa: TRANSP
+      pad_all: 0
+
+    # 导航图标激活样式
+    # 不设置 align，由按钮的 flex 布局统一控制位置
+    - id: nav_icon_activate
+      text_font: extra_icon_80
+      text_color: 0x1A4A4A
+
+    # 导航图标未激活样式
+    - id: nav_icon_inactivate
+      text_font: extra_icon_80
+      text_color: 0x3F4948
+
+    # 内容容器样式
+    - id: content_container
+      align: CENTER
+      bg_opa: COVER
+      border_opa: TRANSP
+      height: 100%
+      width: 1080
+      x: 96
+      pad_top: 30
+      pad_left: 20
+
+    # 语音助手页面：状态卡片样式
+    - id: va_status_card
+      bg_color: 0xFFFFFF
+      bg_opa: COVER
+      border_opa: TRANSP
+      radius: 24
+      width: 900
+      height: 180
+      pad_all: 24
+      shadow_opa: TRANSP
+
+    # 语音助手页面：对话气泡样式（用户问）
+    - id: va_request_bubble
+      bg_color: 0xCCE8E7
+      bg_opa: COVER
+      border_opa: TRANSP
+      radius: 24
+      width: 800
+      height: SIZE_CONTENT
+      min_height: 80
+      pad_all: 24
+      shadow_opa: TRANSP
+
+    # 语音助手页面：对话气泡样式（助手答复）
+    - id: va_response_bubble
+      bg_color: 0xFFE0B2
+      bg_opa: COVER
+      border_opa: TRANSP
+      radius: 24
+      width: 800
+      height: SIZE_CONTENT
+      min_height: 80
+      pad_all: 24
+      shadow_opa: TRANSP
+
     # ========== 模块卡片样式 ==========
     # 设置页面上每个功能模块的外边框，白色圆角矩形
     - id: module_card
