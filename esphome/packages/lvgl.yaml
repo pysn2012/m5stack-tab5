@@ -262,15 +262,18 @@ lvgl:
                 id: api_icon_label
                 hidden: true
                 text_font: extra_icon
+                text_color: 0x111111
                 text: "\U000F109B"
             - label:
                 id: wifi_icon_label
                 hidden: true
                 text_font: extra_icon
+                text_color: 0x111111
                 text: "\U000F05A9"
             - label:
                 id: pwr_bat_icon_label
                 text_font: extra_icon
+                text_color: 0x111111
                 text: "\U000F06A5"
 
       # Wi-Fi 配置弹窗（默认隐藏）
@@ -620,7 +623,7 @@ lvgl:
               - obj:
                   align: TOP_MID
                   x: 0
-                  y: 12
+                  y: 5
                   width: 950
                   height: SIZE_CONTENT
                   bg_opa: TRANSP
@@ -760,6 +763,7 @@ lvgl:
                     - obj:
                         styles: module_card
                         height: SIZE_CONTENT
+                        pad_all: 4
                         layout:
                           type: FLEX
                           flex_flow: COLUMN
@@ -859,6 +863,9 @@ lvgl:
       widgets:  
         - obj:
             styles: content_container
+            align: BOTTOM_RIGHT
+            width: 1088
+            height: 620
             scroll_dir: VER          # 只允许垂直滚动，减少计算
             scrollbar_mode: ACTIVE   # 只有滚动时显示滚动条
             scroll_momentum: false    # 惯性滚动
@@ -868,8 +875,8 @@ lvgl:
               # 与其他页面（main_page/socket_page）保持一致
               - obj:
                   align: TOP_LEFT
-                  y: 0
-                  x: 20
+                  x: 0
+                  y: 5
                   width: 950
                   height: SIZE_CONTENT
                   bg_opa: TRANSP
