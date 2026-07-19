@@ -624,7 +624,7 @@ lvgl:
                   align: TOP_MID
                   x: 0
                   y: 5
-                  width: 950
+                  width: 980
                   height: SIZE_CONTENT
                   bg_opa: TRANSP
                   border_opa: TRANSP
@@ -638,6 +638,7 @@ lvgl:
                     # ─── 模块1：插座 ───
                     - obj:
                         styles: module_card
+                        width: 980
                         height: SIZE_CONTENT
                         layout:
                           type: FLEX
@@ -761,14 +762,14 @@ lvgl:
 
                     # ─── 模块2+3：弱电箱 + 书桌 横向并排 ───
                     - obj:
-                        width: 100%
+                        width: SIZE_CONTENT
                         height: SIZE_CONTENT
                         bg_opa: TRANSP
                         border_opa: TRANSP
                         layout:
                           type: FLEX
                           flex_flow: ROW
-                          flex_align_main: START
+                          flex_align_main: CENTER
                           flex_align_cross: START
                           pad_column: 12
                         widgets:
@@ -783,7 +784,7 @@ lvgl:
                               widgets:
                                 - label:
                                     styles: module_title
-                                    text: "弱电箱"
+                                    text: "弱电"
                                 - obj:
                                     styles: module_divider
                                 - obj:
