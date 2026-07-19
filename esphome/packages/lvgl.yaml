@@ -235,32 +235,46 @@ lvgl:
       - obj:
           align: TOP_RIGHT
           id: status_bar
-          width: 1280
+          width: 1088
           height: 100
-          bg_opa: TRANSP
+          bg_color: 0xFFFFFF
+          bg_opa: COVER
+          text_color: 0x111111
+          border_width: 0
           border_opa: TRANSP
+          pad_left: 28
+          pad_right: 28
           layout:
             type: FLEX
-            flex_flow: ROW_REVERSE
-            flex_align_main: END
+            flex_flow: ROW
+            flex_align_main: START
             flex_align_cross: CENTER
             flex_align_track: CENTER
             pad_column: 20
           widgets:
             - label:
-                id: pwr_bat_icon_label
-                text_font: extra_icon
-                text: "\U000F06A5"
-            - label:
-                id: wifi_icon_label
-                hidden: true
-                text_font: extra_icon
-                text: "\U000F05A9"
+                id: page_title_label
+                text_font: noto_sans_sc_32
+                text_color: 0x111111
+                text: "主页"
+                flex_grow: 1
             - label:
                 id: api_icon_label
                 hidden: true
                 text_font: extra_icon
+                text_color: 0x111111
                 text: "\U000F109B"
+            - label:
+                id: wifi_icon_label
+                hidden: true
+                text_font: extra_icon
+                text_color: 0x111111
+                text: "\U000F05A9"
+            - label:
+                id: pwr_bat_icon_label
+                text_font: 
+                text_color: 0x111111
+                text: "\U000F06A5"
 
       # Wi-Fi 配置弹窗（默认隐藏）
       - obj:
@@ -415,6 +429,13 @@ lvgl:
       widgets:
         - obj:
             styles: content_container
+            align: BOTTOM_RIGHT
+            width: 1088
+            height: 620
+            scroll_dir: NONE
+            scrollbar_mode: "OFF"
+            scroll_momentum: false
+            scroll_elastic: false
             widgets:
               # 时间显示（大字居中）
               - label:
@@ -586,27 +607,23 @@ lvgl:
                               long_mode: WRAP
                               text_align: LEFT
 
-        - label:
-            text_font: noto_sans_sc_32
-            text: "主页"
-            x: 220
-            y: 15
-            text_color: 0x1A4A4A
-
     # ========== 控制页面 ==========
     - id: socket_page
       widgets:
         - obj:
             styles: content_container
+            align: BOTTOM_RIGHT
+            width: 1088
+            height: 620
             scroll_dir: VER          # 只允许垂直滚动，减少计算
             scrollbar_mode: ACTIVE   # 只有滚动时显示滚动条
             scroll_momentum: false    # 惯性滚动
             scroll_elastic: false    # 关闭弹性回弹，减少卡顿
             widgets:
               - obj:
-                  align: TOP_LEFT
-                  y: 0
-                  x: 20
+                  align: TOP_MID
+                  x: 0
+                  y: 12
                   width: 950
                   height: SIZE_CONTENT
                   bg_opa: TRANSP
@@ -839,13 +856,6 @@ lvgl:
                                     id: desk_total_value_label
                                     styles: setting_label
                                     text: "-- Wh"
-
-        - label:
-            text_font: noto_sans_sc_32
-            text: "控制"
-            x: 220
-            y: 15
-            text_color: 0x1A4A4A
 
     # ========== 系统页面 ==========
     - id: system_page
@@ -1203,13 +1213,6 @@ lvgl:
                                     styles: setting_label
                                     text: "--:--:--"
 
-        - label:
-            text_font: noto_sans_sc_32
-            text: "设置"
-            x: 220
-            y: 15
-            text_color: 0x1A4A4A
-
     # ========== 语音助手页面 ==========
     # 由 voice_ui_update 脚本驱动：
     #   - va_status_icon   : 顶部大图标（聆听/思考/回复/错误…）
@@ -1294,9 +1297,4 @@ lvgl:
                         width: 750
                         text_align: LEFT
                         long_mode: WRAP             # ← 不截断，自动换行
-        - label:
-            text_font: noto_sans_sc_32
-            text: "语音助手"
-            x: 220
-            y: 15
-            text_color: 0x1A4A4A
+

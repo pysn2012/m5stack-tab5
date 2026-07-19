@@ -76,19 +76,13 @@ lvgl:
 
     # 内容容器样式
     - id: content_container
-      align: TOP_LEFT
+      bg_color: 0xFFFFFF
       bg_opa: COVER
+      text_color: 0x111111
+      border_width: 0
       border_opa: TRANSP
-
-      # 避开顶部状态栏和标题区域
-      x: 192
-      y: 100
-
-      width: 1080
-      height: 620
-
-      pad_top: 20
-      pad_left: 20
+      radius: 0
+      pad_all: 0
 
     # 语音助手页面：状态卡片样式
     - id: va_status_card

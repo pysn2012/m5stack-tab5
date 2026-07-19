@@ -81,8 +81,8 @@ binary_sensor:
       number: 6
       mode: INPUT_PULLDOWN
     filters:
-      - delayed_on: 1000ms
-      - delayed_off: 1000ms
+      - delayed_on: 2s
+      - delayed_off: 2s
     on_press:
       - lambda: id(battery_percent).update();
     on_release:

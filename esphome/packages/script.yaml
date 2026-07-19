@@ -56,6 +56,17 @@ script:
               // 切换图标
               lv_label_set_text(icons[i], selected ? icon_checked[i] : icon_unchecked[i]);
           }
+          
+          const char* page_titles[] = {
+              "主页",
+              "控制",
+              "设置",
+              "语音助手",
+          };
+
+          if (active >= 0 && active < 4) {
+              lv_label_set_text(id(page_title_label), page_titles[active]);
+          }
 
   # 同步 Home Assistant 状态脚本
   - id: sync_ha
