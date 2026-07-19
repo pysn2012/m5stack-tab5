@@ -270,7 +270,7 @@ lvgl:
                 text: "\U000F05A9"
             - label:
                 id: pwr_bat_icon_label
-                text_font: 
+                text_font: extra_icon
                 text: "\U000F06A5"
 
       # Wi-Fi 配置弹窗（默认隐藏）
