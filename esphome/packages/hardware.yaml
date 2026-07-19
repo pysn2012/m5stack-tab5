@@ -68,7 +68,7 @@ switch:
   # WiFi电源
   - platform: gpio
     id: wifi_power
-    name: "WiFi Power"
+    name: "WiFi电源"
     pin:
       pi4ioe5v6408: pi4ioe2
       number: 0
@@ -76,14 +76,14 @@ switch:
   # USB 5V电源
   - platform: gpio
     id: usb_5v_power
-    name: "USB Power"
+    name: "USB电源"
     pin:
       pi4ioe5v6408: pi4ioe2
       number: 3
   # 快充使能（低电平有效）
   - platform: gpio
     id: quick_charge
-    name: "Quick Charge"
+    name: "快充使能"
     pin:
       pi4ioe5v6408: pi4ioe2
       number: 5

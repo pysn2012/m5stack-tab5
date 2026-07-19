@@ -66,7 +66,7 @@ select:
   - platform: lvgl
     widget: screen_off_timeout_dropdown
     id: screen_off_timeout_sec
-    name: "Screen off timeout"
+    name: "息屏时间"
     entity_category: config
     restore_value: true
 
@@ -90,7 +90,7 @@ binary_sensor:
   # 耳机检测
   - platform: gpio
     id: headphone_detect
-    name: "Headphone Detect"
+    name: "耳机检测"
     pin:
       pi4ioe5v6408: pi4ioe1
       number: 7
@@ -104,7 +104,7 @@ sensor:
     shunt_resistance: 0.005ohm
     bus_voltage:
       id: battery_voltage
-      name: Battery Voltage
+      name: "电池电压"
     current:
       id: battery_current
       name: Battery Current
@@ -113,7 +113,7 @@ sensor:
   # WiFi 信号强度
   - platform: wifi_signal
     id: wifi_rssi
-    name: "WiFi Signal"
+    name: "WiFi信号"
     update_interval: 60s
     on_value:
       - lvgl.label.update:
@@ -126,7 +126,7 @@ sensor:
   # 设备运行时间
   - platform: uptime
     id: device_uptime
-    name: "Uptime"
+    name: "运行时间"
     update_interval: 60s
     on_value:
       - lvgl.label.update:
@@ -144,7 +144,7 @@ sensor:
   # 电池电量百分比计算（基于电压）
   - platform: template
     id: battery_percent
-    name: "Battery Percentage"
+    name: "电池电量"
     unit_of_measurement: "%"
     accuracy_decimals: 0
     lambda: |-
@@ -268,7 +268,7 @@ text_sensor:
   - platform: wifi_info
     ip_address:
       id: wifi_ip
-      name: "WiFi IP Address"
+      name: "IP地址"
       on_value:
         then:
           - lvgl.label.update:
@@ -281,12 +281,12 @@ text_sensor:
 button:
   # 重启设备
   - platform: restart
-    name: "Restart"
+    name: "重启"
     id: restart_button
 
   # 关机（触发硬件关机脉冲）
   - platform: template
-    name: "Shutdown"
+    name: "关机"
     id: shutdown_button
     on_press:
       - logger.log: "执行关机..."
