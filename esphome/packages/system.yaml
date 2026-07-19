@@ -215,6 +215,20 @@ sensor:
             }
 
 text_sensor:
+  # WiFi IP 地址
+  - platform: wifi_info
+    ip_address:
+      id: wifi_ip
+      name: "IP地址"
+      on_value:
+        then:
+          - lvgl.label.update:
+              id: sys_ip_label
+              text: !lambda |-
+                static std::string buf;
+                buf = x;
+                return buf.c_str();
+
   # 背光亮度值同步（从 HA 获取当前亮度）
   - platform: homeassistant
     id: backlight_brightness
@@ -247,19 +261,6 @@ text_sensor:
     lambda: |-
       return std::to_string(id(backlight_brightness_val));
 
-  # WiFi IP 地址
-  - platform: wifi_info
-    ip_address:
-      id: wifi_ip
-      name: "IP地址"
-      on_value:
-        then:
-          - lvgl.label.update:
-              id: sys_ip_label
-              text: !lambda |-
-                static std::string buf;
-                buf = x;
-                return buf.c_str();
 
 button:
   # 重启设备
