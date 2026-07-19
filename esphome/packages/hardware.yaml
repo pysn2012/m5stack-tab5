@@ -83,7 +83,7 @@ switch:
   # 快充使能（低电平有效）
   - platform: gpio
     id: quick_charge
-    name: "快充使能"
+    name: "快充使能A"
     pin:
       pi4ioe5v6408: pi4ioe2
       number: 5
@@ -91,7 +91,7 @@ switch:
   # 充电使能
   - platform: gpio
     id: charge_enable
-    name: "充电使能"
+    name: "充电使能B"
     pin:
       pi4ioe5v6408: pi4ioe2
       number: 7
