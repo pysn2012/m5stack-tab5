@@ -91,7 +91,7 @@ switch:
   # 充电使能
   - platform: gpio
     id: charge_enable
-    name: "Charge Enable"
+    name: "充电使能"
     pin:
       pi4ioe5v6408: pi4ioe2
       number: 7
@@ -183,7 +183,7 @@ output:
 light:
   - platform: monochromatic
     output: backlight_pwm
-    name: "Display Backlight"
+    name: "屏幕背光"
     id: backlight
     restore_mode: RESTORE_DEFAULT_ON
     default_transition_length: 250ms

@@ -422,21 +422,21 @@ lvgl:
                   text_font: montserrat_96
                   text: "14:07"
                   align: CENTER
-                  y: -200
+                  y: -210
               # 日期星期（中字居中）
               - label:
                   id: date_label
                   text_font: montserrat_32
                   text: "2026-03-11 Thu"
                   align: CENTER
-                  y: -110
+                  y: -120
 
               # ═══ 信息区域：FLEX 两列 ═══
               - obj:
                   width: 980
                   height: 400
                   align: CENTER
-                  y: 100
+                  y: 90
                   bg_opa: TRANSP
                   border_opa: TRANSP
                   layout:
@@ -605,7 +605,7 @@ lvgl:
             widgets:
               - obj:
                   align: TOP_LEFT
-                  y: 30
+                  y: 0
                   x: 20
                   width: 950
                   height: SIZE_CONTENT
@@ -763,7 +763,7 @@ lvgl:
                                 flex_flow: ROW
                                 flex_align_main: START
                                 flex_align_cross: CENTER
-                                pad_column: 12
+                                pad_column: 6
                               widgets:
                                 - label:
                                     styles: setting_label
@@ -780,7 +780,7 @@ lvgl:
                                 flex_flow: ROW
                                 flex_align_main: START
                                 flex_align_cross: CENTER
-                                pad_column: 12
+                                pad_column: 6
                               widgets:
                                 - label:
                                     styles: setting_label
@@ -812,7 +812,7 @@ lvgl:
                                 flex_flow: ROW
                                 flex_align_main: START
                                 flex_align_cross: CENTER
-                                pad_column: 12
+                                pad_column: 6
                               widgets:
                                 - label:
                                     styles: setting_label
@@ -829,7 +829,7 @@ lvgl:
                                 flex_flow: ROW
                                 flex_align_main: START
                                 flex_align_cross: CENTER
-                                pad_column: 12
+                                pad_column: 6
                               widgets:
                                 - label:
                                     styles: setting_label
@@ -861,7 +861,7 @@ lvgl:
               # 与其他页面（main_page/socket_page）保持一致
               - obj:
                   align: TOP_LEFT
-                  y: 10
+                  y: 0
                   x: 20
                   width: 950
                   height: SIZE_CONTENT

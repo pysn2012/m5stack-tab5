@@ -75,11 +75,14 @@ binary_sensor:
   # 充电状态
   - platform: gpio
     id: charging
-    name: "Charging Status"
+    name: "充电状态"
     pin:
       pi4ioe5v6408: pi4ioe2
       number: 6
       mode: INPUT_PULLDOWN
+    filters:
+      - delayed_on: 1000ms
+      - delayed_off: 1000ms
     on_press:
       - lambda: id(battery_percent).update();
     on_release:
