@@ -75,7 +75,7 @@ binary_sensor:
   # 充电状态
   - platform: gpio
     id: charging
-    name: "充电状态"
+    name: "Charging Status"
     pin:
       pi4ioe5v6408: pi4ioe2
       number: 6
@@ -90,7 +90,7 @@ binary_sensor:
   # 耳机检测
   - platform: gpio
     id: headphone_detect
-    name: "耳机检测"
+    name: "Headphone Detect"
     pin:
       pi4ioe5v6408: pi4ioe1
       number: 7

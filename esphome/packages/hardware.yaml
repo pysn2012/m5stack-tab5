@@ -83,7 +83,7 @@ switch:
   # 快充使能（低电平有效）
   - platform: gpio
     id: quick_charge
-    name: "快充使能A"
+    name: "快充QC"
     pin:
       pi4ioe5v6408: pi4ioe2
       number: 5
@@ -91,7 +91,7 @@ switch:
   # 充电使能
   - platform: gpio
     id: charge_enable
-    name: "充电使能B"
+    name: "充电CE"
     pin:
       pi4ioe5v6408: pi4ioe2
       number: 7
@@ -130,7 +130,7 @@ display:
     dimensions:
       height: 1280
       width: 720
-    model: M5STACK-TAB5-V2
+    model: M5STACK-TAB5-ST7123
     reset_pin:
       pi4ioe5v6408: pi4ioe1
       number: 4
