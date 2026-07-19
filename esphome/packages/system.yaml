@@ -104,7 +104,7 @@ sensor:
     shunt_resistance: 0.005ohm
     bus_voltage:
       id: battery_voltage
-      name: "电池电压"
+      name: "电池电压V"
     current:
       id: battery_current
       name: Battery Current
@@ -126,7 +126,7 @@ sensor:
   # 设备运行时间
   - platform: uptime
     id: device_uptime
-    name: "运行时间"
+    name: "运行时间S"
     update_interval: 60s
     on_value:
       - lvgl.label.update:
@@ -281,12 +281,12 @@ text_sensor:
 button:
   # 重启设备
   - platform: restart
-    name: "重启"
+    name: "重启Restart"
     id: restart_button
 
   # 关机（触发硬件关机脉冲）
   - platform: template
-    name: "关机"
+    name: "关机Shutdown"
     id: shutdown_button
     on_press:
       - logger.log: "执行关机..."
