@@ -874,7 +874,7 @@ lvgl:
               # 模块容器：透明背景，采用 align:CENTER + y偏移定位
               # 与其他页面（main_page/socket_page）保持一致
               - obj:
-                  align: TOP_LEFT
+                  align: TOP_MID
                   x: 0
                   y: 5
                   width: 950
