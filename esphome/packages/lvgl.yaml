@@ -638,7 +638,7 @@ lvgl:
                     # ─── 模块1：插座 ───
                     - obj:
                         styles: module_card
-                        width: 980
+                        width: 920
                         height: SIZE_CONTENT
                         layout:
                           type: FLEX
