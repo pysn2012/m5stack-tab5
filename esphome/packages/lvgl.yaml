@@ -629,16 +629,20 @@ lvgl:
                   bg_opa: TRANSP
                   border_opa: TRANSP
                   layout:
-                    type: FLEX
-                    flex_flow: COLUMN
-                    flex_align_main: START
-                    flex_align_cross: CENTER
+                    type: GRID
+                    grid_columns: [FR(1), FR(1)]
+                    grid_rows: [CONTENT, CONTENT]
+                    pad_column: 10
                     pad_row: 10
                   widgets:
                     # ─── 模块1：插座 ───
                     - obj:
                         styles: module_card
-                        width: 916
+                        grid_cell_column_pos: 0
+                        grid_cell_row_pos: 0
+                        grid_cell_column_span: 2
+                        grid_cell_x_align: STRETCH
+                        grid_cell_y_align: STRETCH
                         height: SIZE_CONTENT
                         layout:
                           type: FLEX
@@ -760,116 +764,109 @@ lvgl:
                                           data:
                                             entity_id: switch.chuangmi_cn_393289534_212a01_on_p_2_1
 
-                    # ─── 模块2+3：弱电箱 + 书桌 横向并排 ───
+                    # ─── 弱电箱：第1列，第2行 ───
                     - obj:
-                        width: SIZE_CONTENT
-                        height: SIZE_CONTENT
-                        bg_opa: TRANSP
-                        border_opa: TRANSP
+                        styles: small_card
+                        grid_cell_column_pos: 0
+                        grid_cell_row_pos: 1
+                        grid_cell_x_align: STRETCH
+                        grid_cell_y_align: STRETCH
                         layout:
                           type: FLEX
-                          flex_flow: ROW
-                          flex_align_main: CENTER
-                          flex_align_cross: START
-                          pad_column: 12
+                          flex_flow: COLUMN
+                          pad_row: 0
                         widgets:
-                          # 弱电箱（左列）
+                          - label:
+                              styles: module_title
+                              text: "弱电"
                           - obj:
-                              styles: small_card    # ← 使用 small_card
-                              height: SIZE_CONTENT
+                              styles: module_divider
+                          - obj:
+                              styles: setting_row
                               layout:
                                 type: FLEX
-                                flex_flow: COLUMN
-                                pad_row: 0
+                                flex_flow: ROW
+                                flex_align_main: START
+                                flex_align_cross: CENTER
+                                pad_column: 6
                               widgets:
                                 - label:
-                                    styles: module_title
-                                    text: "弱电"
-                                - obj:
-                                    styles: module_divider
-                                - obj:
-                                    styles: setting_row
-                                    layout:
-                                      type: FLEX
-                                      flex_flow: ROW
-                                      flex_align_main: START
-                                      flex_align_cross: CENTER
-                                      pad_column: 6
-                                    widgets:
-                                      - label:
-                                          styles: setting_label
-                                          text: "功率"
-                                          flex_grow: 1
-                                      - label:
-                                          id: weak_power_value_label
-                                          styles: setting_label
-                                          text: "-- W"
-                                - obj:
-                                    styles: setting_row
-                                    layout:
-                                      type: FLEX
-                                      flex_flow: ROW
-                                      flex_align_main: START
-                                      flex_align_cross: CENTER
-                                      pad_column: 6
-                                    widgets:
-                                      - label:
-                                          styles: setting_label
-                                          text: "总电量"
-                                          flex_grow: 1
-                                      - label:
-                                          id: weak_total_value_label
-                                          styles: setting_label
-                                          text: "-- Wh"
+                                    styles: setting_label
+                                    text: "功率"
+                                    flex_grow: 1
+                                - label:
+                                    id: weak_power_value_label
+                                    styles: setting_label
+                                    text: "-- W"
+                          - obj:
+                              styles: setting_row
+                              layout:
+                                type: FLEX
+                                flex_flow: ROW
+                                flex_align_main: START
+                                flex_align_cross: CENTER
+                                pad_column: 6
+                              widgets:
+                                - label:
+                                    styles: setting_label
+                                    text: "总电量"
+                                    flex_grow: 1
+                                - label:
+                                    id: weak_total_value_label
+                                    styles: setting_label
+                                    text: "-- Wh"
 
-                          # 书桌（右列）
+                    # ─── 书桌：第2列，第2行 ───
+                    - obj:
+                        styles: small_card
+                        grid_cell_column_pos: 1
+                        grid_cell_row_pos: 1
+                        grid_cell_x_align: STRETCH
+                        grid_cell_y_align: STRETCH
+                        layout:
+                          type: FLEX
+                          flex_flow: COLUMN
+                          pad_row: 0
+                        widgets:
+                          - label:
+                              styles: module_title
+                              text: "书桌"
                           - obj:
-                              styles: small_card    # ← 使用 small_card
-                              height: SIZE_CONTENT
+                              styles: module_divider
+                          - obj:
+                              styles: setting_row
                               layout:
                                 type: FLEX
-                                flex_flow: COLUMN
-                                pad_row: 0
+                                flex_flow: ROW
+                                flex_align_main: START
+                                flex_align_cross: CENTER
+                                pad_column: 6
                               widgets:
                                 - label:
-                                    styles: module_title
-                                    text: "书桌"
-                                - obj:
-                                    styles: module_divider
-                                - obj:
-                                    styles: setting_row
-                                    layout:
-                                      type: FLEX
-                                      flex_flow: ROW
-                                      flex_align_main: START
-                                      flex_align_cross: CENTER
-                                      pad_column: 6
-                                    widgets:
-                                      - label:
-                                          styles: setting_label
-                                          text: "功率"
-                                          flex_grow: 1
-                                      - label:
-                                          id: desk_power_value_label
-                                          styles: setting_label
-                                          text: "-- W"
-                                - obj:
-                                    styles: setting_row
-                                    layout:
-                                      type: FLEX
-                                      flex_flow: ROW
-                                      flex_align_main: START
-                                      flex_align_cross: CENTER
-                                      pad_column: 6
-                                    widgets:
-                                      - label:
-                                          styles: setting_label
-                                          text: "总电量"
-                                          flex_grow: 1
-                                      - label:
-                                          id: desk_total_value_label
-                                          styles: setting_label
-                                          text: "-- Wh"
+                                    styles: setting_label
+                                    text: "功率"
+                                    flex_grow: 1
+                                - label:
+                                    id: desk_power_value_label
+                                    styles: setting_label
+                                    text: "-- W"
+                          - obj:
+                              styles: setting_row
+                              layout:
+                                type: FLEX
+                                flex_flow: ROW
+                                flex_align_main: START
+                                flex_align_cross: CENTER
+                                pad_column: 6
+                              widgets:
+                                - label:
+                                    styles: setting_label
+                                    text: "总电量"
+                                    flex_grow: 1
+                                - label:
+                                    id: desk_total_value_label
+                                    styles: setting_label
+                                    text: "-- Wh"
 
     # ========== 系统页面 ==========
     - id: system_page
@@ -895,7 +892,7 @@ lvgl:
                   layout:
                     type: GRID                          # ← GRID 布局
                     grid_columns: [FR(1), FR(1)]         # ← 两列，等宽
-                    grid_rows: [FR(1), FR(1)]  # ← 两行，高度自适应
+                    grid_rows: [CONTENT, CONTENT]  # ← 两行自适应
                     pad_column: 10                       # ← 列间距
                     pad_row: 10                          # ← 行间距
                   widgets:
@@ -931,8 +928,8 @@ lvgl:
                                     flex_grow: 1
                                 - slider:
                                     id: backlight_slider
-                                    width: 380
-                                    height: 36
+                                    width: 200
+                                    height: 32
                                     radius: 18
                                     min_value: 0
                                     max_value: 255
@@ -1029,8 +1026,8 @@ lvgl:
                                     flex_grow: 1
                                 - slider:
                                     id: volume_slider
-                                    width: 380
-                                    height: 36
+                                    width: 200
+                                    height: 32
                                     radius: 18
                                     min_value: 0
                                     max_value: 100
