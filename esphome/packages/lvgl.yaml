@@ -1267,6 +1267,9 @@ lvgl:
       widgets:
         - obj:
             styles: content_container
+            align: BOTTOM_RIGHT
+            width: 1088
+            height: 620
             layout:
               type: FLEX
               flex_flow: COLUMN
