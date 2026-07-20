@@ -631,7 +631,7 @@ lvgl:
                   layout:
                     type: GRID
                     grid_columns: [FR(1), FR(1)]
-                    grid_rows: [200, 300]
+                    grid_rows: [230, 230]
                     pad_column: 10
                     pad_row: 10
                   widgets:
@@ -892,7 +892,7 @@ lvgl:
                   layout:
                     type: GRID                          # ← GRID 布局
                     grid_columns: [FR(1), FR(1)]         # ← 两列，等宽
-                    grid_rows: [230, 330]  # ← 两行自适应
+                    grid_rows: [230, 320]  # ← 两行自适应
                     pad_column: 10                       # ← 列间距
                     pad_row: 10                          # ← 行间距
                   widgets:
@@ -928,8 +928,8 @@ lvgl:
                                     flex_grow: 1
                                 - slider:
                                     id: backlight_slider
-                                    width: 200
-                                    height: 32
+                                    width: 220
+                                    height: 35
                                     radius: 18
                                     min_value: 0
                                     max_value: 255
@@ -962,7 +962,7 @@ lvgl:
                                     id: backlight_bright_label
                                     text_font: montserrat_32
                                     text_color: 0x333333
-                                    text: "60 %"
+                                    text: "60%"
                           - obj:
                               styles: setting_row
                               layout:
@@ -978,7 +978,7 @@ lvgl:
                                     flex_grow: 1
                                 - dropdown:
                                     id: screen_off_timeout_dropdown
-                                    width: 180
+                                    width: 200
                                     height: 44
                                     text_font: montserrat_32
                                     bg_color: 0xF5F5F5
@@ -1026,8 +1026,8 @@ lvgl:
                                     flex_grow: 1
                                 - slider:
                                     id: volume_slider
-                                    width: 200
-                                    height: 32
+                                    width: 220
+                                    height: 35
                                     radius: 18
                                     min_value: 0
                                     max_value: 100
@@ -1047,7 +1047,7 @@ lvgl:
                                     id: volume_label
                                     text_font: montserrat_32
                                     text_color: 0x333333
-                                    text: "60 %"
+                                    text: "60%"
                           - obj:
                               styles: setting_row
                               layout:
@@ -1063,7 +1063,7 @@ lvgl:
                                     flex_grow: 1
                                 - dropdown:
                                     id: tab5_dac_output_dropdown
-                                    width: 180
+                                    width: 200
                                     height: 44
                                     text_font: montserrat_32
                                     bg_color: 0xF5F5F5
