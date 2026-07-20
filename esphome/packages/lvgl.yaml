@@ -898,7 +898,7 @@ lvgl:
             align: BOTTOM_RIGHT
             width: 1088
             height: 620
-            scrollbar_mode: OFF
+            scrollbar_mode: "OFF"
             widgets:
               - obj:
                   align: TOP_MID
