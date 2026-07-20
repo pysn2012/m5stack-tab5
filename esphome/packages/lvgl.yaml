@@ -631,7 +631,7 @@ lvgl:
                   layout:
                     type: GRID
                     grid_columns: [FR(1), FR(1)]
-                    grid_rows: [CONTENT, CONTENT]
+                    grid_rows: [200, 300]
                     pad_column: 10
                     pad_row: 10
                   widgets:
@@ -892,7 +892,7 @@ lvgl:
                   layout:
                     type: GRID                          # ← GRID 布局
                     grid_columns: [FR(1), FR(1)]         # ← 两列，等宽
-                    grid_rows: [CONTENT, CONTENT]  # ← 两行自适应
+                    grid_rows: [230, 330]  # ← 两行自适应
                     pad_column: 10                       # ← 列间距
                     pad_row: 10                          # ← 行间距
                   widgets:
