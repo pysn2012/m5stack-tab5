@@ -638,7 +638,7 @@ lvgl:
                     # ─── 模块1：插座 ───
                     - obj:
                         styles: module_card
-                        width: 920
+                        width: 916
                         height: SIZE_CONTENT
                         layout:
                           type: FLEX
@@ -879,32 +879,33 @@ lvgl:
             align: BOTTOM_RIGHT
             width: 1088
             height: 620
-            scroll_dir: VER          # 只允许垂直滚动，减少计算
-            scrollbar_mode: ACTIVE   # 只有滚动时显示滚动条
-            scroll_momentum: false    # 惯性滚动
-            scroll_elastic: false    # 关闭弹性回弹，减少卡顿
+            scroll_dir: VER
+            scrollbar_mode: ACTIVE
+            scroll_momentum: false
+            scroll_elastic: false
             widgets:
-              # 模块容器：透明背景，采用 align:CENTER + y偏移定位
-              # 与其他页面（main_page/socket_page）保持一致
               - obj:
                   align: TOP_MID
                   x: 0
                   y: 5
-                  width: 950
+                  width: 980
                   height: SIZE_CONTENT
                   bg_opa: TRANSP
                   border_opa: TRANSP
                   layout:
-                    type: FLEX
-                    flex_flow: COLUMN
-                    flex_align_main: START
-                    flex_align_cross: CENTER
-                    pad_row: 12
+                    type: GRID                          # ← GRID 布局
+                    grid_columns: [FR(1), FR(1)]         # ← 两列，等宽
+                    grid_rows: [SIZE_CONTENT, SIZE_CONTENT]  # ← 两行，高度自适应
+                    pad_column: 12                       # ← 列间距
+                    pad_row: 12                          # ← 行间距
                   widgets:
-                    # ─── 显示模块 ───
+                    # ─── 显示模块 (第0列, 第0行) ───
                     - obj:
-                        styles: module_card
-                        height: SIZE_CONTENT
+                        styles: small_card
+                        grid_cell_column_pos: 0
+                        grid_cell_row_pos: 0
+                        grid_cell_x_align: STRETCH      # ← 撑满单元格
+                        grid_cell_y_align: STRETCH
                         layout:
                           type: FLEX
                           flex_flow: COLUMN
@@ -996,10 +997,13 @@ lvgl:
                                       - "Never"
                                     selected_index: 1
 
-                    # ─── 声音模块 ───
+                    # ─── 声音模块 (第1列, 第0行) ───
                     - obj:
-                        styles: module_card
-                        height: SIZE_CONTENT
+                        styles: small_card
+                        grid_cell_column_pos: 1
+                        grid_cell_row_pos: 0
+                        grid_cell_x_align: STRETCH
+                        grid_cell_y_align: STRETCH
                         layout:
                           type: FLEX
                           flex_flow: COLUMN
@@ -1075,10 +1079,13 @@ lvgl:
                                       - "BOTH"
                                     selected_index: 0
 
-                    # ─── 网络模块 ───
+                    # ─── 网络模块 (第0列, 第1行) ───
                     - obj:
-                        styles: module_card
-                        height: SIZE_CONTENT
+                        styles: small_card
+                        grid_cell_column_pos: 0
+                        grid_cell_row_pos: 1
+                        grid_cell_x_align: STRETCH
+                        grid_cell_y_align: STRETCH
                         layout:
                           type: FLEX
                           flex_flow: COLUMN
@@ -1153,10 +1160,13 @@ lvgl:
                                     styles: setting_label
                                     text: "-- dBm"
 
-                    # ─── 系统模块 ───
+                    # ─── 系统模块 (第1列, 第1行) ───
                     - obj:
-                        styles: module_card
-                        height: SIZE_CONTENT
+                        styles: small_card
+                        grid_cell_column_pos: 1
+                        grid_cell_row_pos: 1
+                        grid_cell_x_align: STRETCH
+                        grid_cell_y_align: STRETCH
                         layout:
                           type: FLEX
                           flex_flow: COLUMN
