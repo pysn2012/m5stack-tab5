@@ -437,53 +437,68 @@ lvgl:
             scroll_momentum: false
             scroll_elastic: false
             widgets:
-              # 时间显示（大字居中）
-              - label:
-                  id: time_label
-                  text_font: montserrat_96
-                  text: "14:07"
-                  align: CENTER
-                  y: -210
-              # 日期星期（中字居中）
-              - label:
-                  id: date_label
-                  text_font: montserrat_32
-                  text: "2026-03-11 Thu"
-                  align: CENTER
-                  y: -120
-
-              # ═══ 信息区域：FLEX 两列 ═══
               - obj:
+                  align: TOP_MID
+                  x: 0
+                  y: 5
                   width: 980
-                  height: 400
-                  align: CENTER
-                  y: 90
+                  height: SIZE_CONTENT
                   bg_opa: TRANSP
                   border_opa: TRANSP
                   layout:
-                    type: FLEX
-                    flex_flow: ROW
-                    flex_align_main: START
-                    flex_align_cross: STRETCH
+                    type: GRID
+                    grid_columns: [FR(1), FR(1)]
+                    grid_rows: [230, 230, 80]
                     pad_column: 16
+                    pad_row: 16
                   widgets:
-                    # ─── 左列：天气模块（圆角卡片） ───
+                    # ─── 第1行：时间+日期（跨2列，无边框）───
+                    - obj:
+                        grid_cell_column_pos: 0
+                        grid_cell_row_pos: 0
+                        grid_cell_column_span: 2
+                        grid_cell_x_align: CENTER
+                        grid_cell_y_align: CENTER
+                        width: 100%
+                        height: SIZE_CONTENT
+                        bg_opa: TRANSP
+                        border_opa: TRANSP
+                        layout:
+                          type: FLEX
+                          flex_flow: COLUMN
+                          flex_align_main: CENTER
+                          flex_align_cross: CENTER
+                          pad_row: 8
+                        widgets:
+                          - label:
+                              id: time_label
+                              text_font: montserrat_96
+                              text: "14:07"
+                              text_color: 0x111111
+                          - label:
+                              id: date_label
+                              text_font: montserrat_32
+                              text: "2026-03-11 Thu"
+                              text_color: 0x333333
+
+                    # ─── 第2行：天气（左） 室内（右）───
+                    # 天气模块
                     - obj:
                         styles: small_card
-                        height: 100%
+                        grid_cell_column_pos: 0
+                        grid_cell_row_pos: 1
+                        grid_cell_x_align: STRETCH
+                        grid_cell_y_align: STRETCH
                         layout:
                           type: FLEX
                           flex_flow: COLUMN
                           pad_row: 0
                         widgets:
-                          # 标题
                           - label:
                               styles: module_title
                               text: "天气"
-                          # 分隔线
                           - obj:
                               styles: module_divider
-                          # 内容区：4个传感器直接排列，无额外容器包裹
                           - obj:
                               styles: setting_row
                               layout:
@@ -493,7 +508,6 @@ lvgl:
                                 flex_align_cross: CENTER
                                 pad_column: 12
                               widgets:
-                                # 温度（图标+文本，直接放，无obj包裹）
                                 - label:
                                     text_font: extra_icon
                                     text_color: 0xFF8C00
@@ -503,7 +517,6 @@ lvgl:
                                     text_font: noto_sans_sc_32
                                     text_color: 0x333333
                                     text: "-- ℃"
-                                # 湿度（图标+文本，直接放）
                                 - label:
                                     text_font: extra_icon
                                     text_color: 0x3498DB
@@ -513,7 +526,6 @@ lvgl:
                                     text_font: noto_sans_sc_32
                                     text_color: 0x333333
                                     text: "-- %"
-                                # 第2行：气压 + 颗粒物
                           - obj:
                               styles: setting_row
                               layout:
@@ -523,7 +535,6 @@ lvgl:
                                 flex_align_cross: CENTER
                                 pad_column: 12
                               widgets:
-                                # 气压
                                 - label:
                                     text_font: extra_icon
                                     text_color: 0x27AE60
@@ -533,7 +544,6 @@ lvgl:
                                     text_font: noto_sans_sc_32
                                     text_color: 0x333333
                                     text: "-- hPa"
-                                # 颗粒物
                                 - label:
                                     text_font: extra_icon
                                     text_color: 0xE74C3C
@@ -544,23 +554,23 @@ lvgl:
                                     text_color: 0x333333
                                     text: "-- ppm"
 
-                    # ─── 右列：室内 + 预警 ───
+                    # 室内模块
                     - obj:
                         styles: small_card
-                        height: 100%
+                        grid_cell_column_pos: 1
+                        grid_cell_row_pos: 1
+                        grid_cell_x_align: STRETCH
+                        grid_cell_y_align: STRETCH
                         layout:
                           type: FLEX
                           flex_flow: COLUMN
                           pad_row: 0
                         widgets:
-                          # 标题
                           - label:
                               styles: module_title
                               text: "室内"
-                          # 分隔线
                           - obj:
                               styles: module_divider
-                          # 内容区：2个传感器直接排列
                           - obj:
                               styles: setting_row
                               layout:
@@ -589,21 +599,31 @@ lvgl:
                                     text_color: 0x333333
                                     text: "-- %"
 
-                          # ─── 预警模块（包含在室内） ───
+                    # ─── 第3行：预警（跨2列，有边框）───
+                    - obj:
+                        styles: small_card
+                        grid_cell_column_pos: 0
+                        grid_cell_row_pos: 2
+                        grid_cell_column_span: 2
+                        grid_cell_x_align: STRETCH
+                        grid_cell_y_align: CENTER    # ← 垂直居中
+                        layout:
+                          type: FLEX
+                          flex_flow: ROW
+                          flex_align_main: START
+                          flex_align_cross: CENTER
+                          pad_column: 12
+                        widgets:
                           - label:
-                              styles: module_title
-                              text: "预警"
-                          # 分隔线
-                          - obj:
-                              styles: module_divider
-                          # 预警文本直接显示，无包裹
+                              text_font: noto_sans_sc_32
+                              text_color: 0x333333
+                              text: "预警："
                           - label:
                               id: weather_alert_label
                               text_font: noto_sans_sc_32
                               text_color: 0xE74C3C
                               text: "无预警"
-                              width: 100%
-                              height: 160
+                              flex_grow: 1
                               long_mode: WRAP
                               text_align: LEFT
 
