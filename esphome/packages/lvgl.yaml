@@ -633,7 +633,7 @@ lvgl:
                     flex_flow: COLUMN
                     flex_align_main: START
                     flex_align_cross: CENTER
-                    pad_row: 12
+                    pad_row: 10
                   widgets:
                     # ─── 模块1：插座 ───
                     - obj:
@@ -889,15 +889,15 @@ lvgl:
                   x: 0
                   y: 5
                   width: 980
-                  height: SIZE_CONTENT
+                  height: 600
                   bg_opa: TRANSP
                   border_opa: TRANSP
                   layout:
                     type: GRID                          # ← GRID 布局
                     grid_columns: [FR(1), FR(1)]         # ← 两列，等宽
-                    grid_rows: [SIZE_CONTENT, SIZE_CONTENT]  # ← 两行，高度自适应
-                    pad_column: 12                       # ← 列间距
-                    pad_row: 12                          # ← 行间距
+                    grid_rows: [FR(1), FR(1)]  # ← 两行，高度自适应
+                    pad_column: 10                       # ← 列间距
+                    pad_row: 10                          # ← 行间距
                   widgets:
                     # ─── 显示模块 (第0列, 第0行) ───
                     - obj:
