@@ -1,20 +1,36 @@
 substitutions:
-  # 字体和颜色定义，方便统一修改
-  text_font: noto_sans_sc_32      # 中文字体，32px
-  radius: 12px                      # 全局圆角半径
-  card_bg_color: "0xFFFFFF"         # 模块卡片背景：白色
-  card_border_color: "0xE5E5E5"     # 模块卡片边框：浅灰色
-  title_color: "0x1A4A4A"           # 模块标题颜色：青色
-  text_color: "0x333333"            # 普通文字颜色：深灰
-  accent_color: "0xFF8C00"          # 强调色：橙色（未使用，预留）
-  padding: 6px                     # 卡片内边距
+  # ==========================
+  # Theme colors
+  # ==========================
+  light_page_bg: "0xF5F5F5"
+  light_card_bg: "0xFFFFFF"
+  light_border: "0xE5E5E5"
+  light_title: "0x1A4A4A"
+  light_text: "0x333333"
+
+  dark_page_bg: "0x121212"
+  dark_card_bg: "0x1E1E1E"
+  dark_border: "0x444444"
+  dark_title: "0x80CBC4"
+  dark_text: "0xEEEEEE"
+
+  page_bg_color: "0xF5F5F5"
+  card_bg_color: "0xFFFFFF"
+  card_border_color: "0xE5E5E5"
+  title_color: "0x1A4A4A"
+  text_color: "0x333333"
+
+  accent_color: "0xFF8C00"
+  radius: "20px"
+  padding: "12px"
+  text_font: noto_sans_sc_32
 
 lvgl:
-  # LVGL 样式定义
   style_definitions:
+
     # 侧边栏样式
     - id: sidebar
-      bg_color: 0xE9EFEE
+      bg_color: $page_bg_color
       bg_opa: COVER
       border_opa: TRANSP
       pad_top: 30
@@ -67,7 +83,7 @@ lvgl:
     # 不设置 align，由按钮的 flex 布局统一控制位置
     - id: nav_icon_activate
       text_font: extra_icon_80
-      text_color: 0x1A4A4A
+      text_color: $title_color
 
     # 导航图标未激活样式
     - id: nav_icon_inactivate
@@ -76,7 +92,7 @@ lvgl:
 
     # 内容容器样式
     - id: content_container
-      bg_color: 0xFFFFFF
+      bg_color: $card_bg_color
       bg_opa: COVER
       text_color: 0x111111
       border_width: 0
@@ -86,7 +102,7 @@ lvgl:
 
     # 语音助手页面：状态卡片样式
     - id: va_status_card
-      bg_color: 0xFFFFFF
+      bg_color: $card_bg_color
       bg_opa: COVER
       border_opa: TRANSP
       radius: 24
@@ -183,3 +199,30 @@ lvgl:
       text_font: $text_font
       text_color: $text_color
       bg_opa: TRANSP
+    # 首页时间大卡
+    - id: hero_card
+      bg_color: $card_bg_color
+      bg_opa: COVER
+      border_width: 0
+      radius: 24
+      pad_all: 20
+
+    # 语音状态卡
+    - id: voice_card
+      bg_color: $card_bg_color
+      bg_opa: COVER
+      border_width: 0
+      radius: 24
+      width: 900
+      align: CENTER
+      pad_all: 24
+
+    # 聊天气泡
+    - id: message_card
+      bg_color: $card_bg_color
+      bg_opa: COVER
+      border_width: 0
+      radius: 24
+      width: 800
+      align: CENTER
+      pad_all: 20

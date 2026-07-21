@@ -355,3 +355,14 @@ script:
           on_error:
             - logger.log: "Wi-Fi 连接失败，请重试"
 
+
+
+  # 深浅主题切换
+  - id: change_theme
+    then:
+      - lambda: |-
+          if (id(dark_mode)) {
+            lv_obj_set_style_bg_color(lv_scr_act(), lv_color_hex(0x121212), 0);
+          } else {
+            lv_obj_set_style_bg_color(lv_scr_act(), lv_color_hex(0xF5F5F5), 0);
+          }
