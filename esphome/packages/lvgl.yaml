@@ -434,11 +434,9 @@ lvgl:
             height: 620
             scroll_dir: NONE
             scrollbar_mode: "OFF"
-            scroll_momentum: false
-            scroll_elastic: false
             widgets:
               - obj:
-                  align: TOP_MID
+                  align: CENTER
                   x: 0
                   y: 5
                   width: 980
@@ -448,7 +446,7 @@ lvgl:
                   layout:
                     type: GRID
                     grid_columns: [FR(1), FR(1)]
-                    grid_rows: [180, 230, 80]
+                    grid_rows: [180, 230, 100]
                     pad_column: 10
                     pad_row: 10
                   widgets:
@@ -475,13 +473,15 @@ lvgl:
                               text_font: montserrat_96
                               text: "14:07"
                               text_color: 0x111111
-                              align: CENTER
+                              width: 100%
+                              text_align: CENTER
                           - label:
                               id: date_label
                               text_font: montserrat_32
                               text: "2026-03-11 Thu"
                               text_color: 0x333333
-                              align: CENTER
+                              width: 100%
+                              text_align: CENTER
 
                     # ─── 第2行：天气（左） 室内（右）───
                     # 天气模块
@@ -603,16 +603,16 @@ lvgl:
 
                     # ─── 第3行：预警（跨2列，有边框）───
                     - obj:
-                        styles: small_card
+                        styles: module_card
                         grid_cell_column_pos: 0
                         grid_cell_row_pos: 2
                         grid_cell_column_span: 2
                         grid_cell_x_align: STRETCH
-                        grid_cell_y_align: CENTER    # ← 垂直居中
+                        grid_cell_y_align: STRETCH
                         layout:
                           type: FLEX
                           flex_flow: ROW
-                          flex_align_main: START
+                          flex_align_main: CENTER
                           flex_align_cross: CENTER
                           pad_column: 12
                         widgets:
@@ -899,6 +899,7 @@ lvgl:
             width: 1088
             height: 620
             scrollbar_mode: "OFF"
+            scroll_dir: NONE
             widgets:
               - obj:
                   align: TOP_MID
@@ -1279,7 +1280,6 @@ lvgl:
               # 顶部状态卡片（图标 + 状态文字）
               - obj:
                   styles: va_status_card
-                  align: CENTER
                   layout:
                     type: FLEX
                     flex_flow: COLUMN
@@ -1294,7 +1294,7 @@ lvgl:
                         text: "\U000F05CB"
                     - label:
                         id: va_status_label
-                        text_font: noto_sans_sc_32    # ← 统一使用 noto_sans_sc_32
+                        text_font: noto_sans_sc_32
                         text_color: 0x333333
                         text: "待机状态"
                         text_align: CENTER
@@ -1304,7 +1304,6 @@ lvgl:
               # 用户问气泡（蓝色）
               - obj:
                   styles: va_request_bubble
-                  align: CENTER
                   layout:
                     type: FLEX
                     flex_flow: COLUMN
@@ -1327,7 +1326,6 @@ lvgl:
               # 助手答复气泡（橙色）
               - obj:
                   styles: va_response_bubble
-                  align: CENTER
                   layout:
                     type: FLEX
                     flex_flow: COLUMN
