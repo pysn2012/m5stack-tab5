@@ -95,7 +95,7 @@ lvgl:
 
     # 通用透明布局容器（仅用于layout，不承担视觉）
     - id: layout_container
-      bg_color: $page_bg_color
+      bg_color: $card_bg_color
       bg_opa: COVER
       border_opa: TRANSP
       pad_all: 0
@@ -108,7 +108,7 @@ lvgl:
       border_color: $card_border_color
       border_opa: COVER
       radius: $radius
-      pad_all: $padding
+      pad_all: 5
       shadow_width: 0
 
     # 通用消息气泡：替代 va_request_bubble / va_response_bubble
