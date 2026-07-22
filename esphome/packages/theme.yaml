@@ -100,7 +100,7 @@ lvgl:
       border_opa: TRANSP
       pad_all: 0
 
-    # 通用卡片：替代 module_card / small_card / hero_card / voice_card
+    # 通用卡片
     - id: card
       bg_color: $card_bg_color
       bg_opa: COVER

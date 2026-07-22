@@ -241,7 +241,7 @@ lvgl:
           align: TOP_RIGHT
           id: status_bar
           width: 1088
-          height: 100
+          height: 85
           bg_color: $card_bg_color
           bg_opa: COVER
           text_color: 0x111111
@@ -436,7 +436,7 @@ lvgl:
             styles: layout_container
             align: BOTTOM_RIGHT
             width: 1088
-            height: 620
+            height: 635
             scroll_dir: NONE
             scrollbar_mode: "OFF"
             widgets:
@@ -445,13 +445,13 @@ lvgl:
                   x: 0
                   y: 5
                   width: 980
-                  height: 600
+                  height: 620
                   bg_opa: TRANSP
                   border_opa: TRANSP
                   layout:
                     type: GRID
                     grid_columns: [FR(1), FR(1)]
-                    grid_rows: [180, 250, 100]
+                    grid_rows: [180, 240, 100]
                     pad_column: 10
                     pad_row: 10
                   widgets:
@@ -641,20 +641,20 @@ lvgl:
             styles: layout_container
             align: BOTTOM_RIGHT
             width: 1088
-            height: 620
+            height: 635
             widgets:
               - obj:
                   align: TOP_MID
                   x: 0
                   y: 5
                   width: 980
-                  height: 600
+                  height: 620
                   bg_opa: TRANSP
                   border_opa: TRANSP
                   layout:
                     type: GRID
                     grid_columns: [FR(1), FR(1)]
-                    grid_rows: [250, 250]
+                    grid_rows: [240, 240]
                     pad_column: 10
                     pad_row: 10
                   widgets:
@@ -898,7 +898,7 @@ lvgl:
             styles: layout_container
             align: BOTTOM_RIGHT
             width: 1088
-            height: 620
+            height: 635
             scrollbar_mode: "OFF"
             scroll_dir: NONE
             widgets:
@@ -907,13 +907,13 @@ lvgl:
                   x: 0
                   y: 5
                   width: 980
-                  height: 600
+                  height: 620
                   bg_opa: TRANSP
                   border_opa: TRANSP
                   layout:
                     type: GRID                          # ← GRID 布局
                     grid_columns: [FR(1), FR(1)]         # ← 两列，等宽
-                    grid_rows: [230, 320]  # ← 两行自适应
+                    grid_rows: [240, 320]  # ← 两行自适应
                     pad_column: 10                       # ← 列间距
                     pad_row: 10                          # ← 行间距
                   widgets:
@@ -1268,6 +1268,9 @@ lvgl:
       widgets:
         - obj:
             styles: layout_container
+            align: BOTTOM_RIGHT
+            width: 1088
+            height: 620
             layout:
               type: FLEX
               flex_flow: COLUMN
