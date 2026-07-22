@@ -25,6 +25,9 @@ substitutions:
   padding: "12px"
   text_font: noto_sans_sc_32
 
+  user_message_color: "0xCCE8E7"
+  assistant_message_color: "0xFFE0B2"
+
 lvgl:
   style_definitions:
 
@@ -90,82 +93,34 @@ lvgl:
       text_font: extra_icon_80
       text_color: 0x3F4948
 
-    # 内容容器样式
-    - id: content_container
-      bg_color: $card_bg_color
-      bg_opa: COVER
-      text_color: 0x111111
-      border_width: 0
+    # 通用透明布局容器（仅用于layout，不承担视觉）
+    - id: layout_container
+      bg_opa: TRANSP
       border_opa: TRANSP
-      radius: 0
       pad_all: 0
 
-    # 语音助手页面：状态卡片样式
-    - id: va_status_card
-      bg_color: $card_bg_color
-      bg_opa: COVER
-      border_opa: TRANSP
-      radius: 24
-      width: 900
-      height: 180
-      pad_all: 24
-      shadow_opa: TRANSP
-
-    # 语音助手页面：对话气泡样式（用户问）
-    - id: va_request_bubble
-      bg_color: 0xCCE8E7
-      bg_opa: COVER
-      border_opa: TRANSP
-      radius: 24
-      width: 900
-      height: SIZE_CONTENT
-      min_height: 80
-      pad_all: 24
-      shadow_opa: TRANSP
-      align: CENTER
-
-    # 语音助手页面：对话气泡样式（助手答复）
-    - id: va_response_bubble
-      bg_color: 0xFFE0B2
-      bg_opa: COVER
-      border_opa: TRANSP
-      radius: 24
-      width: 900
-      height: SIZE_CONTENT
-      min_height: 80
-      pad_all: 24
-      shadow_opa: TRANSP
-      align: CENTER
-
-    # ========== 模块卡片样式 ==========
-    # 设置页面上每个功能模块的外边框，白色圆角矩形
-    - id: module_card
+    # 通用卡片：替代 module_card / small_card / hero_card / voice_card
+    - id: card
       bg_color: $card_bg_color
       bg_opa: COVER
       border_width: 1
       border_color: $card_border_color
       border_opa: COVER
       radius: $radius
-      width: 900                      # 固定宽度，与 content_container 适配
-      pad_all: $padding               # 四周内边距 10px
-      pad_top: 2                      # 顶部额外压缩，减小标题与上边框距离
-      pad_bottom: 2                   # 底部额外压缩
-      shadow_width: 0                 # 无阴影，扁平风格
+      pad_all: $padding
+      shadow_width: 0
 
-    # ========== 小模块卡片样式 ==========
-    # 设置页面上每个功能模块的外边框，白色圆角矩形
-    - id: small_card
-      bg_color: $card_bg_color
+    # 通用消息气泡：替代 va_request_bubble / va_response_bubble
+    - id: message_bubble
       bg_opa: COVER
-      border_width: 1
-      border_color: $card_border_color
-      border_opa: COVER
-      radius: $radius
-      width: 450                      # 固定宽度
-      pad_all: $padding               # 四周内边距 10px
-      pad_top: 2                      # 顶部额外压缩，减小标题与上边框距离
-      pad_bottom: 2                   # 底部额外压缩
-      shadow_width: 0                 # 无阴影，扁平风格
+      border_width: 0
+      radius: 24
+      width: 900
+      height: SIZE_CONTENT
+      min_height: 80
+      pad_all: 24
+      shadow_width: 0
+      align: CENTER
 
     # ========== 模块标题样式 ==========
     # 卡片内的大标题，如"显示""声音"等
@@ -199,30 +154,3 @@ lvgl:
       text_font: $text_font
       text_color: $text_color
       bg_opa: TRANSP
-    # 首页时间大卡
-    - id: hero_card
-      bg_color: $card_bg_color
-      bg_opa: COVER
-      border_width: 0
-      radius: 24
-      pad_all: 20
-
-    # 语音状态卡
-    - id: voice_card
-      bg_color: $card_bg_color
-      bg_opa: COVER
-      border_width: 0
-      radius: 24
-      width: 900
-      align: CENTER
-      pad_all: 24
-
-    # 聊天气泡
-    - id: message_card
-      bg_color: $card_bg_color
-      bg_opa: COVER
-      border_width: 0
-      radius: 24
-      width: 800
-      align: CENTER
-      pad_all: 20

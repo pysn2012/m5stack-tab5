@@ -68,6 +68,7 @@ lvgl:
   rotation: 270                   # 旋转270度
   byte_order: little_endian       # 字节序：小端模式（与大多数 MCU 和显示屏控制器兼容）
   color_depth: 16                 # 色深：16位 RGB565
+  buffer_size: 25%
   # 启动初始化
   on_boot:
     - light.turn_on: backlight    # 点亮屏幕背光
@@ -432,7 +433,7 @@ lvgl:
     - id: main_page
       widgets:
         - obj:
-            styles: content_container
+            styles: layout_container
             align: BOTTOM_RIGHT
             width: 1088
             height: 620
@@ -490,7 +491,7 @@ lvgl:
                     # ─── 第2行：天气（左） 室内（右）───
                     # 天气模块
                     - obj:
-                        styles: small_card
+                        styles: card
                         grid_cell_column_pos: 0
                         grid_cell_row_pos: 1
                         grid_cell_x_align: STRETCH
@@ -562,7 +563,7 @@ lvgl:
 
                     # 室内模块
                     - obj:
-                        styles: small_card
+                        styles: card
                         grid_cell_column_pos: 1
                         grid_cell_row_pos: 1
                         grid_cell_x_align: STRETCH
@@ -607,7 +608,7 @@ lvgl:
 
                     # ─── 第3行：预警（跨2列，有边框）───
                     - obj:
-                        styles: module_card
+                        styles: card
                         grid_cell_column_pos: 0
                         grid_cell_row_pos: 2
                         grid_cell_column_span: 2
@@ -637,14 +638,10 @@ lvgl:
     - id: socket_page
       widgets:
         - obj:
-            styles: content_container
+            styles: layout_container
             align: BOTTOM_RIGHT
             width: 1088
             height: 620
-            scroll_dir: VER          # 只允许垂直滚动，减少计算
-            scrollbar_mode: ACTIVE   # 只有滚动时显示滚动条
-            scroll_momentum: false    # 惯性滚动
-            scroll_elastic: false    # 关闭弹性回弹，减少卡顿
             widgets:
               - obj:
                   align: TOP_MID
@@ -663,7 +660,7 @@ lvgl:
                   widgets:
                     # ─── 模块1：插座 ───
                     - obj:
-                        styles: module_card
+                        styles: card
                         grid_cell_column_pos: 0
                         grid_cell_row_pos: 0
                         grid_cell_column_span: 2
@@ -792,7 +789,7 @@ lvgl:
 
                     # ─── 弱电箱：第1列，第2行 ───
                     - obj:
-                        styles: small_card
+                        styles: card
                         grid_cell_column_pos: 0
                         grid_cell_row_pos: 1
                         grid_cell_x_align: STRETCH
@@ -844,7 +841,7 @@ lvgl:
 
                     # ─── 书桌：第2列，第2行 ───
                     - obj:
-                        styles: small_card
+                        styles: card
                         grid_cell_column_pos: 1
                         grid_cell_row_pos: 1
                         grid_cell_x_align: STRETCH
@@ -898,7 +895,7 @@ lvgl:
     - id: system_page
       widgets:  
         - obj:
-            styles: content_container
+            styles: layout_container
             align: BOTTOM_RIGHT
             width: 1088
             height: 620
@@ -922,7 +919,7 @@ lvgl:
                   widgets:
                     # ─── 显示模块 (第0列, 第0行) ───
                     - obj:
-                        styles: small_card
+                        styles: card
                         grid_cell_column_pos: 0
                         grid_cell_row_pos: 0
                         grid_cell_x_align: STRETCH      # ← 撑满单元格
@@ -1020,7 +1017,7 @@ lvgl:
 
                     # ─── 声音模块 (第1列, 第0行) ───
                     - obj:
-                        styles: small_card
+                        styles: card
                         grid_cell_column_pos: 1
                         grid_cell_row_pos: 0
                         grid_cell_x_align: STRETCH
@@ -1102,7 +1099,7 @@ lvgl:
 
                     # ─── 网络模块 (第0列, 第1行) ───
                     - obj:
-                        styles: small_card
+                        styles: card
                         grid_cell_column_pos: 0
                         grid_cell_row_pos: 1
                         grid_cell_x_align: STRETCH
@@ -1183,7 +1180,7 @@ lvgl:
 
                     # ─── 系统模块 (第1列, 第1行) ───
                     - obj:
-                        styles: small_card
+                        styles: card
                         grid_cell_column_pos: 1
                         grid_cell_row_pos: 1
                         grid_cell_x_align: STRETCH
@@ -1270,7 +1267,7 @@ lvgl:
     - id: voice_page
       widgets:
         - obj:
-            styles: content_container
+            styles: layout_container
             align: BOTTOM_RIGHT
             width: 1088
             height: 620
@@ -1283,7 +1280,7 @@ lvgl:
             widgets:
               # 顶部状态卡片（图标 + 状态文字）
               - obj:
-                  styles: voice_card
+                  styles: card
                   layout:
                     type: FLEX
                     flex_flow: COLUMN
@@ -1305,9 +1302,10 @@ lvgl:
                         long_mode: WRAP
                         width: 800
 
-              # 用户问气泡（蓝色）
+              # 用户问气泡
               - obj:
-                  styles: message_card
+                  styles: message_bubble
+                  bg_color: $user_message_color
                   layout:
                     type: FLEX
                     flex_flow: COLUMN
@@ -1327,9 +1325,10 @@ lvgl:
                         text_align: LEFT
                         long_mode: WRAP             # ← 不截断，自动换行
 
-              # 助手答复气泡（橙色）
+              # 助手答复气泡
               - obj:
-                  styles: message_card
+                  styles: message_bubble
+                  bg_color: $assistant_message_color
                   layout:
                     type: FLEX
                     flex_flow: COLUMN
