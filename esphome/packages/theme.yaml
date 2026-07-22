@@ -112,6 +112,8 @@ lvgl:
       shadow_width: 0
 
     # 通用消息气泡：替代 va_request_bubble / va_response_bubble
+    # 注意：不要在此设置 align —— 气泡是 flex 布局容器的子项，位置由父布局接管，
+    # 设置 align 会与布局计算冲突。水平居中由父容器的 flex_align_track 实现。
     - id: message_bubble
       bg_opa: COVER
       border_width: 0
@@ -121,7 +123,6 @@ lvgl:
       min_height: 80
       pad_all: 24
       shadow_width: 0
-      align: CENTER
 
     # ========== 模块标题样式 ==========
     # 卡片内的大标题，如"显示""声音"等

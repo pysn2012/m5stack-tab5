@@ -241,7 +241,7 @@ lvgl:
           align: TOP_RIGHT
           id: status_bar
           width: 1088
-          height: 85
+          height: 90
           bg_color: $card_bg_color
           bg_opa: COVER
           text_color: 0x111111
@@ -1270,12 +1270,15 @@ lvgl:
             styles: layout_container
             align: BOTTOM_RIGHT
             width: 1088
-            height: 620
+            height: 635
             layout:
               type: FLEX
               flex_flow: COLUMN
               flex_align_main: CENTER
               flex_align_cross: CENTER
+              # 关键：交叉轴（水平）轨道默认贴左(START)，必须设为 CENTER
+              # 才能把 900px 宽的卡片/气泡在 1088px 容器内水平居中
+              flex_align_track: CENTER
               pad_row: 24
             scrollbar_mode: "OFF"
             scrollable: false
@@ -1291,6 +1294,8 @@ lvgl:
                     flex_flow: COLUMN
                     flex_align_main: CENTER
                     flex_align_cross: CENTER
+                    # 同上：轨道默认贴左，需 CENTER 才能让图标+状态文字在卡片内水平居中
+                    flex_align_track: CENTER
                     pad_row: 8
                   widgets:
                     - label:
