@@ -22,7 +22,7 @@ substitutions:
 
   accent_color: "0xFF8C00"
   radius: "20px"
-  padding: "12px"
+  padding: "8px"
   text_font: noto_sans_sc_32
 
   user_message_color: "0xCCE8E7"
@@ -95,7 +95,8 @@ lvgl:
 
     # 通用透明布局容器（仅用于layout，不承担视觉）
     - id: layout_container
-      bg_opa: TRANSP
+      bg_color: $page_bg_color
+      bg_opa: COVER
       border_opa: TRANSP
       pad_all: 0
 

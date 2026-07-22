@@ -68,7 +68,7 @@ lvgl:
   rotation: 270                   # 旋转270度
   byte_order: little_endian       # 字节序：小端模式（与大多数 MCU 和显示屏控制器兼容）
   color_depth: 16                 # 色深：16位 RGB565
-  buffer_size: 25%
+  buffer_size: 50%
   # 启动初始化
   on_boot:
     - light.turn_on: backlight    # 点亮屏幕背光
@@ -451,7 +451,7 @@ lvgl:
                   layout:
                     type: GRID
                     grid_columns: [FR(1), FR(1)]
-                    grid_rows: [180, 230, 100]
+                    grid_rows: [180, 250, 100]
                     pad_column: 10
                     pad_row: 10
                   widgets:
@@ -654,7 +654,7 @@ lvgl:
                   layout:
                     type: GRID
                     grid_columns: [FR(1), FR(1)]
-                    grid_rows: [230, 230]
+                    grid_rows: [250, 250]
                     pad_column: 10
                     pad_row: 10
                   widgets:
@@ -1276,17 +1276,21 @@ lvgl:
               flex_flow: COLUMN
               flex_align_main: CENTER
               flex_align_cross: CENTER
-              pad_row: 24
+            scrollbar_mode: "OFF"
+            scrollable: false
             widgets:
-              # 顶部状态卡片（图标 + 状态文字）
+              # 状态区域：复用 card，但去掉视觉边框
               - obj:
                   styles: card
+                  width: 900
+                  height: 200
+                  border_width: 0
                   layout:
                     type: FLEX
                     flex_flow: COLUMN
                     flex_align_main: CENTER
                     flex_align_cross: CENTER
-                    pad_row: 12
+                    pad_row: 8
                   widgets:
                     - label:
                         id: va_status_icon
@@ -1299,18 +1303,18 @@ lvgl:
                         text_color: $text_color
                         text: "待机状态"
                         text_align: CENTER
-                        long_mode: WRAP
-                        width: 800
 
-              # 用户问气泡
+              # 用户气泡
               - obj:
                   styles: message_bubble
+                  width: 900
+                  height: 150
                   bg_color: $user_message_color
                   layout:
                     type: FLEX
                     flex_flow: COLUMN
-                    flex_align_main: START
-                    flex_align_cross: START
+                    flex_align_main: CENTER
+                    flex_align_cross: CENTER
                   widgets:
                     - label:
                         text_font: noto_sans_sc_32
@@ -1320,20 +1324,21 @@ lvgl:
                         id: va_request_label
                         text_font: noto_sans_sc_32
                         text_color: 0x1A1A1A
-                        text: ""
-                        width: 750
-                        text_align: LEFT
-                        long_mode: WRAP             # ← 不截断，自动换行
+                        width: 560
+                        text_align: CENTER
+                        long_mode: WRAP
 
-              # 助手答复气泡
+              # 助手气泡
               - obj:
                   styles: message_bubble
+                  width: 900
+                  height: 150
                   bg_color: $assistant_message_color
                   layout:
                     type: FLEX
                     flex_flow: COLUMN
-                    flex_align_main: START
-                    flex_align_cross: START
+                    flex_align_main: CENTER
+                    flex_align_cross: CENTER
                   widgets:
                     - label:
                         text_font: noto_sans_sc_32
@@ -1343,8 +1348,7 @@ lvgl:
                         id: va_response_label
                         text_font: noto_sans_sc_32
                         text_color: 0x1A1A1A
-                        text: ""
-                        width: 750
-                        text_align: LEFT
-                        long_mode: WRAP             # ← 不截断，自动换行
+                        width: 560
+                        text_align: CENTER
+                        long_mode: WRAP
 
