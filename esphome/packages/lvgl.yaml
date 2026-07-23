@@ -101,10 +101,11 @@ lvgl:
           return buf;
     # 设置媒体播放器初始音量
     - media_player.volume_set: !lambda return id(volume_val) / 100.0;
-    # 恢复主题开关状态并应用已保存的主题
-    - lvgl.switch.update:
+    # 恢复主题开关状态并应用已保存的主题（官方文档：状态通过 lvgl.widget.update 的 state 字典更新）
+    - lvgl.widget.update:
         id: theme_switch
-        state: !lambda return id(dark_mode);
+        state:
+          checked: !lambda return id(dark_mode);
     - script.execute: change_theme
  
   # 自动息屏
