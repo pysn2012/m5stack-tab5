@@ -358,11 +358,113 @@ script:
 
 
   # 深浅主题切换
+  # 深色：黑底白字，卡片灰色半透明（毛玻璃观感，LVGL 无高斯模糊，用半透明叠加模拟）
   - id: change_theme
     then:
       - lambda: |-
-          if (id(dark_mode)) {
-            lv_obj_set_style_bg_color(lv_scr_act(), lv_color_hex(0x121212), 0);
-          } else {
-            lv_obj_set_style_bg_color(lv_scr_act(), lv_color_hex(0xF5F5F5), 0);
+          bool dark = id(dark_mode);
+
+          // ── 颜色方案 ──
+          lv_color_t page_bg    = dark ? lv_color_hex(${dark_page_bg})   : lv_color_hex(${light_page_bg});
+          lv_color_t card_bg    = dark ? lv_color_hex(${dark_card_bg})   : lv_color_hex(${light_card_bg});
+          lv_opa_t   card_opa   = dark ? LV_OPA_70 : LV_OPA_COVER;   // 深色半透明=毛玻璃
+          lv_color_t border     = dark ? lv_color_hex(${dark_border})    : lv_color_hex(${light_border});
+          lv_opa_t   border_opa = dark ? LV_OPA_40 : LV_OPA_COVER;
+          lv_color_t title_col  = dark ? lv_color_hex(${dark_title})     : lv_color_hex(${light_title});
+          lv_color_t text_col   = dark ? lv_color_hex(${dark_text})      : lv_color_hex(${light_text});
+          lv_color_t divider    = dark ? lv_color_hex(0x555555)          : lv_color_hex(0xEEEEEE);
+          lv_color_t nav_act    = dark ? lv_color_hex(0x3A3A3A)          : lv_color_hex(0xCCE8E7);
+          lv_color_t icon_inact = dark ? lv_color_hex(0x9E9E9E)          : lv_color_hex(0x3F4948);
+          lv_color_t strong_col = dark ? lv_color_hex(0xFFFFFF)          : lv_color_hex(0x111111); // 状态栏/时间
+          lv_color_t bubble_u   = dark ? lv_color_hex(0x2A4A4A)          : lv_color_hex(${user_message_color});
+          lv_color_t bubble_a   = dark ? lv_color_hex(0x4A3520)          : lv_color_hex(${assistant_message_color});
+          lv_color_t prefix_u   = dark ? lv_color_hex(0x80CBC4)          : lv_color_hex(0x4A6363);
+          lv_color_t prefix_a   = dark ? lv_color_hex(0xFFB74D)          : lv_color_hex(0x8B5A00);
+          lv_color_t body_txt   = dark ? lv_color_hex(0xF5F5F5)          : lv_color_hex(0x1A1A1A);
+          lv_color_t input_bg   = dark ? lv_color_hex(0x2A2A2A)          : lv_color_hex(${light_page_bg});
+          lv_color_t slider_bg  = dark ? lv_color_hex(0x424242)          : lv_color_hex(0xECECEC);
+          lv_color_t sock_bg    = dark ? lv_color_hex(0x4A4A4A)          : lv_color_hex(0xE9EFEE);
+
+          // ── 1) 屏幕背景（黑底）──
+          lv_obj_set_style_bg_color(lv_scr_act(), page_bg, 0);
+          lv_obj_set_style_bg_opa(lv_scr_act(), LV_OPA_COVER, 0);
+
+          // ── 2) 更新共享样式（卡片/标题/分隔线/标签/导航）──
+          lv_style_set_bg_color(id(sidebar), page_bg);
+          lv_style_set_bg_color(id(layout_container), page_bg);
+          lv_style_set_bg_color(id(card), card_bg);
+          lv_style_set_bg_opa(id(card), card_opa);
+          lv_style_set_border_color(id(card), border);
+          lv_style_set_border_opa(id(card), border_opa);
+          lv_style_set_text_color(id(module_title), title_col);
+          lv_style_set_bg_color(id(module_divider), divider);
+          lv_style_set_text_color(id(setting_label), text_col);
+          lv_style_set_bg_color(id(nav_btn_activate), nav_act);
+          lv_style_set_text_color(id(nav_icon_activate), title_col);
+          lv_style_set_text_color(id(nav_icon_inactivate), icon_inact);
+
+          // ── 3) 状态栏 ──
+          lv_obj_set_style_bg_color(id(status_bar), page_bg, 0);
+          lv_obj_set_style_bg_opa(id(status_bar), LV_OPA_COVER, 0);
+          lv_obj_set_style_text_color(id(page_title_label), strong_col, 0);
+          lv_obj_set_style_text_color(id(api_icon_label), strong_col, 0);
+          lv_obj_set_style_text_color(id(wifi_icon_label), strong_col, 0);
+          lv_obj_set_style_text_color(id(pwr_bat_icon_label), strong_col, 0);
+
+          // ── 4) 主页时间/日期/传感器数值/预警前缀 ──
+          lv_obj_set_style_text_color(id(time_label), strong_col, 0);
+          lv_obj_t* text_labels[] = {
+            id(date_label),
+            id(outdoor_temp_label), id(outdoor_humi_label),
+            id(outdoor_pres_label), id(outdoor_pm25_label),
+            id(indoor_temp_label),  id(indoor_humi_label),
+            id(weather_alert_prefix),
+          };
+          for (uint32_t i = 0; i < sizeof(text_labels)/sizeof(text_labels[0]); i++) {
+            lv_obj_set_style_text_color(text_labels[i], text_col, 0);
           }
+
+          // ── 5) 系统页数值标签 / 下拉框 / 滑块 ──
+          lv_obj_set_style_text_color(id(backlight_bright_label), text_col, 0);
+          lv_obj_set_style_text_color(id(volume_label), text_col, 0);
+          lv_obj_t* dropdowns[] = { id(screen_off_timeout_dropdown), id(tab5_dac_output_dropdown) };
+          for (uint32_t i = 0; i < 2; i++) {
+            lv_obj_set_style_bg_color(dropdowns[i], input_bg, 0);
+            lv_obj_set_style_text_color(dropdowns[i], text_col, 0);
+          }
+          lv_obj_set_style_bg_color(id(backlight_slider), slider_bg, 0);
+          lv_obj_set_style_bg_color(id(volume_slider), slider_bg, 0);
+
+          // ── 6) 插座按钮（未选中底色，选中态保持橙色 accent）──
+          lv_obj_t* sock_btns[] = {
+            id(chuangmi_socket1_button), id(chuangmi_socket2_button),
+            id(chuangmi_socket3_button), id(chuangmi_socket4_button),
+          };
+          for (uint32_t i = 0; i < 4; i++) {
+            lv_obj_set_style_bg_color(sock_btns[i], sock_bg, LV_PART_MAIN);
+          }
+
+          // ── 7) 语音页气泡 ──
+          lv_obj_set_style_bg_color(id(va_request_bubble), bubble_u, 0);
+          lv_obj_set_style_bg_opa(id(va_request_bubble), dark ? LV_OPA_80 : LV_OPA_COVER, 0);
+          lv_obj_set_style_bg_color(id(va_response_bubble), bubble_a, 0);
+          lv_obj_set_style_bg_opa(id(va_response_bubble), dark ? LV_OPA_80 : LV_OPA_COVER, 0);
+          lv_obj_set_style_text_color(id(va_request_prefix), prefix_u, 0);
+          lv_obj_set_style_text_color(id(va_response_prefix), prefix_a, 0);
+          lv_obj_set_style_text_color(id(va_request_label), body_txt, 0);
+          lv_obj_set_style_text_color(id(va_response_label), body_txt, 0);
+          lv_obj_set_style_text_color(id(va_status_label), text_col, 0);
+
+          // ── 8) WiFi 弹窗 ──
+          lv_obj_set_style_bg_color(id(wifi_config_panel), dark ? lv_color_hex(0x242424) : lv_color_hex(0xFFFFFF), 0);
+          lv_obj_set_style_border_color(id(wifi_config_panel), border, 0);
+          lv_obj_set_style_text_color(id(wifi_panel_title), text_col, 0);
+          lv_obj_set_style_text_color(id(wifi_ssid_title), text_col, 0);
+          lv_obj_set_style_text_color(id(wifi_pwd_title), text_col, 0);
+          lv_obj_set_style_bg_color(id(ta_wifi_ssid), input_bg, 0);
+          lv_obj_set_style_text_color(id(ta_wifi_ssid), body_txt, 0);
+          lv_obj_set_style_bg_color(id(ta_wifi_pass), input_bg, 0);
+          lv_obj_set_style_text_color(id(ta_wifi_pass), body_txt, 0);
+
+          // ── 9) 通知所有对象刷新共享样式 ──
+          lv_obj_report_style_change(NULL);

@@ -101,6 +101,11 @@ lvgl:
           return buf;
     # 设置媒体播放器初始音量
     - media_player.volume_set: !lambda return id(volume_val) / 100.0;
+    # 恢复主题开关状态并应用已保存的主题
+    - lvgl.switch.update:
+        id: theme_switch
+        state: !lambda return id(dark_mode);
+    - script.execute: change_theme
  
   # 自动息屏
   on_idle:
@@ -302,6 +307,7 @@ lvgl:
           widgets:
             # 标题
             - label:
+                id: wifi_panel_title
                 text_font: noto_sans_sc_32
                 text: "WiFi设置"
                 text_color: $text_color
@@ -320,6 +326,7 @@ lvgl:
                 widgets:
                   # SSID 标签
                   - label:
+                      id: wifi_ssid_title
                       text_font: montserrat_26
                       text: "SSID:"
                       grid_cell_column_pos: 0
@@ -342,6 +349,7 @@ lvgl:
                         
                   # 密码标签
                   - label:
+                      id: wifi_pwd_title
                       text_font: montserrat_26
                       text: "PWD: "
                       grid_cell_column_pos: 0
@@ -622,6 +630,7 @@ lvgl:
                           pad_column: 12
                         widgets:
                           - label:
+                              id: weather_alert_prefix
                               text_font: noto_sans_sc_32
                               text_color: $text_color
                               text: "预警："
@@ -1206,6 +1215,32 @@ lvgl:
                               widgets:
                                 - label:
                                     styles: setting_label
+                                    text: "主题"
+                                    flex_grow: 1
+                                - switch:
+                                    id: theme_switch
+                                    width: 90
+                                    height: 45
+                                    bg_color: 0xD0D0D0
+                                    indicator:
+                                      bg_color: 0xFF8C00
+                                    knob:
+                                      bg_color: 0xFFFFFF
+                                    on_value:
+                                      then:
+                                        - lambda: id(dark_mode) = x;
+                                        - script.execute: change_theme
+                          - obj:
+                              styles: setting_row
+                              layout:
+                                type: FLEX
+                                flex_flow: ROW
+                                flex_align_main: START
+                                flex_align_cross: CENTER
+                                pad_column: 12
+                              widgets:
+                                - label:
+                                    styles: setting_label
                                     text: "设备控制"
                                     flex_grow: 1
                                 - button:
@@ -1312,6 +1347,7 @@ lvgl:
 
               # 用户气泡
               - obj:
+                  id: va_request_bubble
                   styles: message_bubble
                   bg_color: $user_message_color
                   layout:
@@ -1321,6 +1357,7 @@ lvgl:
                     flex_align_cross: START
                   widgets:
                     - label:
+                        id: va_request_prefix
                         text_font: noto_sans_sc_32
                         text_color: 0x4A6363
                         text: "你："
@@ -1335,6 +1372,7 @@ lvgl:
 
               # 助手气泡
               - obj:
+                  id: va_response_bubble
                   styles: message_bubble
                   bg_color: $assistant_message_color
                   layout:
@@ -1344,6 +1382,7 @@ lvgl:
                     flex_align_cross: START
                   widgets:
                     - label:
+                        id: va_response_prefix
                         text_font: noto_sans_sc_32
                         text_color: 0x8B5A00
                         text: "助手："

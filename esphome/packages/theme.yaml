@@ -8,11 +8,12 @@ substitutions:
   light_title: "0x1A4A4A"
   light_text: "0x333333"
 
+  # 深色主题：黑底白字，卡片为灰色半透明（毛玻璃观感）
   dark_page_bg: "0x121212"
-  dark_card_bg: "0x1E1E1E"
-  dark_border: "0x444444"
-  dark_title: "0x80CBC4"
-  dark_text: "0xEEEEEE"
+  dark_card_bg: "0x3C3C3C"
+  dark_border: "0x666666"
+  dark_title: "0xFFFFFF"
+  dark_text: "0xF0F0F0"
 
   page_bg_color: "0xF5F5F5"
   card_bg_color: "0xFFFFFF"
