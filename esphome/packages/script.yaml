@@ -404,67 +404,67 @@ script:
           lv_style_set_text_color(id(nav_icon_inactivate), icon_inact);
 
           // ── 3) 状态栏 ──
-          lv_obj_set_style_bg_color(id(status_bar)->obj, page_bg, 0);
-          lv_obj_set_style_bg_opa(id(status_bar)->obj, LV_OPA_COVER, 0);
-          lv_obj_set_style_text_color(id(page_title_label)->obj, strong_col, 0);
-          lv_obj_set_style_text_color(id(api_icon_label)->obj, strong_col, 0);
-          lv_obj_set_style_text_color(id(wifi_icon_label)->obj, strong_col, 0);
-          lv_obj_set_style_text_color(id(pwr_bat_icon_label)->obj, strong_col, 0);
+          lv_obj_set_style_bg_color(id(status_bar), page_bg, 0);
+          lv_obj_set_style_bg_opa(id(status_bar), LV_OPA_COVER, 0);
+          lv_obj_set_style_text_color(id(page_title_label), strong_col, 0);
+          lv_obj_set_style_text_color(id(api_icon_label), strong_col, 0);
+          lv_obj_set_style_text_color(id(wifi_icon_label), strong_col, 0);
+          lv_obj_set_style_text_color(id(pwr_bat_icon_label), strong_col, 0);
 
           // ── 4) 主页时间/日期/传感器数值/预警前缀 ──
-          lv_obj_set_style_text_color(id(time_label)->obj, strong_col, 0);
+          lv_obj_set_style_text_color(id(time_label), strong_col, 0);
           lv_obj_t* text_labels[] = {
-            id(date_label)->obj,
-            id(outdoor_temp_label)->obj, id(outdoor_humi_label)->obj,
-            id(outdoor_pres_label)->obj, id(outdoor_pm25_label)->obj,
-            id(indoor_temp_label)->obj,  id(indoor_humi_label)->obj,
-            id(weather_alert_prefix)->obj,
+            id(date_label),
+            id(outdoor_temp_label), id(outdoor_humi_label),
+            id(outdoor_pres_label), id(outdoor_pm25_label),
+            id(indoor_temp_label),  id(indoor_humi_label),
+            id(weather_alert_prefix),
           };
           for (uint32_t i = 0; i < sizeof(text_labels)/sizeof(text_labels[0]); i++) {
             lv_obj_set_style_text_color(text_labels[i], text_col, 0);
           }
 
           // ── 5) 系统页数值标签 / 下拉框 / 滑块 ──
-          lv_obj_set_style_text_color(id(backlight_bright_label)->obj, text_col, 0);
-          lv_obj_set_style_text_color(id(volume_label)->obj, text_col, 0);
+          lv_obj_set_style_text_color(id(backlight_bright_label), text_col, 0);
+          lv_obj_set_style_text_color(id(volume_label), text_col, 0);
           lv_obj_t* dropdowns[] = { id(screen_off_timeout_dropdown)->obj, id(tab5_dac_output_dropdown)->obj };
           for (uint32_t i = 0; i < 2; i++) {
             lv_obj_set_style_bg_color(dropdowns[i], input_bg, 0);
             lv_obj_set_style_text_color(dropdowns[i], text_col, 0);
           }
-          lv_obj_set_style_bg_color(id(backlight_slider)->obj, slider_bg, 0);
-          lv_obj_set_style_bg_color(id(volume_slider)->obj, slider_bg, 0);
+          lv_obj_set_style_bg_color(id(backlight_slider), slider_bg, 0);
+          lv_obj_set_style_bg_color(id(volume_slider), slider_bg, 0);
 
           // ── 6) 插座按钮（未选中底色，选中态保持橙色 accent）──
           lv_obj_t* sock_btns[] = {
-            id(chuangmi_socket1_button)->obj, id(chuangmi_socket2_button)->obj,
-            id(chuangmi_socket3_button)->obj, id(chuangmi_socket4_button)->obj,
+            id(chuangmi_socket1_button), id(chuangmi_socket2_button),
+            id(chuangmi_socket3_button), id(chuangmi_socket4_button),
           };
           for (uint32_t i = 0; i < 4; i++) {
             lv_obj_set_style_bg_color(sock_btns[i], sock_bg, LV_PART_MAIN);
           }
 
           // ── 7) 语音页气泡 ──
-          lv_obj_set_style_bg_color(id(va_request_bubble)->obj, bubble_u, 0);
-          lv_obj_set_style_bg_opa(id(va_request_bubble)->obj, dark ? LV_OPA_80 : LV_OPA_COVER, 0);
-          lv_obj_set_style_bg_color(id(va_response_bubble)->obj, bubble_a, 0);
-          lv_obj_set_style_bg_opa(id(va_response_bubble)->obj, dark ? LV_OPA_80 : LV_OPA_COVER, 0);
-          lv_obj_set_style_text_color(id(va_request_prefix)->obj, prefix_u, 0);
-          lv_obj_set_style_text_color(id(va_response_prefix)->obj, prefix_a, 0);
-          lv_obj_set_style_text_color(id(va_request_label)->obj, body_txt, 0);
-          lv_obj_set_style_text_color(id(va_response_label)->obj, body_txt, 0);
-          lv_obj_set_style_text_color(id(va_status_label)->obj, text_col, 0);
+          lv_obj_set_style_bg_color(id(va_request_bubble), bubble_u, 0);
+          lv_obj_set_style_bg_opa(id(va_request_bubble), dark ? LV_OPA_80 : LV_OPA_COVER, 0);
+          lv_obj_set_style_bg_color(id(va_response_bubble), bubble_a, 0);
+          lv_obj_set_style_bg_opa(id(va_response_bubble), dark ? LV_OPA_80 : LV_OPA_COVER, 0);
+          lv_obj_set_style_text_color(id(va_request_prefix), prefix_u, 0);
+          lv_obj_set_style_text_color(id(va_response_prefix), prefix_a, 0);
+          lv_obj_set_style_text_color(id(va_request_label), body_txt, 0);
+          lv_obj_set_style_text_color(id(va_response_label), body_txt, 0);
+          lv_obj_set_style_text_color(id(va_status_label), text_col, 0);
 
           // ── 8) WiFi 弹窗 ──
-          lv_obj_set_style_bg_color(id(wifi_config_panel)->obj, dark ? lv_color_hex(0x242424) : lv_color_hex(0xFFFFFF), 0);
-          lv_obj_set_style_border_color(id(wifi_config_panel)->obj, border, 0);
-          lv_obj_set_style_text_color(id(wifi_panel_title)->obj, text_col, 0);
-          lv_obj_set_style_text_color(id(wifi_ssid_title)->obj, text_col, 0);
-          lv_obj_set_style_text_color(id(wifi_pwd_title)->obj, text_col, 0);
-          lv_obj_set_style_bg_color(id(ta_wifi_ssid)->obj, input_bg, 0);
-          lv_obj_set_style_text_color(id(ta_wifi_ssid)->obj, body_txt, 0);
-          lv_obj_set_style_bg_color(id(ta_wifi_pass)->obj, input_bg, 0);
-          lv_obj_set_style_text_color(id(ta_wifi_pass)->obj, body_txt, 0);
+          lv_obj_set_style_bg_color(id(wifi_config_panel), dark ? lv_color_hex(0x242424) : lv_color_hex(0xFFFFFF), 0);
+          lv_obj_set_style_border_color(id(wifi_config_panel), border, 0);
+          lv_obj_set_style_text_color(id(wifi_panel_title), text_col, 0);
+          lv_obj_set_style_text_color(id(wifi_ssid_title), text_col, 0);
+          lv_obj_set_style_text_color(id(wifi_pwd_title), text_col, 0);
+          lv_obj_set_style_bg_color(id(ta_wifi_ssid), input_bg, 0);
+          lv_obj_set_style_text_color(id(ta_wifi_ssid), body_txt, 0);
+          lv_obj_set_style_bg_color(id(ta_wifi_pass), input_bg, 0);
+          lv_obj_set_style_text_color(id(ta_wifi_pass), body_txt, 0);
 
           // ── 9) 通知所有对象刷新共享样式 ──
           lv_obj_report_style_change(NULL);
