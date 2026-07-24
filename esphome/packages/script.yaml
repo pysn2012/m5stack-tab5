@@ -366,6 +366,7 @@ script:
 
           // ── 颜色方案 ──
           lv_color_t page_bg    = dark ? lv_color_hex(${dark_page_bg})   : lv_color_hex(${light_page_bg});
+          lv_color_t content_bg = dark ? lv_color_hex(0x1E1E1E)          : lv_color_hex(${light_card_bg}); // 内容区/状态栏，与侧边栏拉开层次
           lv_color_t card_bg    = dark ? lv_color_hex(${dark_card_bg})   : lv_color_hex(${light_card_bg});
           lv_opa_t   card_opa   = dark ? LV_OPA_70 : LV_OPA_COVER;   // 深色半透明=毛玻璃
           lv_color_t border     = dark ? lv_color_hex(${dark_border})    : lv_color_hex(${light_border});
@@ -390,8 +391,8 @@ script:
           lv_obj_set_style_bg_opa(lv_scr_act(), LV_OPA_COVER, 0);
 
           // ── 2) 更新共享样式（卡片/标题/分隔线/标签/导航）──
-          lv_style_set_bg_color(id(sidebar), page_bg);
-          lv_style_set_bg_color(id(layout_container), page_bg);
+          lv_style_set_bg_color(id(sidebar), page_bg);        // 侧边栏与页面同色，比内容区深一点
+          lv_style_set_bg_color(id(layout_container), content_bg);
           lv_style_set_bg_color(id(card), card_bg);
           lv_style_set_bg_opa(id(card), card_opa);
           lv_style_set_border_color(id(card), border);
@@ -404,7 +405,7 @@ script:
           lv_style_set_text_color(id(nav_icon_inactivate), icon_inact);
 
           // ── 3) 状态栏 ──
-          lv_obj_set_style_bg_color(id(status_bar), page_bg, 0);
+          lv_obj_set_style_bg_color(id(status_bar), content_bg, 0);
           lv_obj_set_style_bg_opa(id(status_bar), LV_OPA_COVER, 0);
           lv_obj_set_style_text_color(id(page_title_label), strong_col, 0);
           lv_obj_set_style_text_color(id(api_icon_label), strong_col, 0);

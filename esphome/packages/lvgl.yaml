@@ -253,6 +253,7 @@ lvgl:
           text_color: 0x111111
           border_width: 0
           border_opa: TRANSP
+          radius: 0                   # 无圆角，避免圆角处透出屏幕底色
           pad_left: 28
           pad_right: 28
           layout:
@@ -1319,12 +1320,13 @@ lvgl:
             scrollbar_mode: "OFF"
             scrollable: false
             widgets:
-              # 状态区域：复用 card，但去掉视觉边框
+              # 状态区域：复用 card 的布局尺寸，但背景透明（不随主题变色）
               - obj:
                   styles: card
                   width: 900
                   height: 180
                   border_width: 0
+                  bg_opa: TRANSP          # 本地样式覆盖 card 背景，始终透明
                   layout:
                     type: FLEX
                     flex_flow: COLUMN
