@@ -10,7 +10,7 @@ substitutions:
 
   # 深色主题：黑底白字，卡片为灰色半透明（毛玻璃观感）
   dark_page_bg: "0x121212"
-  dark_card_bg: "0x3C3C3C"
+  dark_card_bg: "0x2E3B4A"
   dark_border: "0x666666"
   dark_title: "0xFFFFFF"
   dark_text: "0xF0F0F0"

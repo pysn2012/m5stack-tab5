@@ -368,7 +368,7 @@ script:
           lv_color_t page_bg    = dark ? lv_color_hex(${dark_page_bg})   : lv_color_hex(${light_page_bg});
           lv_color_t content_bg = dark ? lv_color_hex(0x1E1E1E)          : lv_color_hex(${light_card_bg}); // 内容区/状态栏，与侧边栏拉开层次
           lv_color_t card_bg    = dark ? lv_color_hex(${dark_card_bg})   : lv_color_hex(${light_card_bg});
-          lv_opa_t   card_opa   = dark ? LV_OPA_70 : LV_OPA_COVER;   // 深色半透明=毛玻璃
+          lv_opa_t   card_opa   = dark ? LV_OPA_60 : LV_OPA_COVER;   // 深色半透明=毛玻璃
           lv_color_t border     = dark ? lv_color_hex(${dark_border})    : lv_color_hex(${light_border});
           lv_opa_t   border_opa = dark ? LV_OPA_40 : LV_OPA_COVER;
           lv_color_t title_col  = dark ? lv_color_hex(${dark_title})     : lv_color_hex(${light_title});
